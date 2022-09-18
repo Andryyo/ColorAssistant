@@ -1,0 +1,50 @@
+.App {
+  display: flex;
+}
+
+.ColorTable {
+  height: 80vh;
+  flex: 2 1 auto;
+  margin: 1vw 1vw 1vw 1vw;
+}
+
+.ColorContainer {
+  height: 80vh;
+  margin: 1vw 1vw 1vw 1vw;
+}
+
+.ColorDisplay {
+  height: 80vmin;
+  width: 80vmin;
+}
+
+.ColorCell {
+  width: 15vmin;
+  height: 10vmin;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black;
+  -webkit-text-stroke: 1px white;
+  font-size: large;
+  font-weight: bold;
+}
+
+.Canvas {
+  height: 60vmin;
+  width: 60vmin;
+}
+
+.SliderContainer {
+  margin: 1vw 1vw 1vw 1vw;
+  width: 60vmin;
+}
+
+.SelectedColor {
+  margin: 1vw 1vw 1vw 1vw;
+  width: 60vmin;
+  color: black;
+  -webkit-text-stroke: 1px white;
+  font-size: x-large;
+  font-weight: bold;
+}
