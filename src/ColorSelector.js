@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 
 import { Slider } from "@mui/material";
 import * as chromatism from "chromatism"

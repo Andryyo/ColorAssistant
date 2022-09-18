@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import * as chromatism from "chromatism"
 import { DataGrid } from "@mui/x-data-grid";
