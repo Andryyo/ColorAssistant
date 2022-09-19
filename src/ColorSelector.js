@@ -40,24 +40,19 @@ function draw(canvasRef, value) {
 }
 
 const ColorSelector = props => {
-    const [value, setValue] = React.useState(100);
+  const [value, setValue] = React.useState(100);
   const [selectedColor, setSelectedColor] = React.useState(null);
   const [mouseDown, setMouseDown] = React.useState(false);
+  const [position, setPosition] = React.useState({x: 0, y: 0});
+
   const canvasRef = React.useRef(null);
   React.useEffect(() => {
     draw(canvasRef, value);
-  }, [value]);
+  }, []);
 
-  const OnCanvasMove = e => {
-    if (!mouseDown) {
-      return;
-    }
+  const selectColor = (x, y) => {
+    console.log(x, y)
 
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width * canvas.width;
-    const y = (e.clientY - rect.top) / rect.height * canvas.height;
-    draw(canvasRef, value);
     const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath();
     ctx.strokeStyle = 'white';
@@ -80,9 +75,20 @@ const ColorSelector = props => {
     }
   };
 
+  const OnCanvasMove = e => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * canvas.width;
+    const y = (e.clientY - rect.top) / rect.height * canvas.height;
+    draw(canvasRef, value);
+    selectColor(x, y);
+    setPosition({ x, y });
+  };
+
   const onValueChange = (event, newValue) => {
     draw(canvasRef, newValue);
     setValue(newValue);
+    selectColor(position.x, position.y);
   };
 
 return (<div {...props}>
@@ -93,7 +99,7 @@ return (<div {...props}>
         className="Canvas"
         onMouseDown={e => { setMouseDown(true); OnCanvasMove(e) }}
         onMouseUp={() => setMouseDown(false)}
-        onMouseMove={e => OnCanvasMove(e)}/>
+        onMouseMove={e => mouseDown && OnCanvasMove(e)}/>
         <div className="SliderContainer">
             <Slider value={value} onChange={onValueChange} />
         </div>
