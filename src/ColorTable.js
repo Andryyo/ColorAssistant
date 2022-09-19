@@ -58,10 +58,17 @@ const ColorTable = props => {
       }
     }], [props.selectedColor]);
 
+    React.useEffect(() => {
+      setSortModel([ { field: "delta", sort: "asc" } ]);
+    }, [props.selectedColor])
+
+    const [sortModel, setSortModel] = React.useState([ { field: "delta", sort: "asc" } ]);
+
     return (<DataGrid
         rows={colors}
         columns={columns}
-        sortModel={[ { field: "delta", sort: "asc" } ]}
+        sortModel={sortModel}
+        onSortModelChange={(e) => setSortModel(e)}
     />)
   };
 
