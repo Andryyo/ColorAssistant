@@ -9,6 +9,26 @@ const k = (n + H / 60) % 6;
 return (V - V * S * Math.max(0, Math.min(k, 4 - k, 1))) * 255;
 }
 
+const colorToPosition = (canvasRef, color) => {
+  try {
+  const hsv = chromatism.convert(color).hsv;
+  if (!hsv.h || !hsv.s || !hsv.v) {
+    return null;
+  }
+
+  const angle = -hsv.h / 180 * Math.PI;
+  return ({
+    x: (Math.cos(angle) * hsv.s / 100 + 1) * canvasRef.current.width / 2,
+    y: (Math.sin(angle) * hsv.s / 100 + 1) * canvasRef.current.height / 2});
+  } catch {
+    return null;
+  }
+}
+
+const colorToValue = (color) => {
+  return chromatism.convert(color).hsv.v;
+}
+
 function draw(canvasRef, value) {
   const canvas = canvasRef.current;
   const context = canvas.getContext("2d");
@@ -41,7 +61,8 @@ function draw(canvasRef, value) {
 
 const ColorSelector = props => {
   const [value, setValue] = React.useState(100);
-  const [selectedColor, setSelectedColor] = React.useState(null);
+  const [selectedColor, setSelectedColor] = React.useState("#ffffff");
+  const [text, setText] = React.useState("#ffffff");
   const [mouseDown, setMouseDown] = React.useState(false);
   const [position, setPosition] = React.useState({x: 0, y: 0});
 
@@ -50,9 +71,12 @@ const ColorSelector = props => {
     draw(canvasRef, value);
   }, []);
 
-  const selectColor = (x, y) => {
-    console.log(x, y)
+  React.useEffect(() => {
+    draw(canvasRef, value);
+    selectColor(position.x, position.y);
+  }, [position])
 
+  const selectColor = (x, y) => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath();
     ctx.strokeStyle = 'white';
@@ -69,6 +93,7 @@ const ColorSelector = props => {
       b: pixel.data[2]
     }).hex;
     setSelectedColor(newColor);
+    setText(newColor);
 
     if (props.onChange) {
       props.onChange(newColor);
@@ -80,8 +105,7 @@ const ColorSelector = props => {
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width * canvas.width;
     const y = (e.clientY - rect.top) / rect.height * canvas.height;
-    draw(canvasRef, value);
-    selectColor(x, y);
+
     setPosition({ x, y });
   };
 
@@ -91,7 +115,7 @@ const ColorSelector = props => {
     selectColor(position.x, position.y);
   };
 
-return (<div {...props}>
+return (<div className={props.className}>
   <canvas
       ref={canvasRef}
       width={400}
@@ -103,9 +127,20 @@ return (<div {...props}>
         <div className="SliderContainer">
             <Slider value={value} onChange={onValueChange} />
         </div>
-        <div className="SelectedColor" style={{backgroundColor: selectedColor}}>
-            {selectedColor}
-        </div>
+        <input type="text"
+          className="SelectedColor"
+          style={{backgroundColor: selectedColor}}
+          value={text}
+          onChange={e =>
+          {
+            const position = colorToPosition(canvasRef, e.target.value);
+            if (position) {
+              const colorValue = colorToValue(e.target.value);
+              setValue(colorValue);
+              setPosition(position);
+            }
+            setText(e.target.value);
+          }} />
     </div>)
   };
   
