@@ -123,7 +123,10 @@ return (<div className={props.className}>
         className="Canvas"
         onMouseDown={e => { setMouseDown(true); OnCanvasMove(e) }}
         onMouseUp={() => setMouseDown(false)}
-        onMouseMove={e => mouseDown && OnCanvasMove(e)}/>
+        onMouseMove={e => mouseDown && OnCanvasMove(e)}
+        onTouchStart={e => { setMouseDown(true); OnCanvasMove(e) }}
+        onTouchMove={e => mouseDown && OnCanvasMove(e)}
+        onTouchEnd={() => setMouseDown(false)} />
         <div className="SliderContainer">
             <Slider value={value} onChange={onValueChange} />
         </div>

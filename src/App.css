@@ -19,7 +19,6 @@
 }
 
 .ColorCell {
-  width: 15vmin;
   height: 10vmin;
   display: flex;
   justify-content: center;

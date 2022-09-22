@@ -21,13 +21,14 @@ const ColorTable = props => {
           color: color,
           H: Math.round(H),
           S: Math.round(S),
-          V: Math.round(V)
+          V: Math.round(V),
+          owned: false,
         };
     }), []);
 
     const colorsWithDelta = React.useMemo(() => {
       return colors.map(c => {
-        const delta = props.selectedColor ? chromatism.difference(c.color, props.selectedColor, 2, 1) : null;
+        const delta = props.selectedColor ? Math.round(chromatism.difference(c.color, props.selectedColor, 2, 1)) : null;
         return {...c, delta};
       })}, [props.selectedColor]);
 
@@ -46,33 +47,44 @@ const ColorTable = props => {
       field: "id",
       headerName: "Code",
       type: "number",
-      width: 100,
+      width: 150,
       sortable: true,
       filter: true,
-      renderCell: props => {
+      autoHeight: true,
+      cellRenderer: props => {
         return (<div style={{backgroundColor: props.value}} className="ColorCell">{props.value}</div>)
       }
     }, {
       field: "H",
       headerName: "Hue",
       type: "number",
-      width: 100,
+      width: 75,
       sortable: true,
       filter: true,
     }, {
       field: "S",
       headerName: "Saturation",
       type: "number",
-      width: 100,
+      width: 75,
       sortable: true,
       filter: true
     }, {
       field: "V",
       headerName: "Value",
       type: "number",
-      width: 100,
+      width: 75,
       sortable: true,
       filter: true
+    }, {
+      field: "owned",
+      headerName: "Owned",
+      type: "boolean",
+      width: 75,
+      sortable: true,
+      filter: true,
+      cellRenderer: props => {
+        return (<input type="checkbox" checked={props.value}/>)
+      }
     }, {
       field: "delta",
       headerName: "Delta",
