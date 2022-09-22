@@ -100,14 +100,14 @@ const ColorSelector = props => {
     }
   };
 
-  const OnCanvasMove = e => {
+  const OnMove = (x, y) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width * canvas.width;
-    const y = (e.clientY - rect.top) / rect.height * canvas.height;
+    const canvasX = (x - rect.left) / rect.width * canvas.width;
+    const canvasY = (y - rect.top) / rect.height * canvas.height;
 
-    setPosition({ x, y });
-  };
+    setPosition({ x: canvasX, y: canvasY });
+  }
 
   const onValueChange = (event, newValue) => {
     draw(canvasRef, newValue);
@@ -121,12 +121,10 @@ return (<div className={props.className}>
       width={400}
         height={400}
         className="Canvas"
-        onMouseDown={e => { setMouseDown(true); OnCanvasMove(e) }}
+        onMouseDown={e => { setMouseDown(true); OnMove(e.clientX, e.clientY); }}
         onMouseUp={() => setMouseDown(false)}
-        onMouseMove={e => mouseDown && OnCanvasMove(e)}
-        onTouchStart={e => { setMouseDown(true); OnCanvasMove(e) }}
-        onTouchMove={e => mouseDown && OnCanvasMove(e)}
-        onTouchEnd={() => setMouseDown(false)} />
+        onMouseMove={e => mouseDown && OnMove(e.clientX, e.clientY)}
+        onTouchStart={e => OnMove(e.touches[0].clientX, e.touches[0].clientY) } />
         <div className="SliderContainer">
             <Slider value={value} onChange={onValueChange} />
         </div>

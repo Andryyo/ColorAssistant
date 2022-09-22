@@ -46,7 +46,6 @@ const ColorTable = props => {
     }, {
       field: "id",
       headerName: "Code",
-      type: "number",
       width: 150,
       sortable: true,
       filter: true,
@@ -57,38 +56,33 @@ const ColorTable = props => {
     }, {
       field: "H",
       headerName: "Hue",
-      type: "number",
       width: 75,
       sortable: true,
       filter: true,
     }, {
       field: "S",
       headerName: "Saturation",
-      type: "number",
       width: 75,
       sortable: true,
       filter: true
     }, {
       field: "V",
       headerName: "Value",
-      type: "number",
       width: 75,
       sortable: true,
       filter: true
     }, {
       field: "owned",
       headerName: "Owned",
-      type: "boolean",
       width: 75,
       sortable: true,
       filter: true,
       cellRenderer: props => {
-        return (<input type="checkbox" checked={props.value}/>)
+        return (<input type="checkbox" defaultChecked={props.value} readOnly/>)
       }
     }, {
       field: "delta",
       headerName: "Delta",
-      type: "number",
       width: 100,
       sortable: true,
       filter: true
