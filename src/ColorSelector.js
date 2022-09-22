@@ -74,18 +74,35 @@ const ColorSelector = props => {
   React.useEffect(() => {
     draw(canvasRef, value);
     selectColor(position.x, position.y);
+    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 5);
   }, [position])
 
-  const selectColor = (x, y) => {
-    const ctx = canvasRef.current.getContext("2d");
+  React.useEffect(() => {
+    draw(canvasRef, value);
+    for (const color of props.topColors) {
+      const position = colorToPosition(canvasRef, color);
+      drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, color, 3)
+    }
+    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 5);
+  }, [props.topColors])
+
+  function drawColorMarker(ctx, x, y, color, size) {
     ctx.beginPath();
+    ctx.save();
+    ctx.fillStyle=chromatism.convert(color).hex;
+    ctx.arc(x, y, size+1, 0, 2 * Math.PI);
+    ctx.restore();
     ctx.strokeStyle = 'white';
-    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    ctx.arc(x, y, size, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.beginPath();
     ctx.strokeStyle = 'black';
-    ctx.arc(x, y, 6, 0, 2 * Math.PI);
+    ctx.arc(x, y, size+1, 0, 2 * Math.PI);
     ctx.stroke();
+  }
+
+  const selectColor = (x, y) => {
+    const ctx = canvasRef.current.getContext("2d");
     const pixel = ctx.getImageData(x, y, 1, 1);
     const newColor = chromatism.convert({
       r: pixel.data[0],
@@ -94,10 +111,6 @@ const ColorSelector = props => {
     }).hex;
     setSelectedColor(newColor);
     setText(newColor);
-
-    if (props.onChange) {
-      props.onChange(newColor);
-    }
   };
 
   const OnMove = (x, y) => {
@@ -113,6 +126,9 @@ const ColorSelector = props => {
     draw(canvasRef, newValue);
     setValue(newValue);
     selectColor(position.x, position.y);
+    if (props.onChange) {
+      props.onChange(selectedColor);
+    }
   };
 
   return (
@@ -123,9 +139,19 @@ const ColorSelector = props => {
           height={400}
           className="Canvas"
           onMouseDown={e => { setMouseDown(true); OnMove(e.clientX, e.clientY); }}
-          onMouseUp={() => setMouseDown(false)}
+          onMouseUp={() => {
+            setMouseDown(false); 
+            if (props.onChange) {
+              props.onChange(selectedColor);
+            }
+          }}
           onMouseMove={e => mouseDown && OnMove(e.clientX, e.clientY)}
-          onTouchStart={e => OnMove(e.touches[0].clientX, e.touches[0].clientY) } />
+          onTouchStart={e => {
+            OnMove(e.touches[0].clientX, e.touches[0].clientY);
+            if (props.onChange) {
+              props.onChange(selectedColor);
+            }
+          }} />
       <div className="SliderContainer">
           <Slider value={value} onChange={onValueChange} />
       </div>

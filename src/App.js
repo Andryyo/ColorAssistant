@@ -7,17 +7,18 @@ import Grid from '@mui/material/Grid';
 
 function App() {
   const [selectedColor, setSelectedColor] = React.useState(null);
+  const [topColors, setTopColors] = React.useState([]);
 
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} xl={8}>
         <Card className="ColorTable" sx={{ p: 1 }}>
-          <ColorTable selectedColor={selectedColor} />
+          <ColorTable selectedColor={selectedColor} onTopColorsChange={e => setTopColors(e)}/>
         </Card>
       </Grid>
       <Grid item xs={12} xl={4}>
         <Card className="ColorContainer" sx={{ p: 1 }}>
-          <ColorSelector onChange={e => setSelectedColor(e)} />
+          <ColorSelector onChange={e => setSelectedColor(e)} topColors={topColors}/>
         </Card>
       </Grid>
     </Grid>

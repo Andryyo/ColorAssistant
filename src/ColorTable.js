@@ -49,7 +49,6 @@ const ColorTable = props => {
       width: 150,
       sortable: true,
       filter: true,
-      autoHeight: true,
       cellRenderer: props => {
         return (<div style={{backgroundColor: props.value}} className="ColorCell">{props.value}</div>)
       }
@@ -85,12 +84,30 @@ const ColorTable = props => {
       headerName: "Delta",
       width: 100,
       sortable: true,
-      filter: true
+      filter: true,
+      sort: "desc"
     }], []);
 
+    const tableRef = React.useRef(null);
+    React.useEffect(() => {
+      if (props.onTopColorsChange) {
+        let topColors = [];
+        tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
+          if (topColors.length < 5) {
+            topColors.push(node.data.color);
+          } 
+        });
+        props.onTopColorsChange(topColors);
+      }
+    }, [props.selectedColor])
+
     return (<AgGridReact className="ag-theme-alpine"
+        ref={tableRef}
         rowData={colorsWithDelta}
         columnDefs={columns}
+        rowHeight={75}
+        paginationAutoPageSize={true}
+        pagination={true}
     />)
   };
 
