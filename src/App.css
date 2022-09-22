@@ -1,21 +1,14 @@
 .App {
-  display: flex;
 }
 
 .ColorTable {
-  height: 80vh;
-  flex: 2 1 auto;
+  height: 90vh;
   margin: 1vw 1vw 1vw 1vw;
 }
 
 .ColorContainer {
-  height: 80vh;
+  height: 90vh;
   margin: 1vw 1vw 1vw 1vw;
-}
-
-.ColorDisplay {
-  height: 80vmin;
-  width: 80vmin;
 }
 
 .ColorCell {
@@ -30,18 +23,18 @@
 }
 
 .Canvas {
-  height: 60vmin;
-  width: 60vmin;
+  margin: 1vw 1vw 1vw 1vw;
+  width: 90%;
 }
 
 .SliderContainer {
   margin: 1vw 1vw 1vw 1vw;
-  width: 60vmin;
+  width: 90%;
 }
 
 .SelectedColor {
   margin: 1vw 1vw 1vw 1vw;
-  width: 60vmin;
+  width: 90%;
   color: black;
   -webkit-text-stroke: 1px white;
   font-size: x-large;

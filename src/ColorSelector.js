@@ -115,34 +115,35 @@ const ColorSelector = props => {
     selectColor(position.x, position.y);
   };
 
-return (<div className={props.className}>
-  <canvas
-      ref={canvasRef}
-      width={400}
-        height={400}
-        className="Canvas"
-        onMouseDown={e => { setMouseDown(true); OnMove(e.clientX, e.clientY); }}
-        onMouseUp={() => setMouseDown(false)}
-        onMouseMove={e => mouseDown && OnMove(e.clientX, e.clientY)}
-        onTouchStart={e => OnMove(e.touches[0].clientX, e.touches[0].clientY) } />
-        <div className="SliderContainer">
-            <Slider value={value} onChange={onValueChange} />
-        </div>
-        <input type="text"
-          className="SelectedColor"
-          style={{backgroundColor: selectedColor}}
-          value={text}
-          onChange={e =>
-          {
-            const position = colorToPosition(canvasRef, e.target.value);
-            if (position) {
-              const colorValue = colorToValue(e.target.value);
-              setValue(colorValue);
-              setPosition(position);
-            }
-            setText(e.target.value);
-          }} />
-    </div>)
-  };
-  
+  return (
+    <div className={props.className}>
+      <canvas
+          ref={canvasRef}
+          width={400}
+          height={400}
+          className="Canvas"
+          onMouseDown={e => { setMouseDown(true); OnMove(e.clientX, e.clientY); }}
+          onMouseUp={() => setMouseDown(false)}
+          onMouseMove={e => mouseDown && OnMove(e.clientX, e.clientY)}
+          onTouchStart={e => OnMove(e.touches[0].clientX, e.touches[0].clientY) } />
+      <div className="SliderContainer">
+          <Slider value={value} onChange={onValueChange} />
+      </div>
+      <input type="text"
+        className="SelectedColor"
+        style={{backgroundColor: selectedColor}}
+        value={text}
+        onChange={e =>
+        {
+          const position = colorToPosition(canvasRef, e.target.value);
+          if (position) {
+            const colorValue = colorToValue(e.target.value);
+            setValue(colorValue);
+            setPosition(position);
+          }
+          setText(e.target.value);
+        }} />
+      </div>
+      )};
+
   export default ColorSelector;
