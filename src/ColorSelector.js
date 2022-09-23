@@ -19,14 +19,11 @@ const colorToPosition = (canvasRef, color) => {
   const angle = -hsv.h / 180 * Math.PI;
   return ({
     x: (Math.cos(angle) * hsv.s / 100 + 1) * canvasRef.current.width / 2,
-    y: (Math.sin(angle) * hsv.s / 100 + 1) * canvasRef.current.height / 2});
+    y: (Math.sin(angle) * hsv.s / 100 + 1) * canvasRef.current.height / 2,
+    value: hsv.v});
   } catch {
     return null;
   }
-}
-
-const colorToValue = (color) => {
-  return chromatism.convert(color).hsv.v;
 }
 
 function draw(canvasRef, value) {
@@ -74,23 +71,24 @@ const ColorSelector = props => {
   React.useEffect(() => {
     draw(canvasRef, value);
     selectColor(position.x, position.y);
-    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 5);
+    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 6);
   }, [position])
 
   React.useEffect(() => {
     draw(canvasRef, value);
     for (const color of props.topColors) {
       const position = colorToPosition(canvasRef, color);
-      drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, color, 3)
+      drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, color, 5)
     }
-    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 5);
+    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 6);
   }, [props.topColors])
 
-  function drawColorMarker(ctx, x, y, color, size) {
-    ctx.beginPath();
+  function drawColorMarker(ctx, x, y, color, size) {    
     ctx.save();
     ctx.fillStyle=chromatism.convert(color).hex;
+    ctx.beginPath();
     ctx.arc(x, y, size+1, 0, 2 * Math.PI);
+    ctx.fill();
     ctx.restore();
     ctx.strokeStyle = 'white';
     ctx.arc(x, y, size, 0, 2 * Math.PI);
@@ -163,8 +161,7 @@ const ColorSelector = props => {
         {
           const position = colorToPosition(canvasRef, e.target.value);
           if (position) {
-            const colorValue = colorToValue(e.target.value);
-            setValue(colorValue);
+            setValue(position.value);
             setPosition(position);
           }
           setText(e.target.value);
