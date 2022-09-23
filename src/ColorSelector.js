@@ -9,31 +9,15 @@ const k = (n + H / 60) % 6;
 return (V - V * S * Math.max(0, Math.min(k, 4 - k, 1))) * 255;
 }
 
-const colorToPosition = (canvasRef, color) => {
-  try {
-  const hsv = chromatism.convert(color).hsv;
-  if (!hsv.h || !hsv.s || !hsv.v) {
-    return null;
-  }
-
-  const angle = -hsv.h / 180 * Math.PI;
-  return ({
-    x: (Math.cos(angle) * hsv.s / 100 + 1) * canvasRef.current.width / 2,
-    y: (Math.sin(angle) * hsv.s / 100 + 1) * canvasRef.current.height / 2,
-    value: hsv.v});
-  } catch {
-    return null;
-  }
-}
-
 function draw(context, w, h, value) {
   const imageData = context.getImageData(0, 0, w, h);
   const data = imageData.data;
 
   for (let x = 0; x < imageData.width; x++) for (let y = 0; y < imageData.height; y++) {
     const offset = 4 * (y * imageData.width + x);
-    const dx = (x - imageData.width / 2) / imageData.width * 2;
-    const dy = (y - imageData.height / 2) / imageData.height * 2;
+    
+    const dx = (x - imageData.width / 2) / imageData.width * 2 / value * 100;
+    const dy = (y - imageData.height / 2) / imageData.height * 2 / value * 100;
     const saturation = Math.sqrt(dx * dx + dy * dy);
 
     if (saturation > 1) {
@@ -91,19 +75,24 @@ const ColorSelector = props => {
     drawMarkers(context);
   }, [props.topColors])
 
-  function drawColorMarker(ctx, x, y, color, size) {    
+  function drawColorMarker(ctx, color, size) {  
+    const position = colorToPosition(color);
+    if (!position) {
+      return;
+    }
+
     ctx.save();
     ctx.fillStyle=chromatism.convert(color).hex;
     ctx.beginPath();
-    ctx.arc(x, y, size+1, 0, 2 * Math.PI);
+    ctx.arc(position.x, position.y, size+1, 0, 2 * Math.PI);
     ctx.fill();
     ctx.restore();
     ctx.strokeStyle = 'white';
-    ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.arc(position.x, position.y, size, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.beginPath();
     ctx.strokeStyle = 'black';
-    ctx.arc(x, y, size+1, 0, 2 * Math.PI);
+    ctx.arc(position.x, position.y, size+1, 0, 2 * Math.PI);
     ctx.stroke();
   }
 
@@ -142,10 +131,26 @@ const ColorSelector = props => {
 
   const drawMarkers = (context) => {
     for (const color of props.topColors) {
-      const position = colorToPosition(canvasRef, color);
-      drawColorMarker(context, position.x, position.y, color, 5);
+      drawColorMarker(context, color, 5);
     }
-    drawColorMarker(context, position.x, position.y, selectedColor, 6);
+    drawColorMarker(context, selectedColor, 6);
+  }
+
+  const colorToPosition = (color) => {
+    try {
+    const hsv = chromatism.convert(color).hsv;
+    if (!hsv.h || !hsv.s || !hsv.v) {
+      return null;
+    }
+  
+    const angle = -hsv.h / 180 * Math.PI;
+    return ({
+      x: (Math.cos(angle) * hsv.s / 100) * canvasRef.current.width / 2 * value / 100 + canvasRef.current.width / 2,
+      y: (Math.sin(angle) * hsv.s / 100) * canvasRef.current.height / 2 * value / 100 + canvasRef.current.height / 2,
+      value: hsv.v});
+    } catch {
+      return null;
+    }
   }
 
   return (
@@ -178,7 +183,7 @@ const ColorSelector = props => {
         value={text}
         onChange={e =>
         {
-          const position = colorToPosition(canvasRef, e.target.value);
+          const position = colorToPosition(e.target.value);
           if (position) {
             setValue(position.value);
             setPosition(position);
