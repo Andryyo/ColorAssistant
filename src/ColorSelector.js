@@ -5,37 +5,8 @@ import * as chromatism from "chromatism"
 import React from "react";
 
 const fastConvert = (H, S, V, n) => {
-const k = (n + H / 60) % 6;
-return (V - V * S * Math.max(0, Math.min(k, 4 - k, 1))) * 255;
-}
-
-function draw(context, w, h, value) {
-  const imageData = context.getImageData(0, 0, w, h);
-  const data = imageData.data;
-
-  for (let x = 0; x < imageData.width; x++) for (let y = 0; y < imageData.height; y++) {
-    const offset = 4 * (y * imageData.width + x);
-    
-    const dx = (x - imageData.width / 2) / imageData.width * 2 / value * 100;
-    const dy = (y - imageData.height / 2) / imageData.height * 2 / value * 100;
-    const saturation = Math.sqrt(dx * dx + dy * dy);
-
-    if (saturation > 1) {
-      data[offset] = 255;
-      data[offset + 1] = 255;
-      data[offset + 2] = 255;
-      data[offset + 3] = 255;
-      continue;
-    }
-
-    const hue = -Math.atan2(dy, dx) * 180 / Math.PI;
-    data[offset] = fastConvert(hue, saturation, value / 100, 5);
-    data[offset + 1] = fastConvert(hue, saturation, value / 100, 3);
-    data[offset + 2] = fastConvert(hue, saturation, value / 100, 1);
-    data[offset + 3] = 255;
-  }
-
-  context.putImageData(imageData, 0, 0);
+  const k = (n + H / 60) % 6;
+  return (V - V * S * Math.max(0, Math.min(k, 4 - k, 1))) * 255;
 }
 
 const ColorSelector = props => {
@@ -43,9 +14,8 @@ const ColorSelector = props => {
   const [selectedColor, setSelectedColor] = React.useState("#ffffff");
   const [text, setText] = React.useState("#ffffff");
   const [mouseDown, setMouseDown] = React.useState(false);
-  const [position, setPosition] = React.useState({x: 0, y: 0});
-
   const canvasRef = React.useRef(null);
+  
   React.useEffect(() => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -54,7 +24,7 @@ const ColorSelector = props => {
 
     const context = canvas.getContext("2d");
     
-    draw(context, canvas.width, canvas.height, value);
+    draw(context);
     drawMarkers(context);
   }, [canvasRef]);
 
@@ -62,18 +32,9 @@ const ColorSelector = props => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    draw(context, canvas.width, canvas.height, value);
-    selectColor(position.x, position.y);
+    draw(context);
     drawMarkers(context);
-  }, [position])
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-
-    draw(context, canvas.width, canvas.height, value);
-    drawMarkers(context);
-  }, [props.topColors])
+  }, [props.topColors, selectedColor])
 
   function drawColorMarker(ctx, color, size) {  
     const position = colorToPosition(color);
@@ -114,16 +75,20 @@ const ColorSelector = props => {
     const canvasX = (x - rect.left) / rect.width * canvas.width;
     const canvasY = (y - rect.top) / rect.height * canvas.height;
 
-    setPosition({ x: canvasX, y: canvasY });
+    const ctx = canvasRef.current.getContext("2d");
+    draw(ctx);
+    selectColor(canvasX, canvasY);
+    drawMarkers(ctx);
   }
 
   const onValueChange = (event, newValue) => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    draw(context, canvas.width, canvas.height, newValue);
+    const color = chromatism.convert(selectedColor).hsv;
+    const newColor = chromatism.convert({ h: color.h, s: color.s, v: newValue }).hex;
+
     setValue(newValue);
-    selectColor(position.x, position.y);
-    drawMarkers(context);
+    setSelectedColor(newColor);
+    setText(newColor);
+
     if (props.onChange) {
       props.onChange(selectedColor);
     }
@@ -150,6 +115,46 @@ const ColorSelector = props => {
       value: hsv.v});
     } catch {
       return null;
+    }
+  }
+
+  const imageData = React.useMemo(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return null;
+    }
+
+    const imageData = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let x = 0; x < imageData.width; x++) for (let y = 0; y < imageData.height; y++) {
+      const offset = 4 * (y * imageData.width + x);
+
+      const dx = (x - imageData.width / 2) / imageData.width * 2 / value * 100;
+      const dy = (y - imageData.height / 2) / imageData.height * 2 / value * 100;
+      const saturation = Math.sqrt(dx * dx + dy * dy);
+
+      if (saturation > 1) {
+        data[offset] = 255;
+        data[offset + 1] = 255;
+        data[offset + 2] = 255;
+        data[offset + 3] = 255;
+        continue;
+      }
+
+      const hue = -Math.atan2(dy, dx) * 180 / Math.PI;
+      data[offset] = fastConvert(hue, saturation, value / 100, 5);
+      data[offset + 1] = fastConvert(hue, saturation, value / 100, 3);
+      data[offset + 2] = fastConvert(hue, saturation, value / 100, 1);
+      data[offset + 3] = 255;
+    }
+
+    return imageData;
+  }, [canvasRef, canvasRef.current, value]);
+
+  const draw = (context) => {
+    if (imageData) {
+      context.putImageData(imageData, 0, 0);
     }
   }
 
@@ -183,11 +188,7 @@ const ColorSelector = props => {
         value={text}
         onChange={e =>
         {
-          const position = colorToPosition(e.target.value);
-          if (position) {
-            setValue(position.value);
-            setPosition(position);
-          }
+          setSelectedColor(e.target.value)
           setText(e.target.value);
         }} />
       </div>
