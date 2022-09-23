@@ -26,10 +26,8 @@ const colorToPosition = (canvasRef, color) => {
   }
 }
 
-function draw(canvasRef, value) {
-  const canvas = canvasRef.current;
-  const context = canvas.getContext("2d");
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+function draw(context, w, h, value) {
+  const imageData = context.getImageData(0, 0, w, h);
   const data = imageData.data;
 
   for (let x = 0; x < imageData.width; x++) for (let y = 0; y < imageData.height; y++) {
@@ -65,22 +63,32 @@ const ColorSelector = props => {
 
   const canvasRef = React.useRef(null);
   React.useEffect(() => {
-    draw(canvasRef, value);
-  }, []);
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    canvas.widgth = Math.min(rect.width, rect.height);
+    canvas.height = Math.min(rect.width, rect.height);
+
+    const context = canvas.getContext("2d");
+    
+    draw(context, canvas.width, canvas.height, value);
+    drawMarkers(context);
+  }, [canvasRef]);
 
   React.useEffect(() => {
-    draw(canvasRef, value);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    draw(context, canvas.width, canvas.height, value);
     selectColor(position.x, position.y);
-    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 6);
+    drawMarkers(context);
   }, [position])
 
   React.useEffect(() => {
-    draw(canvasRef, value);
-    for (const color of props.topColors) {
-      const position = colorToPosition(canvasRef, color);
-      drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, color, 5)
-    }
-    drawColorMarker(canvasRef.current.getContext("2d"), position.x, position.y, selectedColor, 6);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    draw(context, canvas.width, canvas.height, value);
+    drawMarkers(context);
   }, [props.topColors])
 
   function drawColorMarker(ctx, x, y, color, size) {    
@@ -121,13 +129,24 @@ const ColorSelector = props => {
   }
 
   const onValueChange = (event, newValue) => {
-    draw(canvasRef, newValue);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    draw(context, canvas.width, canvas.height, newValue);
     setValue(newValue);
     selectColor(position.x, position.y);
+    drawMarkers(context);
     if (props.onChange) {
       props.onChange(selectedColor);
     }
   };
+
+  const drawMarkers = (context) => {
+    for (const color of props.topColors) {
+      const position = colorToPosition(canvasRef, color);
+      drawColorMarker(context, position.x, position.y, color, 5);
+    }
+    drawColorMarker(context, position.x, position.y, selectedColor, 6);
+  }
 
   return (
     <div className={props.className}>

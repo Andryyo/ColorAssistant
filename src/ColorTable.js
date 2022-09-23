@@ -77,7 +77,7 @@ const ColorTable = props => {
       sortable: true,
       filter: true,
       cellRenderer: props => {
-        return (<input type="checkbox" defaultChecked={props.value} readOnly/>)
+        return (<input type="checkbox" defaultChecked={props.value} disabled={true}/>)
       }
     }, {
       field: "delta",
@@ -85,7 +85,7 @@ const ColorTable = props => {
       width: 100,
       sortable: true,
       filter: true,
-      sort: "desc"
+      sort: "asc"
     }], []);
 
     const tableRef = React.useRef(null);
@@ -98,6 +98,7 @@ const ColorTable = props => {
           } 
         });
         props.onTopColorsChange(topColors);
+        //props.onTopColorsChange(colors.map(c => c.color));
       }
     }, [props.selectedColor])
 
