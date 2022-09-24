@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import * as chromatism from "chromatism"
+import mixbox from 'mixbox';
 import { data as vallejoGame } from "VallejoGame"
 import { AgGridReact } from "ag-grid-react";
 
@@ -8,7 +9,10 @@ import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 
 const ColorTable = props => {
-    const colors = React.useMemo(() => vallejoGame.split('\n').map(s => {
+    const colors = React.useMemo(() => {
+      let colors = [];
+
+      const vallejoColors = vallejoGame.split('\n').map(s => {
         const code = s.substring(s.indexOf("#"));
         const color = chromatism.convert(code).hsv;
         const H = color.h;
@@ -24,7 +28,30 @@ const ColorTable = props => {
           V: Math.round(V),
           owned: false,
         };
-    }), []);
+      });
+
+      vallejoColors.forEach((c) => colors.push(c));
+
+      for (let i = 0; i < vallejoColors.length; i++)
+      for (let j = i + 1; j < vallejoColors.length; j++)
+      {
+          const mix = mixbox.lerp(vallejoColors[i].id, vallejoColors[j].id, 0.5);
+          const color = chromatism.convert({r: mix[0], g: mix[1], b: mix[2]}).hsv;
+
+          colors.push({
+            collection: "Mix",
+            name: vallejoColors[i].name + "+" + vallejoColors[j].name,
+            id: chromatism.convert(color).hex,
+            color: color,
+            H: Math.round(color.h),
+            S: Math.round(color.s),
+            V: Math.round(color.v),
+            owned: false
+          });
+      }
+
+      return colors;
+    }, []);
 
     const colorsWithDelta = React.useMemo(() => {
       return colors.map(c => {
@@ -35,14 +62,16 @@ const ColorTable = props => {
     const columns = React.useMemo(() => [{
       field: "collection",
       headerName: "Collection",
-      width: 150,
-      filter: true
+      width: 100,
+      filter: true,
+      wrapText: true,
     }, {
       field: "name",
       headerName: "Name",
       width: 150,
       sortable: true,
-      filter: true
+      filter: true,
+      wrapText: true,
     }, {
       field: "id",
       headerName: "Code",

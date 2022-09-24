@@ -15,7 +15,7 @@ const ColorSelector = props => {
   const [text, setText] = React.useState("#ffffff");
   const [mouseDown, setMouseDown] = React.useState(false);
   const canvasRef = React.useRef(null);
-  
+
   React.useEffect(() => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -188,8 +188,14 @@ const ColorSelector = props => {
         value={text}
         onChange={e =>
         {
-          setSelectedColor(e.target.value)
           setText(e.target.value);
+
+          setValue(chromatism.convert(e.target.value).hsv.v);
+          setSelectedColor(e.target.value)
+
+          if (props.onChange) {
+            props.onChange(e.target.value);
+          }
         }} />
       </div>
       )};
