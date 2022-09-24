@@ -11,6 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 const ColorTable = props => {
     const colors = React.useMemo(() => {
       let colors = [];
+      const ownedColors = JSON.parse(localStorage.getItem("ownedColors"));
 
       const vallejoColors = vallejoGame.split('\n').map(s => {
         const code = s.substring(s.indexOf("#"));
@@ -18,15 +19,16 @@ const ColorTable = props => {
         const H = color.h;
         const S = color.s || 0;
         const V = color.v;
+        const name = s.substring(0, s.indexOf("#") - 1);
         return {
           collection: "Vallejo Game Color",
-          name: s.substring(0, s.indexOf("#") - 1),
+          name: name,
           id: code,
           color: color,
           H: Math.round(H),
           S: Math.round(S),
           V: Math.round(V),
-          owned: false,
+          owned: ownedColors ? ownedColors.includes(name) : false,
         };
       });
 
@@ -47,7 +49,7 @@ const ColorTable = props => {
             H: Math.round(color.h),
             S: Math.round(color.s),
             V: Math.round(color.v),
-            owned: false
+            owned: ownedColors ? ownedColors.includes(vallejoColors[i].name) && ownedColors.includes(vallejoColors[j].name) : false
           });
       }
 
@@ -120,7 +122,11 @@ const ColorTable = props => {
       sortable: true,
       filter: true,
       cellRenderer: props => {
-        return (<input type="checkbox" defaultChecked={props.value} disabled={true}/>)
+        return (<input type="checkbox"
+        defaultChecked={props.value}
+        onChange={(e) => {
+          props.node.setDataValue(props.column, e.target.checked);
+        }}/>)
       }
     }, {
       field: "delta",
@@ -142,6 +148,16 @@ const ColorTable = props => {
       }
     };
 
+    const updateLocalStorage = () => {
+      let ownedColors = [];
+      tableRef.current.api?.forEachNode((node) => {
+        if (node.data.collection !== "Mix" && node.data.owned) {
+          ownedColors.push(node.data.name);
+        }
+      });    
+      localStorage.setItem("ownedColors", JSON.stringify(ownedColors));
+    }
+
     const tableRef = React.useRef(null);
     React.useEffect(() => {
       updateTopColors();
@@ -155,6 +171,7 @@ const ColorTable = props => {
         pagination={true}
         onFilterChanged={updateTopColors}
         onSortChanged={updateTopColors}
+        onCellValueChanged={updateLocalStorage}
     />)
   };
 
