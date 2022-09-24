@@ -43,6 +43,7 @@ const ColorTable = props => {
             name: vallejoColors[i].name + "+" + vallejoColors[j].name,
             id: chromatism.convert(color).hex,
             color: color,
+            bases: [vallejoColors[i].id, vallejoColors[j].id],
             H: Math.round(color.h),
             S: Math.round(color.s),
             V: Math.round(color.v),
@@ -73,13 +74,26 @@ const ColorTable = props => {
       filter: true,
       wrapText: true,
     }, {
-      field: "id",
+      valueGetter: props => {
+        return {
+          color: props.data.id,
+          bases: props.data.bases
+        }
+      },
       headerName: "Code",
-      width: 150,
+      width: 200,
       sortable: true,
       filter: true,
       cellRenderer: props => {
-        return (<div style={{backgroundColor: props.value}} className="ColorCell">{props.value}</div>)
+        if (props.value.bases) {
+        return (<div style={{display: "flex", height: "100%"}}>
+          <div style={{backgroundColor: props.value.bases[0]}} className="MiniColorCell"></div>
+          <div style={{backgroundColor: props.value.color}} className="ColorCell">{props.value.color}</div>
+          <div style={{backgroundColor: props.value.bases[1]}} className="MiniColorCell"></div>
+        </div>)
+        } else {
+          return (<div style={{backgroundColor: props.value.color}} className="ColorCell">{props.value.color}</div>)
+        }
       }
     }, {
       field: "H",
