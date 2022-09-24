@@ -57,19 +57,19 @@ const ColorTable = props => {
       headerName: "Hue",
       width: 75,
       sortable: true,
-      filter: true,
+      filter: "agNumberColumnFilter",
     }, {
       field: "S",
       headerName: "Saturation",
       width: 75,
       sortable: true,
-      filter: true
+      filter: "agNumberColumnFilter",
     }, {
       field: "V",
       headerName: "Value",
       width: 75,
       sortable: true,
-      filter: true
+      filter: "agNumberColumnFilter",
     }, {
       field: "owned",
       headerName: "Owned",
@@ -84,22 +84,24 @@ const ColorTable = props => {
       headerName: "Delta",
       width: 100,
       sortable: true,
-      filter: true,
-      sort: "asc"
+      filter: "agNumberColumnFilter",
+      sort: "asc",
+      sortingOrder: [ "asc" ]
     }], []);
 
-    const tableRef = React.useRef(null);
-    React.useEffect(() => {
+    const updateTopColors = () => {
       if (props.onTopColorsChange) {
         let topColors = [];
         tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
-          if (topColors.length < 5) {
             topColors.push(node.data.color);
-          } 
         });
         props.onTopColorsChange(topColors);
-        //props.onTopColorsChange(colors.map(c => c.color));
       }
+    };
+
+    const tableRef = React.useRef(null);
+    React.useEffect(() => {
+      updateTopColors();
     }, [props.selectedColor])
 
     return (<AgGridReact className="ag-theme-alpine"
@@ -107,8 +109,9 @@ const ColorTable = props => {
         rowData={colorsWithDelta}
         columnDefs={columns}
         rowHeight={75}
-        paginationAutoPageSize={true}
         pagination={true}
+        onFilterChanged={updateTopColors}
+        onSortChanged={updateTopColors}
     />)
   };
 
