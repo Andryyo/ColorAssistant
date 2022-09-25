@@ -90,7 +90,7 @@ const ColorSelector = props => {
     setText(newColor);
 
     if (props.onChange) {
-      props.onChange(selectedColor);
+      props.onChange(chromatism.convert(newColor).cielab);
     }
   };
 
@@ -169,14 +169,14 @@ const ColorSelector = props => {
           onMouseUp={() => {
             setMouseDown(false); 
             if (props.onChange) {
-              props.onChange(selectedColor);
+              props.onChange(chromatism.convert(selectedColor).cielab);
             }
           }}
           onMouseMove={e => mouseDown && OnMove(e.clientX, e.clientY)}
           onTouchStart={e => {
             OnMove(e.touches[0].clientX, e.touches[0].clientY);
             if (props.onChange) {
-              props.onChange(selectedColor);
+              props.onChange(chromatism.convert(selectedColor).cielab);
             }
           }} />
       <div className="SliderContainer">
@@ -194,7 +194,7 @@ const ColorSelector = props => {
           setSelectedColor(e.target.value)
 
           if (props.onChange) {
-            props.onChange(e.target.value);
+            props.onChange(chromatism.convert(e.target.value).cielab);
           }
         }} />
       </div>
