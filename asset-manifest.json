@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ColorAssistant/static/css/main.4c213334.css",
-    "main.js": "/ColorAssistant/static/js/main.85ae9c0b.js",
+    "main.js": "/ColorAssistant/static/js/main.5e4b0a44.js",
     "index.html": "/ColorAssistant/index.html",
     "main.4c213334.css.map": "/ColorAssistant/static/css/main.4c213334.css.map",
-    "main.85ae9c0b.js.map": "/ColorAssistant/static/js/main.85ae9c0b.js.map"
+    "main.5e4b0a44.js.map": "/ColorAssistant/static/js/main.5e4b0a44.js.map"
   },
   "entrypoints": [
     "static/css/main.4c213334.css",
-    "static/js/main.85ae9c0b.js"
+    "static/js/main.5e4b0a44.js"
   ]
 }
