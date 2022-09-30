@@ -56,12 +56,16 @@ const Picture = (props) => {
             if (props.onChange) {
               props.onChange(chromatism.convert(selectedColor).cielab);
             }}} />
-        <input type="file" id="fileInput" name="file" onChange={(e) => {
+        <input type="file" name="file" onChange={(e) => {
           const img = new Image();
           img.src = URL.createObjectURL(e.target.files[0]);
           img.onload = () => {
             const canvas = canvasRef.current;
-            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            const xRatio = canvas.width / img.width;
+            const yRatio = canvas.height / img.height;
+            const ratio = Math.min(xRatio, yRatio);
+            canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+            canvas.getContext("2d").drawImage(img, 0, 0, img.width * ratio, img.height * ratio);
           }
           }}/>
           <div
