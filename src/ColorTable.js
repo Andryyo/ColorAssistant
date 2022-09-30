@@ -34,6 +34,12 @@ const ColorTable = props => {
 
       vallejoColors.forEach((c) => colors.push(c));
 
+      for (let color1 of colors)
+      {
+        const deltas = colors.filter(c => c !== color1 && c.owned).map((color2) => Math.round(chromatism.difference(color1.color, color2.color, 2, 1)));
+        color1.minDelta = Math.min(...deltas);
+      }
+
       for (let i = 0; i < vallejoColors.length; i++)
       for (let j = i + 1; j < vallejoColors.length; j++)
       {
@@ -136,6 +142,12 @@ const ColorTable = props => {
       filter: "agNumberColumnFilter",
       sort: "asc",
       sortingOrder: [ "asc" ]
+    }, {
+      field: "minDelta",
+      headerName: "Min Delta",
+      width: 100,
+      sortable: true,
+      filter: "agNumberColumnFilter",
     }], []);
 
     const updateTopColors = () => {
