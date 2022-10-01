@@ -7,6 +7,7 @@ import { data as vallejoModel } from 'VallejoModel';
 import { data as citadel } from 'Citadel';
 import { data as armyPainter } from 'ArmyPainter';
 import { AgGridReact } from 'ag-grid-react';
+import CollectionsFilter from 'CollectionsFilter';
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
@@ -135,7 +136,7 @@ const ColorTable = (props) => {
         field: 'collection',
         headerName: 'Collection',
         width: 100,
-        filter: true,
+        filter: CollectionsFilter,
         wrapText: true
       },
       {
