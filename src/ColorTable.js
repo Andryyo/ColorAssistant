@@ -5,6 +5,7 @@ import mixbox from 'mixbox';
 import { data as vallejoGame } from 'VallejoGame';
 import { data as vallejoModel } from 'VallejoModel';
 import { data as citadel } from 'Citadel';
+import { data as armyPainter } from 'ArmyPainter';
 import { AgGridReact } from 'ag-grid-react';
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
@@ -48,6 +49,9 @@ const ColorTable = (props) => {
       (c) => baseColors.push(c)
     );
     getCollection('Citadel', citadel, ownedColors).forEach((c) =>
+      baseColors.push(c)
+    );
+    getCollection('Army Painter', armyPainter, ownedColors).forEach((c) =>
       baseColors.push(c)
     );
 
