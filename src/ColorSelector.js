@@ -81,7 +81,16 @@ const ColorSelector = props => {
     drawMarkers(ctx);
   }
 
-  const onValueChange = (event, newValue) => {
+  const onValueChanging = (event, newValue) => {
+    const color = chromatism.convert(selectedColor).hsv;
+    const newColor = chromatism.convert({ h: color.h, s: color.s, v: newValue }).hex;
+
+    setValue(newValue);
+    setSelectedColor(newColor);
+    setText(newColor);
+  };
+
+  const onValueChanged = (event, newValue) => {
     const color = chromatism.convert(selectedColor).hsv;
     const newColor = chromatism.convert({ h: color.h, s: color.s, v: newValue }).hex;
 
@@ -95,7 +104,7 @@ const ColorSelector = props => {
   };
 
   const drawMarkers = (context) => {
-    for (const color of props.topColors) {
+    for (const color of props.topColors.slice(0, 10)) {
       drawColorMarker(context, color, 5);
     }
     drawColorMarker(context, selectedColor, 6);
@@ -180,7 +189,7 @@ const ColorSelector = props => {
             }
           }} />
       <div className="SliderContainer">
-          <Slider value={value} onChange={onValueChange} />
+          <Slider value={value} onChange={onValueChanging} onChangeCommitted={onValueChanged} />
       </div>
       <input type="text"
         className="SelectedColor"

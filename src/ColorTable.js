@@ -3,6 +3,8 @@ import React from "react";
 import * as chromatism from "chromatism"
 import mixbox from 'mixbox';
 import { data as vallejoGame } from "VallejoGame"
+import { data as vallejoModel } from "VallejoModel"
+import { data as citadel } from "Citadel"
 import { AgGridReact } from "ag-grid-react";
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
@@ -13,7 +15,9 @@ const ColorTable = props => {
       let colors = [];
       const ownedColors = JSON.parse(localStorage.getItem("ownedColors"));
 
-      const vallejoColors = vallejoGame.split('\n').map(s => {
+      const input = vallejoGame + vallejoModel + citadel;
+
+      const baseColors = input.split('\n').filter(s => s).map(s => {
         const code = s.substring(s.indexOf("#"));
         const color = chromatism.convert(code).hsv;
         const H = color.h;
@@ -32,7 +36,7 @@ const ColorTable = props => {
         };
       });
 
-      vallejoColors.forEach((c) => colors.push(c));
+      baseColors.forEach((c) => colors.push(c));
 
       for (let color1 of colors)
       {
@@ -40,22 +44,22 @@ const ColorTable = props => {
         color1.minDelta = Math.min(...deltas);
       }
 
-      for (let i = 0; i < vallejoColors.length; i++)
-      for (let j = i + 1; j < vallejoColors.length; j++)
+      for (let i = 0; i < baseColors.length; i++)
+      for (let j = i + 1; j < baseColors.length; j++)
       {
-          const mix = mixbox.lerp(vallejoColors[i].id, vallejoColors[j].id, 0.5);
+          const mix = mixbox.lerp(baseColors[i].id, baseColors[j].id, 0.5);
           const color = chromatism.convert({r: mix[0], g: mix[1], b: mix[2]}).hsv;
 
           colors.push({
             collection: "Mix",
-            name: vallejoColors[i].name + "+" + vallejoColors[j].name,
+            name: baseColors[i].name + "+" + baseColors[j].name,
             id: chromatism.convert(color).hex,
             color: chromatism.convert(color).cielab,
-            bases: [vallejoColors[i].id, vallejoColors[j].id],
+            bases: [baseColors[i].id, baseColors[j].id],
             H: Math.round(color.h),
             S: Math.round(color.s),
             V: Math.round(color.v),
-            owned: ownedColors ? ownedColors.includes(vallejoColors[i].name) && ownedColors.includes(vallejoColors[j].name) : false
+            owned: ownedColors ? ownedColors.includes(baseColors[i].name) && ownedColors.includes(baseColors[j].name) : false
           });
       }
 

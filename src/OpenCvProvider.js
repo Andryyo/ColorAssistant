@@ -22,13 +22,11 @@ export const OpenCvProvider = ({ openCvPath, children, onLoad }) => {
     if (onLoad) {
       onLoad(window.cv)
     }
-    console.log("Loaded from handeOnLoad")
     setLoaded(true)
   }, [])
 
   React.useEffect(() => {
     if (window.cv) {
-      console.log("Loaded by default")
       setLoaded(true)
       return
     }
@@ -60,7 +58,6 @@ export const OpenCvProvider = ({ openCvPath, children, onLoad }) => {
 
   const memoizedProviderValue = React.useMemo(
     () => {
-      console.log(loaded, window.cv)
       return { loaded, cv: window.cv }
     },
     [loaded]

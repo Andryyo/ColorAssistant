@@ -83,4 +83,5 @@ Heavy Gold Brown #ba8636
 Heavy Orange #ee5527
 Heavy Brown #705d41
 Heavy Sienna #744642
-Heavy Charcoal #1c2e2e`;
+Heavy Charcoal #1c2e2e
+`;
