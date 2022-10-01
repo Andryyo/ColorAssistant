@@ -14,6 +14,7 @@ const ColorSelector = (props) => {
   const [selectedColor, setSelectedColor] = React.useState('#ffffff');
   const [text, setText] = React.useState('#ffffff');
   const [mouseDown, setMouseDown] = React.useState(false);
+  const [imageData, setImageData] = React.useState(null);
   const canvasRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -21,12 +22,51 @@ const ColorSelector = (props) => {
     const rect = canvas.getBoundingClientRect();
     canvas.widgth = Math.min(rect.width, rect.height);
     canvas.height = Math.min(rect.width, rect.height);
+  }, [canvasRef]);
 
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+
+    const imageData = canvas
+      .getContext('2d')
+      .createImageData(canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let x = 0; x < imageData.width; x++)
+      for (let y = 0; y < imageData.height; y++) {
+        const offset = 4 * (y * imageData.width + x);
+
+        const dx =
+          ((((x - imageData.width / 2) / imageData.width) * 2) / value) * 100;
+        const dy =
+          ((((y - imageData.height / 2) / imageData.height) * 2) / value) * 100;
+        const saturation = Math.sqrt(dx * dx + dy * dy);
+
+        if (saturation > 1) {
+          data[offset] = 255;
+          data[offset + 1] = 255;
+          data[offset + 2] = 255;
+          data[offset + 3] = 255;
+          continue;
+        }
+
+        const hue = (-Math.atan2(dy, dx) * 180) / Math.PI;
+        data[offset] = fastConvert(hue, saturation, value / 100, 5);
+        data[offset + 1] = fastConvert(hue, saturation, value / 100, 3);
+        data[offset + 2] = fastConvert(hue, saturation, value / 100, 1);
+        data[offset + 3] = 255;
+      }
+
+    setImageData(imageData);
+  }, [canvasRef, value]);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
     draw(context);
     drawMarkers(context);
-  }, [canvasRef]);
+  }, [imageData]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -144,45 +184,6 @@ const ColorSelector = (props) => {
       return null;
     }
   };
-
-  const imageData = React.useMemo(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return null;
-    }
-
-    const imageData = canvas
-      .getContext('2d')
-      .createImageData(canvas.width, canvas.height);
-    const data = imageData.data;
-
-    for (let x = 0; x < imageData.width; x++)
-      for (let y = 0; y < imageData.height; y++) {
-        const offset = 4 * (y * imageData.width + x);
-
-        const dx =
-          ((((x - imageData.width / 2) / imageData.width) * 2) / value) * 100;
-        const dy =
-          ((((y - imageData.height / 2) / imageData.height) * 2) / value) * 100;
-        const saturation = Math.sqrt(dx * dx + dy * dy);
-
-        if (saturation > 1) {
-          data[offset] = 255;
-          data[offset + 1] = 255;
-          data[offset + 2] = 255;
-          data[offset + 3] = 255;
-          continue;
-        }
-
-        const hue = (-Math.atan2(dy, dx) * 180) / Math.PI;
-        data[offset] = fastConvert(hue, saturation, value / 100, 5);
-        data[offset + 1] = fastConvert(hue, saturation, value / 100, 3);
-        data[offset + 2] = fastConvert(hue, saturation, value / 100, 1);
-        data[offset + 3] = 255;
-      }
-
-    return imageData;
-  }, [canvasRef, canvasRef.current, value]);
 
   const draw = (context) => {
     if (imageData) {
