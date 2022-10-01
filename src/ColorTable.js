@@ -12,13 +12,8 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 import cielabDifference from 'difference';
 
 const ColorTable = (props) => {
-  const colors = React.useMemo(() => {
-    let colors = [];
-    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
-
-    const input = vallejoGame + vallejoModel + citadel;
-
-    const baseColors = input
+  const getCollection = (collection, data, ownedColors) => {
+    return data
       .split('\n')
       .filter((s) => s)
       .map((s) => {
@@ -29,7 +24,7 @@ const ColorTable = (props) => {
         const V = color.v;
         const name = s.substring(0, s.indexOf('#') - 1);
         return {
-          collection: 'Vallejo Game Color',
+          collection: collection,
           name: name,
           id: code,
           color: chromatism.convert(color).cielab,
@@ -39,6 +34,22 @@ const ColorTable = (props) => {
           owned: ownedColors ? ownedColors.includes(name) : false
         };
       });
+  };
+
+  const colors = React.useMemo(() => {
+    let colors = [];
+    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
+
+    let baseColors = [];
+    getCollection('Vallejo Game Colors', vallejoGame, ownedColors).forEach(
+      (c) => baseColors.push(c)
+    );
+    getCollection('Vallejo Model Colors', vallejoModel, ownedColors).forEach(
+      (c) => baseColors.push(c)
+    );
+    getCollection('Citadel', citadel, ownedColors).forEach((c) =>
+      baseColors.push(c)
+    );
 
     baseColors.forEach((c) => colors.push(c));
 
@@ -100,7 +111,7 @@ const ColorTable = (props) => {
       {
         field: 'name',
         headerName: 'Name',
-        width: 150,
+        width: 200,
         sortable: true,
         filter: true,
         wrapText: true
