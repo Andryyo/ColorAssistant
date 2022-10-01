@@ -1,10 +1,8 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import * as chromatism from 'chromatism';
-import { OpenCvContext, OpenCvProvider } from 'OpenCvProvider';
+import { OpenCvContext } from 'OpenCvProvider';
 import { Button } from '@mui/material';
-import { flexbox } from '@mui/system';
 
 const Picture = (props) => {
   const canvasRef = React.useRef(null);
@@ -43,9 +41,16 @@ const Picture = (props) => {
 
   return (
     <div className="PictureContainer">
-      <div style={{ flex: '1', minHeight: 0 }}>
+      <div
+        style={{
+          flex: '1',
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'row'
+        }}
+      >
         <canvas
-          style={{ flex: '1', minHeight: 0 }}
+          style={{ flex: '1', minHeight: 0, height: '90%' }}
           ref={canvasRef}
           className="Canvas"
           onMouseDown={(e) => {
@@ -71,7 +76,7 @@ const Picture = (props) => {
             <div
               key={c}
               className="ColorCell"
-              style={{ width: '20%', height: '5%', backgroundColor: c }}
+              style={{ width: 'auto', height: 'auto', backgroundColor: c }}
               onClick={() => {
                 setSelectedColor(c);
                 if (props.onChange) {
