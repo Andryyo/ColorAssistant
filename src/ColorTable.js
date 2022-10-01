@@ -9,6 +9,7 @@ import { AgGridReact } from 'ag-grid-react';
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
+import cielabDifference from 'difference';
 
 const ColorTable = (props) => {
   const colors = React.useMemo(() => {
@@ -45,7 +46,7 @@ const ColorTable = (props) => {
       const deltas = colors
         .filter((c) => c !== color1 && c.owned)
         .map((color2) =>
-          Math.round(chromatism.difference(color1.color, color2.color, 2, 1))
+          Math.round(cielabDifference(color1.color, color2.color, 2, 1))
         );
       color1.minDelta = Math.min(...deltas);
     }
@@ -81,7 +82,7 @@ const ColorTable = (props) => {
   const colorsWithDelta = React.useMemo(() => {
     return colors.map((c) => {
       const delta = props.selectedColor
-        ? Math.round(chromatism.difference(c.color, props.selectedColor, 2, 1))
+        ? Math.round(cielabDifference(c.color, props.selectedColor, 2, 1))
         : null;
       return { ...c, delta };
     });
