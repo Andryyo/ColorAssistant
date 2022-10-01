@@ -4,11 +4,13 @@ import React from 'react';
 import * as chromatism from 'chromatism';
 import { OpenCvContext, OpenCvProvider } from 'OpenCvProvider';
 import { Button } from '@mui/material';
+import { flexbox } from '@mui/system';
 
 const Picture = (props) => {
   const canvasRef = React.useRef(null);
   const [selectedColor, setSelectedColor] = React.useState(null);
   const [mouseDown, setMouseDown] = React.useState(false);
+  const [colors, setColors] = React.useState([]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,29 +42,50 @@ const Picture = (props) => {
   const context = React.useContext(OpenCvContext);
 
   return (
-    <React.Fragment>
-      <canvas
-        ref={canvasRef}
-        className="Canvas"
-        onMouseDown={(e) => {
-          setMouseDown(true);
-          OnMove(e.clientX, e.clientY);
-        }}
-        onMouseUp={() => {
-          setMouseDown(false);
-          if (props.onChange) {
-            props.onChange(chromatism.convert(selectedColor).cielab);
-          }
-        }}
-        onMouseMove={(e) => mouseDown && OnMove(e.clientX, e.clientY)}
-        onTouchStart={(e) => {
-          OnMove(e.touches[0].clientX, e.touches[0].clientY);
-          if (props.onChange) {
-            props.onChange(chromatism.convert(selectedColor).cielab);
-          }
-        }}
-      />
+    <div className="PictureContainer">
+      <div style={{ flex: '1', minHeight: 0 }}>
+        <canvas
+          style={{ flex: '1', minHeight: 0 }}
+          ref={canvasRef}
+          className="Canvas"
+          onMouseDown={(e) => {
+            setMouseDown(true);
+            OnMove(e.clientX, e.clientY);
+          }}
+          onMouseUp={() => {
+            setMouseDown(false);
+            if (props.onChange) {
+              props.onChange(chromatism.convert(selectedColor).cielab);
+            }
+          }}
+          onMouseMove={(e) => mouseDown && OnMove(e.clientX, e.clientY)}
+          onTouchStart={(e) => {
+            OnMove(e.touches[0].clientX, e.touches[0].clientY);
+            if (props.onChange) {
+              props.onChange(chromatism.convert(selectedColor).cielab);
+            }
+          }}
+        />
+        <div className="ColorsContainer">
+          {colors.map((c) => (
+            <div
+              key={c}
+              className="ColorCell"
+              style={{ width: '20%', height: '5%', backgroundColor: c }}
+              onClick={() => {
+                setSelectedColor(c);
+                if (props.onChange) {
+                  props.onChange(chromatism.convert(c).cielab);
+                }
+              }}
+            >
+              {c}
+            </div>
+          ))}
+        </div>
+      </div>
       <input
+        style={{ flex: '0 0 auto' }}
         type="file"
         name="file"
         onChange={(e) => {
@@ -82,10 +105,14 @@ const Picture = (props) => {
           };
         }}
       />
-      <div className="SelectedColor" style={{ backgroundColor: selectedColor }}>
+      <div
+        className="SelectedColor"
+        style={{ flex: '0 0 auto', backgroundColor: selectedColor }}
+      >
         {selectedColor}
       </div>
       <Button
+        style={{ flex: '0 0 auto' }}
         onClick={() => {
           const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
@@ -154,6 +181,18 @@ const Picture = (props) => {
                 )
               );
               ctx.putImageData(imgData, 0, 0);
+
+              let colors = [];
+
+              for (x = 0; x < centers.rows; x++) {
+                const R = centers.floatAt(x, 0);
+                const G = centers.floatAt(x, 1);
+                const B = centers.floatAt(x, 2);
+                const color = chromatism.convert({ r: R, g: G, b: B }).hex;
+                colors.push(color);
+              }
+
+              setColors(colors);
             } catch (ex) {
               console.log(ex);
             }
@@ -162,7 +201,7 @@ const Picture = (props) => {
       >
         Transform
       </Button>
-    </React.Fragment>
+    </div>
   );
 };
 

@@ -35,10 +35,16 @@
   font-weight: bold;
 }
 
+.ColorsContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
 .Canvas {
   margin: 1vw 1vw 1vw 1vw;
   width: 90%;
-  height: 70%;
+  height: 75%;
 }
 
 .SliderContainer {
@@ -53,4 +59,13 @@
   -webkit-text-stroke: 1px white;
   font-size: x-large;
   font-weight: bold;
+}
+
+.PictureContainer {
+  height: 80vh;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  flex: 0 0 auto;
 }
