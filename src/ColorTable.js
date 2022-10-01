@@ -91,8 +91,7 @@ const ColorTable = (props) => {
             cielabDifference(color1.color, color2.color, 2, 1)
           );
           return delta;
-        })
-        .filter((c) => c);
+        });
       color1.minDelta = Math.min(...deltas);
     }
 
