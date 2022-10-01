@@ -1,4 +1,4 @@
-export const data = `Dead White #fffffe
+export const data = `Dead White #ffffff
 Pale Flesh #f6bdb3
 Elf Skintone #f8a070
 Moon Yellow #fff103
@@ -47,7 +47,7 @@ Wolf Grey #90a2bc
 Sombre Grey #4c5c7d
 Stonewall Grey #828e95
 Cold Grey #54646d
-Black #000001
+Black #000000
 Khaki #8c806d
 Earth #6f563d
 Desert Yellow #8e7845

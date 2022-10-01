@@ -13,27 +13,52 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 import cielabDifference from 'difference';
 
 const ColorTable = (props) => {
+  const createColor = (collection, name, id, owned) => {
+    let color, H, S, V;
+
+    if (id === '#000000') {
+      H = 0;
+      S = 0;
+      V = 0;
+      color = { L: 0, a: 0, b: 0 };
+    } else if (id === '#ffffff') {
+      H = 0;
+      S = 0;
+      V = 100;
+      color = { L: 100, a: 0, b: 0 };
+    } else {
+      const hsv = chromatism.convert(id).hsv;
+      H = hsv.h;
+      S = hsv.s;
+      V = hsv.v;
+      color = chromatism.convert(id).cielab;
+    }
+
+    return {
+      collection: collection,
+      name: name,
+      id: id,
+      color: color,
+      H: Math.round(H),
+      S: Math.round(S),
+      V: Math.round(V),
+      owned: owned
+    };
+  };
+
   const getCollection = (collection, data, ownedColors) => {
     return data
       .split('\n')
       .filter((s) => s)
       .map((s) => {
         const code = s.substring(s.indexOf('#'));
-        const color = chromatism.convert(code).hsv;
-        const H = color.h;
-        const S = color.s || 0;
-        const V = color.v;
         const name = s.substring(0, s.indexOf('#') - 1);
-        return {
-          collection: collection,
-          name: name,
-          id: code,
-          color: chromatism.convert(color).cielab,
-          H: Math.round(H),
-          S: Math.round(S),
-          V: Math.round(V),
-          owned: ownedColors ? ownedColors.includes(name) : false
-        };
+        return createColor(
+          collection,
+          name,
+          code,
+          ownedColors ? ownedColors.includes(name) : false
+        );
       });
   };
 
@@ -60,35 +85,36 @@ const ColorTable = (props) => {
     for (let color1 of colors) {
       const deltas = colors
         .filter((c) => c !== color1 && c.owned)
-        .map((color2) =>
-          Math.round(cielabDifference(color1.color, color2.color, 2, 1))
-        );
+        .map((color2) => {
+          const delta = Math.round(
+            cielabDifference(color1.color, color2.color, 2, 1)
+          );
+          return delta;
+        })
+        .filter((c) => c);
       color1.minDelta = Math.min(...deltas);
     }
 
     for (let i = 0; i < baseColors.length; i++)
       for (let j = i + 1; j < baseColors.length; j++) {
         const mix = mixbox.lerp(baseColors[i].id, baseColors[j].id, 0.5);
-        const color = chromatism.convert({
+        const code = chromatism.convert({
           r: mix[0],
           g: mix[1],
           b: mix[2]
-        }).hsv;
+        }).hex;
 
-        colors.push({
-          collection: 'Mix',
-          name: baseColors[i].name + '+' + baseColors[j].name,
-          id: chromatism.convert(color).hex,
-          color: chromatism.convert(color).cielab,
-          bases: [baseColors[i].id, baseColors[j].id],
-          H: Math.round(color.h),
-          S: Math.round(color.s),
-          V: Math.round(color.v),
-          owned: ownedColors
+        const color = createColor(
+          'Mix',
+          baseColors[i].name + '+' + baseColors[j].name,
+          code,
+          ownedColors
             ? ownedColors.includes(baseColors[i].name) &&
-              ownedColors.includes(baseColors[j].name)
+                ownedColors.includes(baseColors[j].name)
             : false
-        });
+        );
+
+        colors.push({ ...color, bases: [baseColors[i].id, baseColors[j].id] });
       }
 
     return colors;

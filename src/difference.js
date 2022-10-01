@@ -18,8 +18,8 @@ export default function cielabDifference(Lab1, Lab2, l, c) {
 
   const dH = Math.sqrt(Math.pow(da, 2) + Math.pow(db, 2) - Math.pow(dC, 2));
 
-  const SL = Lab1.L < 16 ? 0.511 : (0.040975 * Lab1.L) / (1.01765 * Lab1.L);
-  const SC = (0.0638 * C1) / (1.0131 * C1);
+  const SL = Lab1.L < 16 ? 0.511 : (0.040975 * Lab1.L) / (1 + 0.01765 * Lab1.L);
+  const SC = (0.0638 * C1) / (1 + 0.0131 * C1);
 
   const H = Math.atan2(Lab1.b, Lab1.a);
   const H1 = H >= 0 ? H : H + 360;
@@ -32,9 +32,11 @@ export default function cielabDifference(Lab1, Lab2, l, c) {
 
   const SH = SC * (F * T + 1 - F);
 
-  const EqPrt1 = Math.pow(dL / (l * SL), 2);
-  const EqPrt2 = Math.pow(dC / (c * SC), 2);
-  const EqPrt3 = Math.pow(dH / SH, 2);
+  const EqPrt1 = Math.pow(SL === 0 ? 0 : dL / (l * SL), 2);
+  const EqPrt2 = Math.pow(SC === 0 ? 0 : dC / (c * SC), 2);
+  const EqPrt3 = Math.pow(SH === 0 ? 0 : dH / SH, 2);
 
-  return Math.sqrt(EqPrt1 + EqPrt2 + EqPrt3);
+  const result = Math.sqrt(EqPrt1 + EqPrt2 + EqPrt3);
+
+  return result;
 }
