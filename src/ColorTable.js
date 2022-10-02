@@ -8,6 +8,7 @@ import { data as citadel } from 'Citadel';
 import { data as armyPainter } from 'ArmyPainter';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
+import OwnedFloatingFilter from 'OwnedFloatingFilter';
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
@@ -114,7 +115,11 @@ const ColorTable = (props) => {
             : false
         );
 
-        colors.push({ ...color, bases: [baseColors[i].id, baseColors[j].id] });
+        colors.push({
+          ...color,
+          bases: [baseColors[i].id, baseColors[j].id],
+          baseCollections: [baseColors[i].collection, baseColors[j].collection]
+        });
       }
 
     return colors;
@@ -144,6 +149,7 @@ const ColorTable = (props) => {
         width: 200,
         sortable: true,
         filter: true,
+        floatingFilter: true,
         wrapText: true
       },
       {
@@ -216,6 +222,8 @@ const ColorTable = (props) => {
         width: 75,
         sortable: true,
         filter: true,
+        floatingFilter: true,
+        floatingFilterComponent: OwnedFloatingFilter,
         cellRenderer: (props) => {
           return (
             <input

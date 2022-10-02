@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import { Checkbox, FormControlLabel } from '@mui/material';
@@ -22,7 +21,11 @@ export default forwardRef((props, ref) => {
   useImperativeHandle(ref, () => {
     return {
       doesFilterPass(params) {
-        return collections.has(params.data.collection);
+        return (
+          collections.has(params.data.collection) &&
+          (!params.data.baseCollections ||
+            params.data.baseCollections.every((c) => collections.has(c)))
+        );
       },
 
       isFilterActive() {
