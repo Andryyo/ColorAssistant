@@ -71,18 +71,14 @@ const Picture = (props) => {
       for (y = 0; y < mat.rows; y++)
         for (x = 0; x < mat.cols; x++) {
           var cluster_idx = labels.intAt(y + x * mat.rows, 0);
-          var redChan = new Uint8Array(1);
-          var greenChan = new Uint8Array(1);
-          var blueChan = new Uint8Array(1);
-          var alphaChan = new Uint8Array(1);
-          redChan[0] = centers.floatAt(cluster_idx, 0);
-          greenChan[0] = centers.floatAt(cluster_idx, 1);
-          blueChan[0] = centers.floatAt(cluster_idx, 2);
-          alphaChan[0] = 255;
-          newImage.ucharPtr(y, x)[0] = redChan;
-          newImage.ucharPtr(y, x)[1] = greenChan;
-          newImage.ucharPtr(y, x)[2] = blueChan;
-          newImage.ucharPtr(y, x)[3] = alphaChan;
+          const red = centers.floatAt(cluster_idx, 0);
+          const green = centers.floatAt(cluster_idx, 1);
+          const blue = centers.floatAt(cluster_idx, 2);
+          const alpha = 255;
+          newImage.ucharPtr(y, x)[0] = red;
+          newImage.ucharPtr(y, x)[1] = green;
+          newImage.ucharPtr(y, x)[2] = blue;
+          newImage.ucharPtr(y, x)[3] = alpha;
         }
 
       let imgData = ctx.createImageData(newImage.cols, newImage.rows);
@@ -120,8 +116,6 @@ const Picture = (props) => {
       canvas.width = rect.width;
       canvas.height = rect.height;
 
-      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-
       const imgRatio = img.width / img.height;
 
       let targetWidth, targetHeight;
@@ -144,15 +138,26 @@ const Picture = (props) => {
         targetHeight = canvas.height;
       }
 
-      canvas
-        .getContext('2d')
-        .drawImage(
-          img,
-          (canvas.width - targetWidth) / 2,
-          (canvas.height - targetHeight) / 2,
-          targetWidth,
-          targetHeight
-        );
+      const ctx = canvas.getContext('2d');
+
+      ctx.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
+
+      const corner = ctx.getImageData(0, 0, 1, 1).data;
+
+      ctx.fillStyle = chromatism.convert({
+        r: corner[0],
+        g: corner[1],
+        b: corner[2]
+      }).hex;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(
+        img,
+        (canvas.width - targetWidth) / 2,
+        (canvas.height - targetHeight) / 2,
+        targetWidth,
+        targetHeight
+      );
     };
   };
 
