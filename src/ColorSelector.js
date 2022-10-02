@@ -20,7 +20,7 @@ const ColorSelector = (props) => {
   React.useEffect(() => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    canvas.widgth = Math.min(rect.width, rect.height);
+    canvas.width = Math.min(rect.width, rect.height);
     canvas.height = Math.min(rect.width, rect.height);
   }, [canvasRef]);
 
