@@ -17,7 +17,7 @@ function App() {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} xl={8}>
-        <Card className="ColorTable" sx={{ p: 1 }}>
+        <Card className="ColorTable" sx={{ p: 1, height: '90vh' }}>
           <ColorTable
             selectedColor={selectedColor}
             onTopColorsChange={(e) => setTopColors(e)}
@@ -25,7 +25,7 @@ function App() {
         </Card>
       </Grid>
       <Grid item xs={12} xl={4}>
-        <Card className="ColorContainer" sx={{ p: 1 }}>
+        <Card className="ColorContainer" sx={{ p: 1, height: '90vh' }}>
           <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
             <Tab label="Color Wheel" />
             <Tab label="Picture" />

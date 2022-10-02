@@ -10,13 +10,6 @@ const Picture = (props) => {
   const [mouseDown, setMouseDown] = React.useState(false);
   const [colors, setColors] = React.useState([]);
 
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    canvas.widgth = Math.min(rect.width, rect.height);
-    canvas.height = Math.min(rect.width, rect.height);
-  }, [canvasRef]);
-
   const OnMove = (x, y) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -98,15 +91,45 @@ const Picture = (props) => {
           img.src = URL.createObjectURL(e.target.files[0]);
           img.onload = () => {
             const canvas = canvasRef.current;
-            const xRatio = canvas.width / img.width;
-            const yRatio = canvas.height / img.height;
-            const ratio = Math.min(xRatio, yRatio);
+            const rect = canvas.getBoundingClientRect();
+            canvas.widgth = rect.width;
+            canvas.height = rect.height;
+
             canvas
               .getContext('2d')
               .clearRect(0, 0, canvas.width, canvas.height);
+
+            const imgRatio = img.width / img.height;
+
+            let targetWidth, targetHeight;
+
+            if (imgRatio > 1) {
+              targetWidth = canvas.width;
+              targetHeight = canvas.width / imgRatio;
+            } else {
+              targetWidth = canvas.height * imgRatio;
+              targetHeight = canvas.height;
+            }
+
+            if (targetWidth > canvas.width) {
+              targetHeight = (targetHeight * canvas.width) / targetWidth;
+              targetWidth = canvas.width;
+            }
+
+            if (targetHeight > canvas.height) {
+              targetWidth = (targetWidth * canvas.height) / targetHeight;
+              targetHeight = canvas.height;
+            }
+
             canvas
               .getContext('2d')
-              .drawImage(img, 0, 0, img.width * ratio, img.height * ratio);
+              .drawImage(
+                img,
+                (canvas.width - targetWidth) / 2,
+                (canvas.height - targetHeight) / 2,
+                targetWidth,
+                targetHeight
+              );
           };
         }}
       />
@@ -196,6 +219,11 @@ const Picture = (props) => {
                 const color = chromatism.convert({ r: R, g: G, b: B }).hex;
                 colors.push(color);
               }
+
+              colors.sort(
+                (a, b) =>
+                  chromatism.convert(b).hsv.h - chromatism.convert(a).hsv.h
+              );
 
               setColors(colors);
             } catch (ex) {
