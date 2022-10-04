@@ -1,27 +1,31 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import * as chromatism from 'chromatism';
 import { OpenCvContext } from 'OpenCvProvider';
 import { Button } from '@mui/material';
+import MapColorSelector from 'MapColorSelector';
 
 const Picture = (props) => {
-  const canvasRef = React.useRef(null);
   const context = React.useContext(OpenCvContext);
   const [selectedColor, setSelectedColor] = React.useState(null);
   const [mouseDown, setMouseDown] = React.useState(false);
   const [colors, setColors] = React.useState([]);
+  const [imgCanvas, setImgCanvas] = React.useState(null);
+  const [imgSrc, setImgSrc] = React.useState(null);
 
-  const OnMove = (x, y) => {
+  /*const OnMove = (x, y) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const canvasX = ((x - rect.left) / rect.width) * canvas.width;
     const canvasY = ((y - rect.top) / rect.height) * canvas.height;
 
     selectColor(canvasX, canvasY);
-  };
+  };*/
 
   const selectColor = (x, y) => {
-    const ctx = canvasRef.current.getContext('2d');
+    console.log(x, y, imgCanvas.width, imgCanvas.height);
+    const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
     const newColor = chromatism.convert({
       r: pixel.data[0],
@@ -29,11 +33,14 @@ const Picture = (props) => {
       b: pixel.data[2]
     }).hex;
     setSelectedColor(newColor);
+    if (props.onChange) {
+      props.onChange(chromatism.convert(newColor).cielab);
+    }
   };
 
   const transform = () => {
     try {
-      const canvas = canvasRef.current;
+      const canvas = imgCanvas;
       const ctx = canvas.getContext('2d');
       const cv = context.cv;
       const mat = cv.matFromImageData(
@@ -102,6 +109,9 @@ const Picture = (props) => {
       );
 
       setColors(colors);
+      canvas.toBlob((blob) => {
+        setImgSrc(URL.createObjectURL(blob));
+      });
     } catch (ex) {
       console.log(ex);
     }
@@ -111,53 +121,15 @@ const Picture = (props) => {
     const img = new Image();
     img.src = src;
     img.onload = () => {
-      const canvas = canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-
-      const imgRatio = img.width / img.height;
-
-      let targetWidth, targetHeight;
-
-      if (imgRatio > 1) {
-        targetWidth = canvas.width;
-        targetHeight = canvas.width / imgRatio;
-      } else {
-        targetWidth = canvas.height * imgRatio;
-        targetHeight = canvas.height;
-      }
-
-      if (targetWidth > canvas.width) {
-        targetHeight = (targetHeight * canvas.width) / targetWidth;
-        targetWidth = canvas.width;
-      }
-
-      if (targetHeight > canvas.height) {
-        targetWidth = (targetWidth * canvas.height) / targetHeight;
-        targetHeight = canvas.height;
-      }
-
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-
-      ctx.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
-
-      const corner = ctx.getImageData(0, 0, 1, 1).data;
-
-      ctx.fillStyle = chromatism.convert({
-        r: corner[0],
-        g: corner[1],
-        b: corner[2]
-      }).hex;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.drawImage(
-        img,
-        (canvas.width - targetWidth) / 2,
-        (canvas.height - targetHeight) / 2,
-        targetWidth,
-        targetHeight
-      );
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+      setImgCanvas(canvas);
+      canvas.toBlob((blob) => {
+        setImgSrc(URL.createObjectURL(blob));
+      });
     };
   };
 
@@ -171,27 +143,12 @@ const Picture = (props) => {
           flexDirection: 'row'
         }}
       >
-        <canvas
+        <MapColorSelector
           style={{ flex: '1', minHeight: 0, height: '90%' }}
-          ref={canvasRef}
-          className="Canvas"
-          onMouseDown={(e) => {
-            setMouseDown(true);
-            OnMove(e.clientX, e.clientY);
-          }}
-          onMouseUp={() => {
-            setMouseDown(false);
-            if (props.onChange) {
-              props.onChange(chromatism.convert(selectedColor).cielab);
-            }
-          }}
-          onMouseMove={(e) => mouseDown && OnMove(e.clientX, e.clientY)}
-          onTouchStart={(e) => {
-            OnMove(e.touches[0].clientX, e.touches[0].clientY);
-            if (props.onChange) {
-              props.onChange(chromatism.convert(selectedColor).cielab);
-            }
-          }}
+          src={imgSrc}
+          imgHeight={imgCanvas?.height}
+          imgWidth={imgCanvas?.width}
+          click={(e) => selectColor(e.x, e.y)}
         />
         <div className="ColorsContainer">
           {colors.map((c) => (
