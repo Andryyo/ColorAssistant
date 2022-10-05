@@ -8,7 +8,7 @@ importScripts('/ColorAssistant/VallejoModel.js');
 importScripts('/ColorAssistant/difference.js');
 
 console.log('Started colors worker');
-var colors = [];
+var colors = null;
 
 const createColor = (collection, name, id, owned) => {
   let color, H, S, V;
@@ -61,6 +61,11 @@ const getCollection = (collection, data, ownedColors) => {
 
 self.onmessage = (message) => {
   if (message.data.type === 'init') {
+    if (colors) {
+      postMessage({ type: 'init', colors: colors });
+      return;
+    }
+
     colors = [];
     let baseColors = [];
     getCollection(
@@ -107,9 +112,18 @@ self.onmessage = (message) => {
           b: mix[2]
         }).hex;
 
+        const name =
+          baseColors[i].collection +
+          ' ' +
+          baseColors[i].name +
+          '+' +
+          baseColors[j].collection +
+          ' ' +
+          baseColors[j].name;
+
         const color = createColor(
           'Mix',
-          baseColors[i].name + '+' + baseColors[j].name,
+          name,
           code,
           message.data.ownedColors
             ? message.data.ownedColors.includes(baseColors[i].name) &&

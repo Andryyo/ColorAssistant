@@ -13,23 +13,37 @@ function App() {
   const [topColors, setTopColors] = React.useState([]);
   const [selectedTab, setSelectedTab] = React.useState(1);
 
-  const [colorsWorker] = React.useState(() => {
-    return new Worker(process.env.PUBLIC_URL + '/colorsWorker.js');
-  });
+  const [colorsWorker, setColorsWorker] = React.useState(null);
 
-  const [opencvWorker] = React.useState(() => {
-    return new Worker(process.env.PUBLIC_URL + '/opencvWorker.js');
-  });
+  const [opencvWorker, setOpencvWorker] = React.useState(null);
+
+  React.useEffect(() => {
+    console.log('Creating workers');
+
+    const cw = new Worker(process.env.PUBLIC_URL + '/colorsWorker.js');
+    const cvw = new Worker(process.env.PUBLIC_URL + '/opencvWorker.js');
+
+    setColorsWorker(cw);
+    setOpencvWorker(cvw);
+
+    return function cleanup() {
+      console.log('Cleanup', cw, cvw);
+      cw?.terminate();
+      cvw?.terminate();
+    };
+  }, []);
 
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} xl={8}>
         <Card className="ColorTable" sx={{ p: 1, height: '90vh' }}>
-          <ColorTable
-            selectedColor={selectedColor}
-            onTopColorsChange={(e) => setTopColors(e)}
-            worker={colorsWorker}
-          />
+          {colorsWorker && (
+            <ColorTable
+              selectedColor={selectedColor}
+              onTopColorsChange={(e) => setTopColors(e)}
+              worker={colorsWorker}
+            />
+          )}
         </Card>
       </Grid>
       <Grid item xs={12} xl={4}>
@@ -44,7 +58,7 @@ function App() {
               topColors={topColors}
             />
           )}
-          {selectedTab === 1 && (
+          {selectedTab === 1 && opencvWorker && (
             <Picture
               onChange={(e) => setSelectedColor(e)}
               topColors={topColors}

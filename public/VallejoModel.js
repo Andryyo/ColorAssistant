@@ -19,7 +19,6 @@ Offwhite #efeee2
 German Cam. Beige WW2 #9c8d70
 German Cam. Black Brown #5b3528
 Luftwaffe Cam. Green #596b3f
-German Cam. Black Brown #553528
 German Cam. Orange Ochre #9d7e55
 German Cam. Pale Brown #82685e
 German Cam. Medium Brown #722b2f
@@ -49,7 +48,6 @@ Medium Fleshtone #c08245
 Glossy Black #010101
 Black Grey #2d373a
 Grey Green #565a60
-Dark Blue Grey #4b5751
 Dark Sea Green #2f4844
 Basalt Grey #576860
 Medium Sea Grey #869393
@@ -62,7 +60,7 @@ Brown Sand #b08064
 Gold Brown #ba8636
 Green Brown #8d7b55
 Khaki Grey #8b7f5d
-Yellow Green #91864b
+Yellow Green 1 #91864b
 Middlestone #9c9660
 Silver Grey #d8dfd5
 Stone Grey #959980
@@ -118,14 +116,13 @@ Grey Blue #45708d
 Old Rose #d47b7d
 Magenta #a92a56
 Dark Red #a24a46
-Dark Sand #d1b47e
 Golden Yellow #f7c65e
 Light Yellow #f7ea62
 Black #252b31
 White #ffffff
 Lemon Yellow #fef10e
 Flat Yellow #ffcd25
-Yellow Green #d9e02a
+Yellow Green 2 #d9e02a
 Flat Flesh #d8a977
 Clear Orange #f1552c
 Flat Red #aa3037

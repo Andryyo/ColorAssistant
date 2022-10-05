@@ -210,6 +210,7 @@ const ColorTable = (props) => {
       onCellValueChanged={updateLocalStorage}
       loadingOverlayComponent={progressOverlay}
       loadingOverlayComponentParams={{ progress: progress }}
+      getRowId={(r) => r.data.collection + ' ' + r.data.name}
     />
   );
 };
