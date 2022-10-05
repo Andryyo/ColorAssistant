@@ -84,7 +84,7 @@ self.onmessage = (message) => {
 
     baseColors.forEach((c) => colors.push(c));
 
-    /*for (let color1 of colors) {
+    for (let color1 of colors) {
       const deltas = colors
         .filter((c) => c !== color1 && c.owned)
         .map((color2) => {
@@ -94,9 +94,11 @@ self.onmessage = (message) => {
           return delta;
         });
       color1.minDelta = Math.min(...deltas);
-    }*/
+    }
 
-    for (let i = 0; i < baseColors.length; i++)
+    const step = Math.round(baseColors.length / 100);
+
+    for (let i = 0; i < baseColors.length; i++) {
       for (let j = i + 1; j < baseColors.length; j++) {
         const mix = mixbox.lerp(baseColors[i].id, baseColors[j].id, 0.5);
         const code = chromatism.convert({
@@ -121,6 +123,11 @@ self.onmessage = (message) => {
           baseCollections: [baseColors[i].collection, baseColors[j].collection]
         });
       }
+
+      if (i % step == 0) {
+        postMessage({ type: 'progressUpdate', value: i / step });
+      }
+    }
 
     postMessage({ type: 'init', colors: colors });
   } else if (message.data.type === 'updateSelectedColor') {

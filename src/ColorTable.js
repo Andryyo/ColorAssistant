@@ -11,31 +11,34 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 
 const ColorTable = (props) => {
   const [colorsWithDelta, setColorsWithDelta] = React.useState(null);
-
-  React.useEffect(() => {
-    props.worker.onmessage = (message) => {
-      if (message.data.type === 'init') {
-        console.log('Colors loaded');
-        setColorsWithDelta(message.data.colors);
-      }
-    };
-
-    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
-    props.worker.postMessage({ type: 'init', ownedColors: ownedColors });
-  }, []);
+  const [progress, setProgress] = React.useState(0);
+  const tableRef = React.useRef(null);
 
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
       if (message.data.type === 'updateSelectedColor') {
         setColorsWithDelta(message.data.colors);
+      } else if (message.data.type === 'init') {
+        console.log('Colors loaded');
+        setColorsWithDelta(message.data.colors);
+        tableRef.current?.api?.hideOverlay();
+      } else if (message.data.type === 'progressUpdate') {
+        setProgress(message.data.value);
+        tableRef.current?.api?.showLoadingOverlay();
       }
     };
-
-    props.worker.postMessage({
-      type: 'updateSelectedColor',
-      selectedColor: props.selectedColor
-    });
+    if (props.selectedColor) {
+      props.worker.postMessage({
+        type: 'updateSelectedColor',
+        selectedColor: props.selectedColor
+      });
+    }
   }, [props.selectedColor]);
+
+  React.useEffect(() => {
+    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
+    props.worker.postMessage({ type: 'init', ownedColors: ownedColors });
+  }, []);
 
   const columns = React.useMemo(
     () => [
@@ -179,10 +182,20 @@ const ColorTable = (props) => {
     localStorage.setItem('ownedColors', JSON.stringify(ownedColors));
   };
 
-  const tableRef = React.useRef(null);
   React.useEffect(() => {
     updateTopColors();
   }, [colorsWithDelta]);
+
+  const progressOverlay = (props) => {
+    return (
+      <div
+        className="ag-overlay-loading-center"
+        style={{ backgroundColor: 'lightsteelblue', height: '9%' }}
+      >
+        <i className="far fa-frown"> Loading: {props.progress}%</i>
+      </div>
+    );
+  };
 
   return (
     <AgGridReact
@@ -195,6 +208,8 @@ const ColorTable = (props) => {
       onFilterChanged={updateTopColors}
       onSortChanged={updateTopColors}
       onCellValueChanged={updateLocalStorage}
+      loadingOverlayComponent={progressOverlay}
+      loadingOverlayComponentParams={{ progress: progress }}
     />
   );
 };
