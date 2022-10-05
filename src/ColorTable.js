@@ -10,7 +10,7 @@ import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 
 const ColorTable = (props) => {
-  const [colorsWithDelta, setColorsWithDelta] = React.useState([]);
+  const [colorsWithDelta, setColorsWithDelta] = React.useState(null);
 
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
