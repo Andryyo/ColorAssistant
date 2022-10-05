@@ -7,12 +7,14 @@ import Picture from 'Picture';
 import Grid from '@mui/material/Grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { OpenCvProvider } from 'OpenCvProvider';
 
 function App() {
   const [selectedColor, setSelectedColor] = React.useState(null);
   const [topColors, setTopColors] = React.useState([]);
   const [selectedTab, setSelectedTab] = React.useState(1);
+  const [worker] = React.useState(() => {
+    return new Worker(process.env.PUBLIC_URL + '/opencvWorker.js');
+  });
 
   return (
     <Grid container spacing={1}>
@@ -21,6 +23,7 @@ function App() {
           <ColorTable
             selectedColor={selectedColor}
             onTopColorsChange={(e) => setTopColors(e)}
+            worker={worker}
           />
         </Card>
       </Grid>
@@ -37,12 +40,11 @@ function App() {
             />
           )}
           {selectedTab === 1 && (
-            <OpenCvProvider>
-              <Picture
-                onChange={(e) => setSelectedColor(e)}
-                topColors={topColors}
-              />
-            </OpenCvProvider>
+            <Picture
+              onChange={(e) => setSelectedColor(e)}
+              topColors={topColors}
+              worker={worker}
+            />
           )}
         </Card>
       </Grid>

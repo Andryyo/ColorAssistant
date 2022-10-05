@@ -8,8 +8,7 @@
             "type": "firefox",
             "request": "launch",
             "name": "Launch Firefox against localhost",
-            "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}/src"
+            "url": "http://localhost:3000/ColorAssistant"
         }
     ]
 }
