@@ -48,6 +48,14 @@ const Picture = (props) => {
         imgCanvas
           .convertToBlob()
           .then((blob) => setImgSrc(URL.createObjectURL(blob)));
+
+        const colors = message.data.colors.map(
+          (c) => chromatism.convert(c).hex
+        );
+        colors.sort(
+          (a, b) => chromatism.convert(b).hsv.h - chromatism.convert(a).hsv.h
+        );
+        setColors(colors);
       }
     };
   };
@@ -56,9 +64,11 @@ const Picture = (props) => {
     const img = new Image();
     img.src = src;
     img.onload = () => {
-      const canvas = new OffscreenCanvas(img.width, img.height);
+      const ratio = img.width / img.height;
+      const canvas = new OffscreenCanvas(300, 300 / ratio);
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, img.width, img.height);
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       setImgCanvas(canvas);
       canvas
         .convertToBlob()

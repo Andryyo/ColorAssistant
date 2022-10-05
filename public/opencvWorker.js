@@ -16,14 +16,15 @@ function kmeans(message) {
   const startTime = performance.now();
 
   console.log(performance.now() - startTime, 'Starting...');
-  const mat = cv.matFromImageData(message.data.data);
+  const imageData = message.data.data;
   //define criteria, number of clusters(K) and apply kmeans()
-  let sample = new cv.Mat(mat.rows * mat.cols, 3, cv.CV_32F);
+  let sample = new cv.Mat(imageData.height * imageData.width, 3, cv.CV_32F);
 
-  for (var y = 0; y < mat.rows; y++)
-    for (var x = 0; x < mat.cols; x++)
+  for (var y = 0; y < imageData.height; y++)
+    for (var x = 0; x < imageData.width; x++)
       for (var z = 0; z < 3; z++)
-        sample.floatPtr(y + x * mat.rows)[z] = mat.ucharPtr(y, x)[z];
+        sample.floatPtr(y + x * imageData.height)[z] =
+          imageData.data[y * 4 + x * imageData.height * 4 + z];
 
   var clusterCount = 16;
   var labels = new cv.Mat();
@@ -50,44 +51,30 @@ function kmeans(message) {
 
   console.log(performance.now() - startTime, 'Completed k-means');
 
-  var newImage = new cv.Mat(mat.size(), mat.type());
-  for (y = 0; y < mat.rows; y++)
-    for (x = 0; x < mat.cols; x++) {
-      var cluster_idx = labels.intAt(y + x * mat.rows, 0);
+  for (y = 0; y < imageData.height; y++)
+    for (x = 0; x < imageData.width; x++) {
+      var cluster_idx = labels.intAt(y + x * imageData.height, 0);
       const red = centers.floatAt(cluster_idx, 0);
       const green = centers.floatAt(cluster_idx, 1);
       const blue = centers.floatAt(cluster_idx, 2);
       const alpha = 255;
-      newImage.ucharPtr(y, x)[0] = red;
-      newImage.ucharPtr(y, x)[1] = green;
-      newImage.ucharPtr(y, x)[2] = blue;
-      newImage.ucharPtr(y, x)[3] = alpha;
+      const imageDataOffset = y * 4 + x * imageData.height * 4;
+      imageData.data[imageDataOffset + 0] = red;
+      imageData.data[imageDataOffset + 1] = green;
+      imageData.data[imageDataOffset + 2] = blue;
+      imageData.data[imageDataOffset + 3] = alpha;
     }
-
-  message.data.data.data.set(
-    new Uint8ClampedArray(newImage.data, newImage.cols, newImage.rows)
-  );
 
   console.log(performance.now() - startTime, 'Posting result');
 
-  self.postMessage(message.data);
+  let colors = [];
 
-  /*let colors = [];
+  for (x = 0; x < centers.rows; x++) {
+    const R = centers.floatAt(x, 0);
+    const G = centers.floatAt(x, 1);
+    const B = centers.floatAt(x, 2);
+    colors.push({ r: R, g: G, b: B });
+  }
 
-      for (x = 0; x < centers.rows; x++) {
-        const R = centers.floatAt(x, 0);
-        const G = centers.floatAt(x, 1);
-        const B = centers.floatAt(x, 2);
-        const color = chromatism.convert({ r: R, g: G, b: B }).hex;
-        colors.push(color);
-      }
-
-      colors.sort(
-        (a, b) => chromatism.convert(b).hsv.h - chromatism.convert(a).hsv.h
-      );*/
-
-  /*setColors(colors);
-      canvas
-        .convertToBlob()
-        .then((blob) => setImgSrc(URL.createObjectURL(blob)));*/
+  self.postMessage({ ...message.data, colors: colors });
 }
