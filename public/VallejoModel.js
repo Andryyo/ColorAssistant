@@ -1,4 +1,4 @@
-export const data = `Sunset Red #c22c5f
+const vallejoModel = `Sunset Red #c22c5f
 Brown Rose #cf8774
 Beige Red #c79166
 German Orange #f05426

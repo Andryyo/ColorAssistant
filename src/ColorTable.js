@@ -2,136 +2,38 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import * as chromatism from 'chromatism';
-import mixbox from 'mixbox';
-import { data as vallejoGame } from 'VallejoGame';
-import { data as vallejoModel } from 'VallejoModel';
-import { data as citadel } from 'Citadel';
-import { data as armyPainter } from 'ArmyPainter';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
-import cielabDifference from 'difference';
 
 const ColorTable = (props) => {
-  const createColor = (collection, name, id, owned) => {
-    let color, H, S, V;
+  const [colorsWithDelta, setColorsWithDelta] = React.useState([]);
 
-    if (id === '#000000') {
-      H = 0;
-      S = 0;
-      V = 0;
-      color = { L: 0, a: 0, b: 0 };
-    } else if (id === '#ffffff') {
-      H = 0;
-      S = 0;
-      V = 100;
-      color = { L: 100, a: 0, b: 0 };
-    } else {
-      const hsv = chromatism.convert(id).hsv;
-      H = hsv.h;
-      S = hsv.s;
-      V = hsv.v;
-      color = chromatism.convert(id).cielab;
-    }
-
-    return {
-      collection: collection,
-      name: name,
-      id: id,
-      color: color,
-      H: Math.round(H),
-      S: Math.round(S),
-      V: Math.round(V),
-      owned: owned
-    };
-  };
-
-  const getCollection = (collection, data, ownedColors) => {
-    return data
-      .split('\n')
-      .filter((s) => s)
-      .map((s) => {
-        const code = s.substring(s.indexOf('#'));
-        const name = s.substring(0, s.indexOf('#') - 1);
-        return createColor(
-          collection,
-          name,
-          code,
-          ownedColors ? ownedColors.includes(name) : false
-        );
-      });
-  };
-
-  const colors = React.useMemo(() => {
-    let colors = [];
-    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
-
-    let baseColors = [];
-    getCollection('Vallejo Game Colors', vallejoGame, ownedColors).forEach(
-      (c) => baseColors.push(c)
-    );
-    getCollection('Vallejo Model Colors', vallejoModel, ownedColors).forEach(
-      (c) => baseColors.push(c)
-    );
-    getCollection('Citadel', citadel, ownedColors).forEach((c) =>
-      baseColors.push(c)
-    );
-    getCollection('Army Painter', armyPainter, ownedColors).forEach((c) =>
-      baseColors.push(c)
-    );
-
-    baseColors.forEach((c) => colors.push(c));
-
-    for (let color1 of colors) {
-      const deltas = colors
-        .filter((c) => c !== color1 && c.owned)
-        .map((color2) => {
-          const delta = Math.round(
-            cielabDifference(color1.color, color2.color, 2, 1)
-          );
-          return delta;
-        });
-      color1.minDelta = Math.min(...deltas);
-    }
-
-    for (let i = 0; i < baseColors.length; i++)
-      for (let j = i + 1; j < baseColors.length; j++) {
-        const mix = mixbox.lerp(baseColors[i].id, baseColors[j].id, 0.5);
-        const code = chromatism.convert({
-          r: mix[0],
-          g: mix[1],
-          b: mix[2]
-        }).hex;
-
-        const color = createColor(
-          'Mix',
-          baseColors[i].name + '+' + baseColors[j].name,
-          code,
-          ownedColors
-            ? ownedColors.includes(baseColors[i].name) &&
-                ownedColors.includes(baseColors[j].name)
-            : false
-        );
-
-        colors.push({
-          ...color,
-          bases: [baseColors[i].id, baseColors[j].id],
-          baseCollections: [baseColors[i].collection, baseColors[j].collection]
-        });
+  React.useEffect(() => {
+    props.worker.onmessage = (message) => {
+      if (message.data.type === 'init') {
+        console.log('Colors loaded');
+        setColorsWithDelta(message.data.colors);
       }
+    };
 
-    return colors;
+    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
+    props.worker.postMessage({ type: 'init', ownedColors: ownedColors });
   }, []);
 
-  const colorsWithDelta = React.useMemo(() => {
-    return colors.map((c) => {
-      const delta = props.selectedColor
-        ? Math.round(cielabDifference(c.color, props.selectedColor, 2, 1))
-        : null;
-      return { ...c, delta };
+  React.useEffect(() => {
+    props.worker.onmessage = (message) => {
+      if (message.data.type === 'updateSelectedColor') {
+        setColorsWithDelta(message.data.colors);
+      }
+    };
+
+    props.worker.postMessage({
+      type: 'updateSelectedColor',
+      selectedColor: props.selectedColor
     });
   }, [props.selectedColor]);
 
@@ -280,7 +182,7 @@ const ColorTable = (props) => {
   const tableRef = React.useRef(null);
   React.useEffect(() => {
     updateTopColors();
-  }, [props.selectedColor]);
+  }, [colorsWithDelta]);
 
   return (
     <AgGridReact

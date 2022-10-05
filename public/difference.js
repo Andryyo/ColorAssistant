@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
 // from graypegg/chromatism
 
 function toRadian(angle) {
   return angle * (Math.PI / 180);
 }
 
-export default function cielabDifference(Lab1, Lab2, l, c) {
+function cielabDifference(Lab1, Lab2, l, c) {
   l = l || 1;
   c = c || 1;
 

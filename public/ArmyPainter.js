@@ -1,4 +1,4 @@
-export const data = `Army Painter #231f20
+const armyPainter = `Army Painter #231f20
 Matt White #ffffff
 Pure Red #cf2127
 Dragon Red #9a1b1e

@@ -1,4 +1,4 @@
-export const data = `Dead White #ffffff
+const vallejoGame = `Dead White #ffffff
 Pale Flesh #f6bdb3
 Elf Skintone #f8a070
 Moon Yellow #fff103

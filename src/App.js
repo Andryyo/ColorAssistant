@@ -12,7 +12,12 @@ function App() {
   const [selectedColor, setSelectedColor] = React.useState(null);
   const [topColors, setTopColors] = React.useState([]);
   const [selectedTab, setSelectedTab] = React.useState(1);
-  const [worker] = React.useState(() => {
+
+  const [colorsWorker] = React.useState(() => {
+    return new Worker(process.env.PUBLIC_URL + '/colorsWorker.js');
+  });
+
+  const [opencvWorker] = React.useState(() => {
     return new Worker(process.env.PUBLIC_URL + '/opencvWorker.js');
   });
 
@@ -23,7 +28,7 @@ function App() {
           <ColorTable
             selectedColor={selectedColor}
             onTopColorsChange={(e) => setTopColors(e)}
-            worker={worker}
+            worker={colorsWorker}
           />
         </Card>
       </Grid>
@@ -43,7 +48,7 @@ function App() {
             <Picture
               onChange={(e) => setSelectedColor(e)}
               topColors={topColors}
-              worker={worker}
+              worker={opencvWorker}
             />
           )}
         </Card>

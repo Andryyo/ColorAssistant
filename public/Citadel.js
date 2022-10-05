@@ -1,4 +1,4 @@
-export const data = `Ceramite White Base Layer #ffffff
+const citadel = `Ceramite White Base Layer #ffffff
 White Scar Base Layer #ffffff
 Averland Sunset Base Layer #fbba00
 Yriel Yellow Base Layer #ffda00
