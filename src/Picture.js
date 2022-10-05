@@ -49,9 +49,10 @@ const Picture = (props) => {
           .convertToBlob()
           .then((blob) => setImgSrc(URL.createObjectURL(blob)));
 
-        const colors = message.data.colors.map(
-          (c) => chromatism.convert(c).hex
-        );
+        let colors = message.data.colors.map((c) => chromatism.convert(c).hex);
+
+        colors = [...new Set(colors)];
+
         colors.sort(
           (a, b) => chromatism.convert(b).hsv.h - chromatism.convert(a).hsv.h
         );
