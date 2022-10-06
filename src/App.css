@@ -15,7 +15,7 @@
 }
 
 .MiniColorCell {
-  height: 100%;
+  height: 75px;
   width: 20%;
   display: flex;
   justify-content: center;
@@ -27,7 +27,7 @@
 }
 
 .ColorCell {
-  height: 100%;
+  height: 75px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -74,6 +74,15 @@
   flex-direction: column;
   align-items: left;
   flex: 0 0 auto;
+}
+
+.ColorWheelContainer {
+  margin: 1vw 1vw 1vw 1vw;
+  height: 90%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
 }
 
 .ag-theme-material {

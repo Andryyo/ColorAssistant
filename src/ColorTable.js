@@ -208,6 +208,7 @@ const ColorTable = (props) => {
       loadingOverlayComponent={progressOverlay}
       loadingOverlayComponentParams={{ progress: progress }}
       getRowId={(r) => r.data.collection + ' ' + r.data.name}
+      enableCellTextSelection={true}
     />
   );
 };

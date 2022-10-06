@@ -7,6 +7,7 @@ import MapColorSelector from 'MapColorSelector';
 
 const Picture = (props) => {
   const [selectedColor, setSelectedColor] = React.useState(null);
+  const [selectedPosition, setSelectedPosition] = React.useState(null);
   const [colors, setColors] = React.useState([]);
   const [imgCanvas, setImgCanvas] = React.useState(null);
   const [imgSrc, setImgSrc] = React.useState(null);
@@ -29,6 +30,7 @@ const Picture = (props) => {
       b: pixel.data[2]
     }).hex;
     setSelectedColor(newColor);
+    setSelectedPosition({ x, y });
     if (props.onChange) {
       props.onChange(chromatism.convert(newColor).cielab);
     }
@@ -77,6 +79,16 @@ const Picture = (props) => {
     };
   };
 
+  let markers = [];
+
+  if (selectedColor && selectedPosition) {
+    markers.push({
+      x: selectedPosition.x,
+      y: selectedPosition.y,
+      color: selectedColor
+    });
+  }
+
   return (
     <div className="PictureContainer">
       <div
@@ -93,6 +105,7 @@ const Picture = (props) => {
           imgHeight={imgCanvas?.height}
           imgWidth={imgCanvas?.width}
           click={(e) => selectColor(e.x, e.y)}
+          markers={markers}
         />
         <div className="ColorsContainer">
           {colors.map((c) => (

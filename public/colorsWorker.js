@@ -145,7 +145,6 @@ self.onmessage = (message) => {
 
     postMessage({ type: 'init', colors: colors });
   } else if (message.data.type === 'updateSelectedColor') {
-    console.log('Updating deltas');
     const result = colors.map((c) => {
       const delta = message.data.selectedColor
         ? Math.round(
@@ -154,7 +153,6 @@ self.onmessage = (message) => {
         : null;
       return { ...c, delta };
     });
-    console.log('Updated deltas');
 
     postMessage({ type: 'updateSelectedColor', colors: result });
   }
