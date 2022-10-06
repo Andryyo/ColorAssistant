@@ -6,9 +6,6 @@ import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
 
-import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
-import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
-
 const ColorTable = (props) => {
   const [colorsWithDelta, setColorsWithDelta] = React.useState(null);
   const [progress, setProgress] = React.useState(0);
@@ -145,7 +142,7 @@ const ColorTable = (props) => {
       {
         field: 'delta',
         headerName: 'Delta',
-        width: 100,
+        width: 50,
         sortable: true,
         filter: 'agNumberColumnFilter',
         sort: 'asc',
@@ -154,7 +151,7 @@ const ColorTable = (props) => {
       {
         field: 'minDelta',
         headerName: 'Min Delta',
-        width: 100,
+        width: 50,
         sortable: true,
         filter: 'agNumberColumnFilter'
       }
@@ -199,7 +196,7 @@ const ColorTable = (props) => {
 
   return (
     <AgGridReact
-      className="ag-theme-alpine"
+      className="ag-theme-material"
       ref={tableRef}
       rowData={colorsWithDelta}
       columnDefs={columns}
