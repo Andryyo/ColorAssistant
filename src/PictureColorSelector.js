@@ -112,6 +112,7 @@ const Picture = (props) => {
           imgWidth={imgCanvas?.width}
           click={(e) => selectColor(e.x, e.y)}
           markers={markers}
+          topColor={props.topColors && props.topColors[0]}
         />
         <div className="ColorsContainer">
           {colors.map((c) => (

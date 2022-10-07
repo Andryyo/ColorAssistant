@@ -166,6 +166,7 @@ const ColorSelector = (props) => {
   }
 
   markers = [...new Map(markers.map((m) => [m.color, m])).values()];
+  markers.sort((a, b) => a.delta - b.delta);
 
   return (
     <div className="ColorWheelContainer">
@@ -175,6 +176,7 @@ const ColorSelector = (props) => {
         imgHeight={imgCanvas?.height}
         imgWidth={imgCanvas?.width}
         markers={markers}
+        topColor={props.topColors && props.topColors[0]}
         click={(e) => selectColorByPosition(e.x, e.y)}
         markerSelected={(m) => {
           selectColor(m.color);

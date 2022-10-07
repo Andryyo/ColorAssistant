@@ -90,6 +90,74 @@ const MapColorSelector = (props) => {
     return null;
   };
 
+  const ColorCell = (props) => {
+    if (props.marker.bases) {
+      return (
+        <div style={{ display: 'flex', width: '100px' }}>
+          <div
+            style={{ backgroundColor: props.marker.bases[0] }}
+            className="MiniColorCell"
+          ></div>
+          <div
+            style={{ backgroundColor: props.marker.id }}
+            className="ColorCell"
+          >
+            {props.marker.id}
+          </div>
+          <div
+            style={{ backgroundColor: props.marker.bases[1] }}
+            className="MiniColorCell"
+          ></div>
+        </div>
+      );
+    } else {
+      return (
+        <div
+          style={{
+            backgroundColor: props.marker.id,
+            width: '100px'
+          }}
+          className="ColorCell"
+        >
+          {props.marker.id}
+        </div>
+      );
+    }
+  };
+
+  const ColorPopup = (props) => {
+    return (
+      <Popup>
+        <div style={{ maxWidth: '200px' }}>
+          {props.marker.collection}
+          <br />
+          {props.marker.name}
+          <br />
+          <ColorCell marker={props.marker} />
+        </div>
+      </Popup>
+    );
+  };
+
+  const SelectedColorPopup = (props) => {
+    return (
+      <Popup>
+        <div style={{ maxWidth: '200px' }}>
+          <ColorCell marker={props.marker} />
+          <br />
+          {props.closestColor && (
+            <React.Fragment>
+              Closest:
+              {props.closestColor.collection + ' ' + props.closestColor.name}
+              <br />
+              <ColorCell marker={props.closestColor} />
+            </React.Fragment>
+          )}
+        </div>
+      </Popup>
+    );
+  };
+
   return (
     <React.Fragment>
       <link rel="stylesheet" href="/ColorAssistant/leaflet.css" />
@@ -110,7 +178,7 @@ const MapColorSelector = (props) => {
         {props.markers?.map((m) => (
           <Marker
             zIndexOffset={m.selected ? 100 : 0}
-            key={m.color}
+            key={m.collection + m.name + m.id}
             position={[m.y, m.x]}
             icon={createIcon(m.id, m.selected)}
             eventHandlers={{
@@ -120,7 +188,13 @@ const MapColorSelector = (props) => {
                 }
               }
             }}
-          ></Marker>
+          >
+            {m.selected ? (
+              <SelectedColorPopup marker={m} closestColor={props.topColor} />
+            ) : (
+              <ColorPopup marker={m} />
+            )}
+          </Marker>
         ))}
       </MapContainer>
     </React.Fragment>
