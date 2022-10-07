@@ -163,7 +163,7 @@ const ColorTable = (props) => {
     if (props.onTopColorsChange) {
       let topColors = [];
       tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
-        topColors.push(node.data.color);
+        topColors.push(node.data);
       });
       props.onTopColorsChange(topColors);
     }

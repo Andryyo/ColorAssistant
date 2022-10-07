@@ -148,9 +148,9 @@ const ColorSelector = (props) => {
     markers = props.topColors
       .slice(0, 10)
       .map((c) => {
-        const pos = colorToPosition(c);
+        const pos = colorToPosition(c.color);
         if (pos) {
-          return { x: pos.x, y: pos.y, color: chromatism.convert(c).hex };
+          return { x: pos.x, y: pos.y, ...c };
         } else {
           return null;
         }
@@ -161,7 +161,7 @@ const ColorSelector = (props) => {
   if (selectedColor) {
     const pos = colorToPosition(selectedColor);
     if (pos) {
-      markers.push({ x: pos.x, y: pos.y, color: selectedColor });
+      markers.push({ x: pos.x, y: pos.y, id: selectedColor, selected: true });
     }
   }
 

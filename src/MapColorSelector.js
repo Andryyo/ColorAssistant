@@ -20,7 +20,7 @@ import {
   useMapEvents
 } from 'react-leaflet';
 
-const createIcon = (color) => {
+const createIcon = (color, selected) => {
   const canvas = document.createElement('canvas');
   canvas.width = 32;
   canvas.height = 32;
@@ -40,14 +40,23 @@ const createIcon = (color) => {
   context.fill();
   context.stroke();
 
-  return new Icon({
-    iconUrl: canvas.toDataURL(),
+  if (selected) {
+    return new Icon({
+      iconUrl: canvas.toDataURL(),
 
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [1, -34],
-    tooltipAnchor: [16, -28]
-  });
+      iconSize: [48, 48],
+      iconAnchor: [24, 48],
+      popupAnchor: [1, -34]
+    });
+  } else {
+    return new Icon({
+      iconUrl: canvas.toDataURL(),
+
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [1, -34]
+    });
+  }
 };
 
 const MapColorSelector = (props) => {
@@ -100,13 +109,14 @@ const MapColorSelector = (props) => {
         {props.src && <ImageOverlay url={props.src} bounds={bounds} />}
         {props.markers?.map((m) => (
           <Marker
+            zIndexOffset={m.selected ? 100 : 0}
             key={m.color}
             position={[m.y, m.x]}
-            icon={createIcon(m.color)}
+            icon={createIcon(m.id, m.selected)}
             eventHandlers={{
               click: (e) => {
                 if (props.markerSelected) {
-                  props.markerSelected(m);
+                  //props.markerSelected(m);
                 }
               }
             }}
