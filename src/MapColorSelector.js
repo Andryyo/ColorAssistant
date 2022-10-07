@@ -64,6 +64,7 @@ const MapColorSelector = (props) => {
 
   React.useEffect(() => {
     if (mapRef.current && bounds) {
+      mapRef.current.setMaxBounds(bounds);
       mapRef.current.fitBounds(bounds);
     }
   }, [props.src]);
@@ -93,6 +94,7 @@ const MapColorSelector = (props) => {
         scrollWheelZoom={true}
         crs={CRSPixel}
         attributionControl={false}
+        maxBoundsViscosity={0.9}
       >
         <EventHandler />
         {props.src && <ImageOverlay url={props.src} bounds={bounds} />}
