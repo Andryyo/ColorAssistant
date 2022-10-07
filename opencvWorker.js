@@ -62,7 +62,7 @@ function kmeans(message) {
       imageData.data[imageDataOffset + 0] = red;
       imageData.data[imageDataOffset + 1] = green;
       imageData.data[imageDataOffset + 2] = blue;
-      imageData.data[imageDataOffset + 3] = alpha;
+      //imageData.data[imageDataOffset + 3] = alpha;
     }
 
   console.log(performance.now() - startTime, 'Posting result');
