@@ -20,8 +20,8 @@ function App() {
   React.useEffect(() => {
     console.log('Creating workers');
 
-    const cw = new Worker(process.env.PUBLIC_URL + '/colorsWorker.js');
-    const cvw = new Worker(process.env.PUBLIC_URL + '/opencvWorker.js');
+    const cw = new Worker(new URL('./colorsWorker.js', import.meta.url));
+    const cvw = new Worker(new URL('./opencvWorker.js', import.meta.url));
 
     setColorsWorker(cw);
     setOpencvWorker(cvw);

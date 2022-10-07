@@ -53,5 +53,11 @@
   "devDependencies": {
     "eslint": "^8.23.1",
     "eslint-plugin-react": "^7.31.8"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false,
+    "crypto": false
   }
 }
