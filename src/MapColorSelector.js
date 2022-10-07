@@ -73,7 +73,7 @@ const MapColorSelector = (props) => {
 
   React.useEffect(() => {
     if (mapRef.current && bounds) {
-      mapRef.current.setMaxBounds(bounds);
+      mapRef.current.setMaxBounds(bounds.pad(0.75));
       mapRef.current.fitBounds(bounds);
     }
   }, [props.src]);
