@@ -24,6 +24,11 @@ const Picture = (props) => {
   const selectColor = (x, y) => {
     const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
+
+    if (pixel.data[3] == 0) {
+      return;
+    }
+
     const newColor = chromatism.convert({
       r: pixel.data[0],
       g: pixel.data[1],
