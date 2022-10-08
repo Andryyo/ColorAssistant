@@ -39,7 +39,13 @@ export default forwardRef((props, ref) => {
   }, [collections]);
 
   return (
-    <div style={{ display: 'inline-block', width: '400px' }}>
+    <div
+      style={{
+        width: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
       <FormControlLabel
         control={
           <Checkbox
