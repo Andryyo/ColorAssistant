@@ -6,23 +6,24 @@ import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
 import { gridSelectionStateSelector } from '@mui/x-data-grid';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from './db';
+import cielabDifference from 'difference';
 
 const ColorTable = (props) => {
-  const [colorsWithDelta, setColorsWithDelta] = React.useState(null);
   const [progress, setProgress] = React.useState(0);
   const tableRef = React.useRef(null);
+  const colors = useLiveQuery(() => db.colors.toArray());
 
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
-      if (message.data.type === 'updateColors') {
-        setColorsWithDelta(message.data.colors);
-      } else if (message.data.type === 'init') {
-        console.log('Colors loaded');
-        setColorsWithDelta(message.data.colors);
-        tableRef.current?.api?.hideOverlay();
-      } else if (message.data.type === 'progressUpdate') {
-        setProgress(message.data.value);
-        tableRef.current?.api?.showLoadingOverlay();
+      if (message.data.type === 'progressUpdate') {
+        if (message.data.value === 100) {
+          tableRef.current?.api?.hideOverlay();
+        } else {
+          setProgress(message.data.value);
+          tableRef.current?.api?.showLoadingOverlay();
+        }
       }
     };
     if (props.selectedColor) {
@@ -32,6 +33,15 @@ const ColorTable = (props) => {
       });
     }
   }, [props.selectedColor]);
+
+  const colorsWithDelta = React.useMemo(() => {
+    return colors?.map((c) => {
+      const delta = props.selectedColor
+        ? Math.round(cielabDifference(c.color, props.selectedColor, 2, 1))
+        : null;
+      return { ...c, delta: delta };
+    });
+  }, [colors, props.selectedColor]);
 
   const columns = React.useMemo(
     () => [
@@ -202,8 +212,8 @@ const ColorTable = (props) => {
       onCellValueChanged={(e) => onCellValueChanged(e)}
       loadingOverlayComponent={progressOverlay}
       loadingOverlayComponentParams={{ progress: progress }}
-      getRowId={(r) => r.data.collection + ' ' + r.data.name}
       enableCellTextSelection={true}
+      getRowId={(r) => r.data.collection + ' ' + r.data.name + ' ' + r.data.hex}
     />
   );
 };

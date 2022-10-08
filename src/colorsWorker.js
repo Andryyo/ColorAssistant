@@ -59,13 +59,7 @@ const colorToBase = (color) => {
 };
 
 (async () => {
-  console.log('Starting getting colors');
-
-  colors = await db.colors.toArray();
-
-  if (colors && colors.length > 0) {
-    console.log('Loaded colors:', colors.length);
-    postMessage({ type: 'init', colors: colors });
+  if ((await db.colors.count()) > 0) {
     return;
   }
 
@@ -98,7 +92,7 @@ const colorToBase = (color) => {
 
   let mixes = [];
 
-  const step = Math.round(baseColors.length / 100);
+  const step = Math.ceil(baseColors.length / 100);
 
   for (let i = 0; i < baseColors.length; i++) {
     for (let j = i + 1; j < baseColors.length; j++) {
@@ -133,25 +127,29 @@ const colorToBase = (color) => {
 
   colors.push(...mixes);
 
+  postMessage({ type: 'progressUpdate', value: 95 });
+
   console.log('Saving colors', colors.length);
   await db.colors.bulkPut(colors);
   console.log('Saved colors');
 
-  postMessage({ type: 'init', colors: colors });
+  postMessage({ type: 'progressUpdate', value: 100 });
 })();
 
 self.onmessage = async (message) => {
   if (message.data.type === 'updateSelectedColor') {
-    const result = colors.map((c) => {
+    /*console.log('Started updating deltas');
+
+    await db.colors.toCollection().modify((c) => {
       const delta = message.data.selectedColor
         ? Math.round(
             cielabDifference(c.color, message.data.selectedColor, 2, 1)
           )
         : null;
-      return { ...c, delta };
+      c.delta = delta;
     });
 
-    postMessage({ type: 'updateColors', colors: result });
+    console.log('Done updating deltas');*/
   } else if (message.data.type === 'updateOwned') {
     await db.colors
       .where(['collection', 'name', 'hex'])
@@ -182,18 +180,5 @@ self.onmessage = async (message) => {
     }
 
     await db.colors.bulkPut(mixes);
-
-    colors = await db.colors.toArray();
-
-    const result = colors.map((c) => {
-      const delta = message.data.selectedColor
-        ? Math.round(
-            cielabDifference(c.color, message.data.selectedColor, 2, 1)
-          )
-        : null;
-      return { ...c, delta };
-    });
-
-    postMessage({ type: 'updateColors', colors: result });
   }
 };
