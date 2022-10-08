@@ -197,7 +197,7 @@ self.onmessage = async (message) => {
 
     postMessage({ type: 'progressUpdate', value: 40 });
 
-    await updateMinDelta();
+    updateMinDelta();
 
     postMessage({ type: 'progressUpdate', value: 100 });
   }
