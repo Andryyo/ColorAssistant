@@ -73,7 +73,7 @@ function kmeans(message) {
     const R = centers.floatAt(x, 0);
     const G = centers.floatAt(x, 1);
     const B = centers.floatAt(x, 2);
-    colors.push({ r: R, g: G, b: B });
+    colors.push({ mode: 'rgb', r: R / 256, g: G / 256, b: B / 256 });
   }
 
   self.postMessage({ ...message.data, colors: colors });

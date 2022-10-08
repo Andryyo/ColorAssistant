@@ -1,44 +1,28 @@
 /* eslint-disable no-undef */
-import cielabDifference from './difference.js';
 import vallejoGame from './VallejoGame';
 import vallejoModel from './VallejoModel';
 import citadel from './Citadel';
 import armyPainter from './ArmyPainter';
-import { convert } from 'chromatism';
 import mixbox from 'mixbox';
 import { db } from 'db.js';
+import * as culori from 'culori';
+
+const difference = culori.differenceCiede2000();
 
 var colors = null;
 
 const createColor = (collection, name, hex, owned) => {
-  let color, H, S, V;
-
-  if (hex === '#000000') {
-    H = 0;
-    S = 0;
-    V = 0;
-    color = { L: 0, a: 0, b: 0 };
-  } else if (hex === '#ffffff') {
-    H = 0;
-    S = 0;
-    V = 100;
-    color = { L: 100, a: 0, b: 0 };
-  } else {
-    const hsv = convert(hex).hsv;
-    H = hsv.h;
-    S = hsv.s;
-    V = hsv.v;
-    color = convert(hex).cielab;
-  }
+  const color = culori.lab65(hex);
+  const hsv = culori.hsv(color);
 
   return {
     collection: collection,
     name: name,
     hex: hex,
     color: color,
-    H: Math.round(H),
-    S: Math.round(S),
-    V: Math.round(V),
+    H: Math.round(hsv.h || 0),
+    S: Math.round(hsv.s),
+    V: Math.round(hsv.v),
     owned: owned
   };
 };
@@ -53,9 +37,7 @@ const updateMinDelta = async () => {
       const deltas = colors
         .filter((c) => c !== color1 && c.owned)
         .map((color2) => {
-          const delta = Math.round(
-            cielabDifference(color1.color, color2.color, 2, 1)
-          );
+          const delta = Math.round(difference(color1.color, color2.color));
           return delta;
         });
       await db.colors.update([color1.collection, color1.name, color1.hex], {
@@ -107,11 +89,12 @@ const colorToBase = (color) => {
   for (let i = 0; i < baseColors.length; i++) {
     for (let j = i + 1; j < baseColors.length; j++) {
       const mix = mixbox.lerp(baseColors[i].hex, baseColors[j].hex, 0.5);
-      const code = convert({
-        r: mix[0],
-        g: mix[1],
-        b: mix[2]
-      }).hex;
+      const code = culori.formatHex({
+        mode: 'rgb',
+        r: mix[0] / 256,
+        g: mix[1] / 256,
+        b: mix[2] / 256
+      });
 
       const name =
         baseColors[i].collection +

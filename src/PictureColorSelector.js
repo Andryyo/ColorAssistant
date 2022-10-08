@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
-import * as chromatism from 'chromatism';
 import { Button } from '@mui/material';
 import MapColorSelector from 'MapColorSelector';
+
+import * as culori from 'culori';
 
 const Picture = (props) => {
   const [selectedColor, setSelectedColor] = React.useState(null);
@@ -11,15 +12,6 @@ const Picture = (props) => {
   const [colors, setColors] = React.useState([]);
   const [imgCanvas, setImgCanvas] = React.useState(null);
   const [imgSrc, setImgSrc] = React.useState(null);
-
-  /*const OnMove = (x, y) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const canvasX = ((x - rect.left) / rect.width) * canvas.width;
-    const canvasY = ((y - rect.top) / rect.height) * canvas.height;
-
-    selectColor(canvasX, canvasY);
-  };*/
 
   const selectColor = (x, y) => {
     const ctx = imgCanvas.getContext('2d');
@@ -29,15 +21,17 @@ const Picture = (props) => {
       return;
     }
 
-    const newColor = chromatism.convert({
-      r: pixel.data[0],
-      g: pixel.data[1],
-      b: pixel.data[2]
-    }).hex;
-    setSelectedColor(newColor);
+    const newColor = {
+      mode: 'rgb',
+      r: pixel.data[0] / 256,
+      g: pixel.data[1] / 256,
+      b: pixel.data[2] / 256
+    };
+
+    setSelectedColor(culori.formatHex(newColor));
     setSelectedPosition({ x, y });
     if (props.onChange) {
-      props.onChange(chromatism.convert(newColor).cielab);
+      props.onChange(culori.lab65(newColor));
     }
   };
 
@@ -56,13 +50,11 @@ const Picture = (props) => {
           .convertToBlob()
           .then((blob) => setImgSrc(URL.createObjectURL(blob)));
 
-        let colors = message.data.colors.map((c) => chromatism.convert(c).hex);
+        let colors = message.data.colors.map((c) => culori.formatHex(c));
 
         colors = [...new Set(colors)];
 
-        colors.sort(
-          (a, b) => chromatism.convert(b).hsv.h - chromatism.convert(a).hsv.h
-        );
+        colors.sort((a, b) => culori.hsv(b).h - culori.hsv(a).h);
         setColors(colors);
       }
     };
@@ -123,7 +115,7 @@ const Picture = (props) => {
               onClick={() => {
                 setSelectedColor(c);
                 if (props.onChange) {
-                  props.onChange(chromatism.convert(c).cielab);
+                  props.onChange(culori.lab65(c));
                 }
               }}
             >

@@ -1,14 +1,15 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
-import * as chromatism from 'chromatism';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
 import { gridSelectionStateSelector } from '@mui/x-data-grid';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
-import cielabDifference from 'difference';
+import * as culori from 'culori';
+
+const difference = culori.differenceCiede2000();
 
 const ColorTable = (props) => {
   const [progress, setProgress] = React.useState(0);
@@ -40,7 +41,7 @@ const ColorTable = (props) => {
   const colorsWithDelta = React.useMemo(() => {
     return colors?.map((c) => {
       const delta = props.selectedColor
-        ? Math.round(cielabDifference(c.color, props.selectedColor, 2, 1))
+        ? Math.round(difference(c.color, props.selectedColor))
         : null;
       return { ...c, delta: delta };
     });

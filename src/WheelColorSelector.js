@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 
 import { Slider } from '@mui/material';
-import * as chromatism from 'chromatism';
 import MapColorSelector from 'MapColorSelector';
 import React from 'react';
+import * as culori from 'culori';
 
 const fastConvert = (H, S, V, n) => {
   const k = (n + H / 60) % 6;
@@ -11,10 +11,9 @@ const fastConvert = (H, S, V, n) => {
 };
 
 const ColorSelector = (props) => {
-  const [value, setValue] = React.useState(100);
+  const [value, setValue] = React.useState(1);
   const [selectedColor, setSelectedColor] = React.useState('#ffffff');
   const [text, setText] = React.useState('#ffffff');
-  //const [mouseDown, setMouseDown] = React.useState(false);
   const [imgSrc, setImgSrc] = React.useState(null);
   const [imgCanvas, setImgCanvas] = React.useState(null);
 
@@ -30,10 +29,9 @@ const ColorSelector = (props) => {
       for (let y = 0; y < imageData.height; y++) {
         const offset = 4 * (y * imageData.width + x);
 
-        const dx =
-          ((((x - imageData.width / 2) / imageData.width) * 2) / value) * 100;
+        const dx = (((x - imageData.width / 2) / imageData.width) * 2) / value;
         const dy =
-          ((((y - imageData.height / 2) / imageData.height) * 2) / value) * 100;
+          (((y - imageData.height / 2) / imageData.height) * 2) / value;
         const saturation = Math.sqrt(dx * dx + dy * dy);
 
         if (saturation > 1) {
@@ -45,9 +43,9 @@ const ColorSelector = (props) => {
         }
 
         const hue = (-Math.atan2(dy, dx) * 180) / Math.PI;
-        data[offset] = fastConvert(hue, saturation, value / 100, 5);
-        data[offset + 1] = fastConvert(hue, saturation, value / 100, 3);
-        data[offset + 2] = fastConvert(hue, saturation, value / 100, 1);
+        data[offset] = fastConvert(hue, saturation, value, 5);
+        data[offset + 1] = fastConvert(hue, saturation, value, 3);
+        data[offset + 2] = fastConvert(hue, saturation, value, 1);
         data[offset + 3] = 255;
       }
 
@@ -65,34 +63,36 @@ const ColorSelector = (props) => {
       return;
     }
 
-    const newColor = chromatism.convert({
-      r: pixel.data[0],
-      g: pixel.data[1],
-      b: pixel.data[2]
-    }).hex;
+    const newColor = culori.formatHex({
+      mode: 'rgb',
+      r: pixel.data[0] / 256,
+      g: pixel.data[1] / 256,
+      b: pixel.data[2] / 256
+    });
     setSelectedColor(newColor);
     setText(newColor);
     if (props.onChange) {
-      props.onChange(chromatism.convert(newColor).cielab);
+      props.onChange(culori.lab65(newColor));
     }
   };
 
   const selectColor = (color) => {
-    setValue(chromatism.convert(color).hsv.v);
+    setValue(culori.hsv(color).v);
     setSelectedColor(color);
     setText(color);
     if (props.onChange) {
-      props.onChange(chromatism.convert(color).cielab);
+      props.onChange(culori.lab65(color));
     }
   };
 
   const onValueChanging = (event, newValue) => {
-    const color = chromatism.convert(selectedColor).hsv;
-    const newColor = chromatism.convert({
-      h: color.h,
+    const color = culori.hsv(selectedColor);
+    const newColor = culori.formatHex({
+      mode: 'hsv',
+      h: color.h || 0,
       s: color.s,
       v: newValue
-    }).hex;
+    });
 
     setValue(newValue);
     setSelectedColor(newColor);
@@ -100,44 +100,38 @@ const ColorSelector = (props) => {
   };
 
   const onValueChanged = (event, newValue) => {
-    const color = chromatism.convert(selectedColor).hsv;
-    const newColor = chromatism.convert({
-      h: color.h,
+    const color = culori.hsv(selectedColor);
+    const newColor = culori.formatHex({
+      mode: 'hsv',
+      h: color.h || 0,
       s: color.s,
       v: newValue
-    }).hex;
+    });
 
     setValue(newValue);
     setSelectedColor(newColor);
     setText(newColor);
 
     if (props.onChange) {
-      props.onChange(chromatism.convert(newColor).cielab);
+      props.onChange(culori.lab65(newColor));
     }
   };
 
   const colorToPosition = (color) => {
     try {
-      const hsv = chromatism.convert(color).hsv;
-      if (!hsv.h || !hsv.s || !hsv.v) {
-        return null;
-      }
+      const hsv = culori.hsv(color);
 
-      const angle = (-hsv.h / 180) * Math.PI;
+      const angle = (-(hsv.h || 0) / 180) * Math.PI;
       return {
         x:
-          (((((Math.cos(angle) * hsv.s) / 100) * imgCanvas.width) / 2) *
-            value) /
-            100 +
+          ((Math.cos(angle) * hsv.s * imgCanvas.width) / 2) * value +
           imgCanvas.width / 2,
         y:
-          (((((Math.sin(angle) * hsv.s) / 100) * imgCanvas.height) / 2) *
-            value) /
-            100 +
+          ((Math.sin(angle) * hsv.s * imgCanvas.height) / 2) * value +
           imgCanvas.height / 2,
         value: hsv.v
       };
-    } catch {
+    } catch (err) {
       return null;
     }
   };
@@ -187,6 +181,8 @@ const ColorSelector = (props) => {
           value={value}
           onChange={onValueChanging}
           onChangeCommitted={onValueChanged}
+          max={1}
+          step={0.01}
         />
       </div>
       <input
