@@ -1,19 +1,19 @@
 {
   "files": {
     "main.css": "/ColorAssistant/static/css/main.d125ae63.css",
-    "main.js": "/ColorAssistant/static/js/main.183a0abd.js",
-    "static/js/323.0d848be8.chunk.js": "/ColorAssistant/static/js/323.0d848be8.chunk.js",
+    "main.js": "/ColorAssistant/static/js/main.9d711f56.js",
+    "static/js/571.f1895a63.chunk.js": "/ColorAssistant/static/js/571.f1895a63.chunk.js",
     "static/js/873.805743a0.chunk.js": "/ColorAssistant/static/js/873.805743a0.chunk.js",
-    "static/js/525.d34e5e9f.chunk.js": "/ColorAssistant/static/js/525.d34e5e9f.chunk.js",
+    "static/js/13.51d27091.chunk.js": "/ColorAssistant/static/js/13.51d27091.chunk.js",
     "index.html": "/ColorAssistant/index.html",
     "main.d125ae63.css.map": "/ColorAssistant/static/css/main.d125ae63.css.map",
-    "main.183a0abd.js.map": "/ColorAssistant/static/js/main.183a0abd.js.map",
-    "323.0d848be8.chunk.js.map": "/ColorAssistant/static/js/323.0d848be8.chunk.js.map",
+    "main.9d711f56.js.map": "/ColorAssistant/static/js/main.9d711f56.js.map",
+    "571.f1895a63.chunk.js.map": "/ColorAssistant/static/js/571.f1895a63.chunk.js.map",
     "873.805743a0.chunk.js.map": "/ColorAssistant/static/js/873.805743a0.chunk.js.map",
-    "525.d34e5e9f.chunk.js.map": "/ColorAssistant/static/js/525.d34e5e9f.chunk.js.map"
+    "13.51d27091.chunk.js.map": "/ColorAssistant/static/js/13.51d27091.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d125ae63.css",
-    "static/js/main.183a0abd.js"
+    "static/js/main.9d711f56.js"
   ]
 }
