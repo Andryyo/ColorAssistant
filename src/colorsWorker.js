@@ -6,35 +6,35 @@ import citadel from './Citadel';
 import armyPainter from './ArmyPainter';
 import { convert } from 'chromatism';
 import mixbox from 'mixbox';
+import { db } from 'db.js';
 
-console.log('Started colors worker');
 var colors = null;
 
-const createColor = (collection, name, id, owned) => {
+const createColor = (collection, name, hex, owned) => {
   let color, H, S, V;
 
-  if (id === '#000000') {
+  if (hex === '#000000') {
     H = 0;
     S = 0;
     V = 0;
     color = { L: 0, a: 0, b: 0 };
-  } else if (id === '#ffffff') {
+  } else if (hex === '#ffffff') {
     H = 0;
     S = 0;
     V = 100;
     color = { L: 100, a: 0, b: 0 };
   } else {
-    const hsv = convert(id).hsv;
+    const hsv = convert(hex).hsv;
     H = hsv.h;
     S = hsv.s;
     V = hsv.v;
-    color = convert(id).cielab;
+    color = convert(hex).cielab;
   }
 
   return {
     collection: collection,
     name: name,
-    id: id,
+    hex: hex,
     color: color,
     H: Math.round(H),
     S: Math.round(S),
@@ -43,108 +43,105 @@ const createColor = (collection, name, id, owned) => {
   };
 };
 
-const getCollection = (collection, data, ownedColors) => {
+const getCollection = (collection, data) => {
   return data
     .split('\n')
     .filter((s) => s)
     .map((s) => {
       const code = s.substring(s.indexOf('#'));
       const name = s.substring(0, s.indexOf('#') - 1);
-      return createColor(
-        collection,
-        name,
-        code,
-        ownedColors ? ownedColors.includes(name) : false
-      );
+      return createColor(collection, name, code, false);
     });
 };
 
-self.onmessage = (message) => {
-  if (message.data.type === 'init') {
-    if (colors) {
-      postMessage({ type: 'init', colors: colors });
-      return;
-    }
+const colorToBase = (color) => {
+  return [color.collection, color.name, color.hex];
+};
 
-    colors = [];
-    let baseColors = [];
-    getCollection(
-      'Vallejo Game Colors',
-      vallejoGame,
-      message.data.ownedColors
-    ).forEach((c) => baseColors.push(c));
-    getCollection(
-      'Vallejo Model Colors',
-      vallejoModel,
-      message.data.ownedColors
-    ).forEach((c) => baseColors.push(c));
-    getCollection('Citadel', citadel, message.data.ownedColors).forEach((c) =>
-      baseColors.push(c)
-    );
-    getCollection(
-      'Army Painter',
-      armyPainter,
-      message.data.ownedColors
-    ).forEach((c) => baseColors.push(c));
+(async () => {
+  console.log('Starting getting colors');
 
-    baseColors.forEach((c) => colors.push(c));
+  colors = await db.colors.toArray();
 
-    for (let color1 of colors) {
-      const deltas = colors
-        .filter((c) => c !== color1 && c.owned)
-        .map((color2) => {
-          const delta = Math.round(
-            cielabDifference(color1.color, color2.color, 2, 1)
-          );
-          return delta;
-        });
-      color1.minDelta = Math.min(...deltas);
-    }
-
-    const step = Math.round(baseColors.length / 100);
-
-    for (let i = 0; i < baseColors.length; i++) {
-      for (let j = i + 1; j < baseColors.length; j++) {
-        const mix = mixbox.lerp(baseColors[i].id, baseColors[j].id, 0.5);
-        const code = convert({
-          r: mix[0],
-          g: mix[1],
-          b: mix[2]
-        }).hex;
-
-        const name =
-          baseColors[i].collection +
-          ' ' +
-          baseColors[i].name +
-          '+' +
-          baseColors[j].collection +
-          ' ' +
-          baseColors[j].name;
-
-        const color = createColor(
-          'Mix',
-          name,
-          code,
-          message.data.ownedColors
-            ? message.data.ownedColors.includes(baseColors[i].name) &&
-                message.data.ownedColors.includes(baseColors[j].name)
-            : false
-        );
-
-        colors.push({
-          ...color,
-          bases: [baseColors[i].id, baseColors[j].id],
-          baseCollections: [baseColors[i].collection, baseColors[j].collection]
-        });
-      }
-
-      if (i % step == 0) {
-        postMessage({ type: 'progressUpdate', value: i / step });
-      }
-    }
-
+  if (colors && colors.length > 0) {
+    console.log('Loaded colors:', colors.length);
     postMessage({ type: 'init', colors: colors });
-  } else if (message.data.type === 'updateSelectedColor') {
+    return;
+  }
+
+  console.log('Starting generation');
+
+  colors = [];
+  let baseColors = [];
+  getCollection('Vallejo Game Colors', vallejoGame).forEach((c) =>
+    baseColors.push(c)
+  );
+  getCollection('Vallejo Model Colors', vallejoModel).forEach((c) =>
+    baseColors.push(c)
+  );
+  getCollection('Citadel', citadel).forEach((c) => baseColors.push(c));
+  getCollection('Army Painter', armyPainter).forEach((c) => baseColors.push(c));
+
+  baseColors.forEach((c) => colors.push(c));
+
+  for (let color1 of colors) {
+    const deltas = colors
+      .filter((c) => c !== color1 && c.owned)
+      .map((color2) => {
+        const delta = Math.round(
+          cielabDifference(color1.color, color2.color, 2, 1)
+        );
+        return delta;
+      });
+    color1.minDelta = Math.min(...deltas);
+  }
+
+  let mixes = [];
+
+  const step = Math.round(baseColors.length / 100);
+
+  for (let i = 0; i < baseColors.length; i++) {
+    for (let j = i + 1; j < baseColors.length; j++) {
+      const mix = mixbox.lerp(baseColors[i].hex, baseColors[j].hex, 0.5);
+      const code = convert({
+        r: mix[0],
+        g: mix[1],
+        b: mix[2]
+      }).hex;
+
+      const name =
+        baseColors[i].collection +
+        ' ' +
+        baseColors[i].name +
+        '+' +
+        baseColors[j].collection +
+        ' ' +
+        baseColors[j].name;
+
+      const color = createColor('Mix', name, code, false);
+
+      mixes.push({
+        ...color,
+        bases: [colorToBase(baseColors[i]), colorToBase(baseColors[j])]
+      });
+    }
+
+    if (i % step == 0) {
+      postMessage({ type: 'progressUpdate', value: i / step });
+    }
+  }
+
+  colors.push(...mixes);
+
+  console.log('Saving colors', colors.length);
+  await db.colors.bulkPut(colors);
+  console.log('Saved colors');
+
+  postMessage({ type: 'init', colors: colors });
+})();
+
+self.onmessage = async (message) => {
+  if (message.data.type === 'updateSelectedColor') {
     const result = colors.map((c) => {
       const delta = message.data.selectedColor
         ? Math.round(
@@ -154,6 +151,49 @@ self.onmessage = (message) => {
       return { ...c, delta };
     });
 
-    postMessage({ type: 'updateSelectedColor', colors: result });
+    postMessage({ type: 'updateColors', colors: result });
+  } else if (message.data.type === 'updateOwned') {
+    await db.colors
+      .where(['collection', 'name', 'hex'])
+      .equals([
+        message.data.color.collection,
+        message.data.color.name,
+        message.data.color.hex
+      ])
+      .modify((c) => {
+        c.owned = message.data.color.owned;
+      });
+    const mixes = await db.colors
+      .where('bases')
+      .equals([
+        message.data.color.collection,
+        message.data.color.name,
+        message.data.color.hex
+      ])
+      .toArray();
+
+    for (const mix of mixes) {
+      const bases = await db.colors
+        .where(['collection', 'name', 'hex'])
+        .anyOf(mix.bases)
+        .toArray();
+
+      mix.owned = bases.every((b) => b.owned);
+    }
+
+    await db.colors.bulkPut(mixes);
+
+    colors = await db.colors.toArray();
+
+    const result = colors.map((c) => {
+      const delta = message.data.selectedColor
+        ? Math.round(
+            cielabDifference(c.color, message.data.selectedColor, 2, 1)
+          )
+        : null;
+      return { ...c, delta };
+    });
+
+    postMessage({ type: 'updateColors', colors: result });
   }
 };

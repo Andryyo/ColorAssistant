@@ -23,8 +23,8 @@ export default forwardRef((props, ref) => {
       doesFilterPass(params) {
         return (
           collections.has(params.data.collection) &&
-          (!params.data.baseCollections ||
-            params.data.baseCollections.every((c) => collections.has(c)))
+          (!params.data.bases ||
+            params.data.bases.every((b) => collections.has(b[0])))
         );
       },
 

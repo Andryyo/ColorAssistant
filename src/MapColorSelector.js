@@ -95,17 +95,17 @@ const MapColorSelector = (props) => {
       return (
         <div style={{ display: 'flex', width: '100px' }}>
           <div
-            style={{ backgroundColor: props.marker.bases[0] }}
+            style={{ backgroundColor: props.marker.bases[0][2] }}
             className="MiniColorCell"
           ></div>
           <div
-            style={{ backgroundColor: props.marker.id }}
+            style={{ backgroundColor: props.marker.hex }}
             className="ColorCell"
           >
-            {props.marker.id}
+            {props.marker.hex}
           </div>
           <div
-            style={{ backgroundColor: props.marker.bases[1] }}
+            style={{ backgroundColor: props.marker.bases[1][2] }}
             className="MiniColorCell"
           ></div>
         </div>
@@ -114,12 +114,12 @@ const MapColorSelector = (props) => {
       return (
         <div
           style={{
-            backgroundColor: props.marker.id,
+            backgroundColor: props.marker.hex,
             width: '100px'
           }}
           className="ColorCell"
         >
-          {props.marker.id}
+          {props.marker.hex}
         </div>
       );
     }
@@ -178,9 +178,9 @@ const MapColorSelector = (props) => {
         {props.markers?.map((m) => (
           <Marker
             zIndexOffset={m.selected ? 100 : 0}
-            key={m.collection + m.name + m.id}
+            key={m.collection + m.name + m.hex}
             position={[m.y, m.x]}
-            icon={createIcon(m.id, m.selected)}
+            icon={createIcon(m.hex, m.selected)}
             eventHandlers={{
               click: (e) => {
                 if (props.markerSelected) {

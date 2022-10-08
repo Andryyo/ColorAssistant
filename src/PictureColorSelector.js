@@ -90,7 +90,7 @@ const Picture = (props) => {
     markers.push({
       x: selectedPosition.x,
       y: selectedPosition.y,
-      id: selectedColor,
+      hex: selectedColor,
       selected: true
     });
   }

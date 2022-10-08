@@ -161,7 +161,7 @@ const ColorSelector = (props) => {
   if (selectedColor) {
     const pos = colorToPosition(selectedColor);
     if (pos) {
-      markers.push({ x: pos.x, y: pos.y, id: selectedColor, selected: true });
+      markers.push({ x: pos.x, y: pos.y, hex: selectedColor, selected: true });
     }
   }
 

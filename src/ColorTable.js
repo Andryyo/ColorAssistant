@@ -5,6 +5,7 @@ import * as chromatism from 'chromatism';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
+import { gridSelectionStateSelector } from '@mui/x-data-grid';
 
 const ColorTable = (props) => {
   const [colorsWithDelta, setColorsWithDelta] = React.useState(null);
@@ -13,7 +14,7 @@ const ColorTable = (props) => {
 
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
-      if (message.data.type === 'updateSelectedColor') {
+      if (message.data.type === 'updateColors') {
         setColorsWithDelta(message.data.colors);
       } else if (message.data.type === 'init') {
         console.log('Colors loaded');
@@ -31,11 +32,6 @@ const ColorTable = (props) => {
       });
     }
   }, [props.selectedColor]);
-
-  React.useEffect(() => {
-    const ownedColors = JSON.parse(localStorage.getItem('ownedColors'));
-    props.worker.postMessage({ type: 'init', ownedColors: ownedColors });
-  }, []);
 
   const columns = React.useMemo(
     () => [
@@ -58,7 +54,7 @@ const ColorTable = (props) => {
       {
         valueGetter: (props) => {
           return {
-            color: props.data.id,
+            color: props.data.hex,
             bases: props.data.bases
           };
         },
@@ -71,7 +67,7 @@ const ColorTable = (props) => {
             return (
               <div style={{ display: 'flex', height: '100%' }}>
                 <div
-                  style={{ backgroundColor: props.value.bases[0] }}
+                  style={{ backgroundColor: props.value.bases[0][2] }}
                   className="MiniColorCell"
                 ></div>
                 <div
@@ -81,7 +77,7 @@ const ColorTable = (props) => {
                   {props.value.color}
                 </div>
                 <div
-                  style={{ backgroundColor: props.value.bases[1] }}
+                  style={{ backgroundColor: props.value.bases[1][2] }}
                   className="MiniColorCell"
                 ></div>
               </div>
@@ -132,6 +128,7 @@ const ColorTable = (props) => {
             <input
               type="checkbox"
               defaultChecked={props.value}
+              disabled={props.data.collection === 'Mix'}
               onChange={(e) => {
                 props.node.setDataValue(props.column, e.target.checked);
               }}
@@ -169,14 +166,12 @@ const ColorTable = (props) => {
     }
   };
 
-  const updateLocalStorage = () => {
-    let ownedColors = [];
-    tableRef.current.api?.forEachNode((node) => {
-      if (node.data.collection !== 'Mix' && node.data.owned) {
-        ownedColors.push(node.data.name);
-      }
+  const onCellValueChanged = (e) => {
+    props.worker.postMessage({
+      type: 'updateOwned',
+      color: e.data,
+      selectedColor: props.selectedColor
     });
-    localStorage.setItem('ownedColors', JSON.stringify(ownedColors));
   };
 
   React.useEffect(() => {
@@ -204,7 +199,7 @@ const ColorTable = (props) => {
       pagination={true}
       onFilterChanged={updateTopColors}
       onSortChanged={updateTopColors}
-      onCellValueChanged={updateLocalStorage}
+      onCellValueChanged={(e) => onCellValueChanged(e)}
       loadingOverlayComponent={progressOverlay}
       loadingOverlayComponentParams={{ progress: progress }}
       getRowId={(r) => r.data.collection + ' ' + r.data.name}
