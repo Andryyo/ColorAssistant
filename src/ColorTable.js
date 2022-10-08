@@ -26,6 +26,9 @@ const ColorTable = (props) => {
         }
       }
     };
+  }, [props.worker]);
+
+  React.useEffect(() => {
     if (props.selectedColor) {
       props.worker.postMessage({
         type: 'updateSelectedColor',

@@ -43,6 +43,23 @@ const createColor = (collection, name, hex, owned) => {
   };
 };
 
+const updateMinDelta = async () => {
+  const colors = await db.colors.where('collection').notEqual('Mix').toArray();
+  for (let color1 of colors) {
+    const deltas = colors
+      .filter((c) => c !== color1 && c.owned)
+      .map((color2) => {
+        const delta = Math.round(
+          cielabDifference(color1.color, color2.color, 2, 1)
+        );
+        return delta;
+      });
+    color1.minDelta = Math.min(...deltas);
+  }
+
+  await db.colors.bulkPut(colors);
+};
+
 const getCollection = (collection, data) => {
   return data
     .split('\n')
@@ -77,18 +94,6 @@ const colorToBase = (color) => {
   getCollection('Army Painter', armyPainter).forEach((c) => baseColors.push(c));
 
   baseColors.forEach((c) => colors.push(c));
-
-  for (let color1 of colors) {
-    const deltas = colors
-      .filter((c) => c !== color1 && c.owned)
-      .map((color2) => {
-        const delta = Math.round(
-          cielabDifference(color1.color, color2.color, 2, 1)
-        );
-        return delta;
-      });
-    color1.minDelta = Math.min(...deltas);
-  }
 
   let mixes = [];
 
@@ -137,20 +142,9 @@ const colorToBase = (color) => {
 })();
 
 self.onmessage = async (message) => {
-  if (message.data.type === 'updateSelectedColor') {
-    /*console.log('Started updating deltas');
+  if (message.data.type === 'updateOwned') {
+    postMessage({ type: 'progressUpdate', value: 0 });
 
-    await db.colors.toCollection().modify((c) => {
-      const delta = message.data.selectedColor
-        ? Math.round(
-            cielabDifference(c.color, message.data.selectedColor, 2, 1)
-          )
-        : null;
-      c.delta = delta;
-    });
-
-    console.log('Done updating deltas');*/
-  } else if (message.data.type === 'updateOwned') {
     await db.colors
       .where(['collection', 'name', 'hex'])
       .equals([
@@ -180,5 +174,8 @@ self.onmessage = async (message) => {
     }
 
     await db.colors.bulkPut(mixes);
+    await updateMinDelta();
+
+    postMessage({ type: 'progressUpdate', value: 0 });
   }
 };
