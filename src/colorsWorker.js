@@ -44,20 +44,25 @@ const createColor = (collection, name, hex, owned) => {
 };
 
 const updateMinDelta = async () => {
-  const colors = await db.colors.where('collection').notEqual('Mix').toArray();
-  for (let color1 of colors) {
-    const deltas = colors
-      .filter((c) => c !== color1 && c.owned)
-      .map((color2) => {
-        const delta = Math.round(
-          cielabDifference(color1.color, color2.color, 2, 1)
-        );
-        return delta;
+  await db.transaction('rw', db.colors, async () => {
+    const colors = await db.colors
+      .where('collection')
+      .notEqual('Mix')
+      .toArray();
+    for (let color1 of colors) {
+      const deltas = colors
+        .filter((c) => c !== color1 && c.owned)
+        .map((color2) => {
+          const delta = Math.round(
+            cielabDifference(color1.color, color2.color, 2, 1)
+          );
+          return delta;
+        });
+      await db.colors.update([color1.collection, color1.name, color1.hex], {
+        minDelta: Math.min(...deltas)
       });
-    color1.minDelta = Math.min(...deltas);
-  }
-
-  await db.colors.bulkPut(colors);
+    }
+  });
 };
 
 const getCollection = (collection, data) => {
@@ -135,7 +140,7 @@ const colorToBase = (color) => {
   postMessage({ type: 'progressUpdate', value: 95 });
 
   console.log('Saving colors', colors.length);
-  await db.colors.bulkPut(colors);
+  await db.colors.bulkAdd(colors);
   console.log('Saved colors');
 
   postMessage({ type: 'progressUpdate', value: 100 });
@@ -145,37 +150,55 @@ self.onmessage = async (message) => {
   if (message.data.type === 'updateOwned') {
     postMessage({ type: 'progressUpdate', value: 0 });
 
-    await db.colors
-      .where(['collection', 'name', 'hex'])
-      .equals([
-        message.data.color.collection,
-        message.data.color.name,
-        message.data.color.hex
-      ])
-      .modify((c) => {
-        c.owned = message.data.color.owned;
-      });
-    const mixes = await db.colors
-      .where('bases')
-      .equals([
-        message.data.color.collection,
-        message.data.color.name,
-        message.data.color.hex
-      ])
-      .toArray();
-
-    for (const mix of mixes) {
-      const bases = await db.colors
+    await db.transaction('rw', db.colors, async () => {
+      await db.colors
         .where(['collection', 'name', 'hex'])
-        .anyOf(mix.bases)
+        .equals([
+          message.data.color.collection,
+          message.data.color.name,
+          message.data.color.hex
+        ])
+        .modify((c) => {
+          c.owned = message.data.color.owned;
+          console.log('Update', c);
+        });
+
+      postMessage({ type: 'progressUpdate', value: 10 });
+
+      const mixes = await db.colors
+        .where('bases')
+        .equals([
+          message.data.color.collection,
+          message.data.color.name,
+          message.data.color.hex
+        ])
         .toArray();
 
-      mix.owned = bases.every((b) => b.owned);
-    }
+      postMessage({ type: 'progressUpdate', value: 20 });
 
-    await db.colors.bulkPut(mixes);
+      let i = 0;
+
+      for (const mix of mixes) {
+        const bases = await db.colors
+          .where(['collection', 'name', 'hex'])
+          .anyOf(mix.bases)
+          .toArray();
+
+        await db.colors.update([mix.collection, mix.name, mix.hex], {
+          owned: bases.every((b) => b.owned)
+        });
+
+        postMessage({
+          type: 'progressUpdate',
+          value: 30 + Math.round((i++ * 10) / mixes.length)
+        });
+      }
+    });
+
+    postMessage({ type: 'progressUpdate', value: 40 });
+
     await updateMinDelta();
 
-    postMessage({ type: 'progressUpdate', value: 0 });
+    postMessage({ type: 'progressUpdate', value: 100 });
   }
 };
