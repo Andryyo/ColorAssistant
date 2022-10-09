@@ -24,7 +24,7 @@ export default forwardRef((props, ref) => {
         return (
           collections.has(params.data.collection) &&
           (!params.data.bases ||
-            params.data.bases.every((b) => collections.has(b[0])))
+            params.data.bases.every((b) => collections.has(b.collection)))
         );
       },
 

@@ -95,7 +95,7 @@ const MapColorSelector = (props) => {
       return (
         <div style={{ display: 'flex', width: '100px' }}>
           <div
-            style={{ backgroundColor: props.marker.bases[0][2] }}
+            style={{ backgroundColor: props.marker.bases[0].hex }}
             className="MiniColorCell"
           ></div>
           <div
@@ -105,7 +105,7 @@ const MapColorSelector = (props) => {
             {props.marker.hex}
           </div>
           <div
-            style={{ backgroundColor: props.marker.bases[1][2] }}
+            style={{ backgroundColor: props.marker.bases[1].hex }}
             className="MiniColorCell"
           ></div>
         </div>

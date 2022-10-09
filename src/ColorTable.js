@@ -82,7 +82,7 @@ const ColorTable = (props) => {
             return (
               <div style={{ display: 'flex', height: '100%' }}>
                 <div
-                  style={{ backgroundColor: props.value.bases[0][2] }}
+                  style={{ backgroundColor: props.value.bases[0].hex }}
                   className="MiniColorCell"
                 ></div>
                 <div
@@ -92,7 +92,7 @@ const ColorTable = (props) => {
                   {props.value.color}
                 </div>
                 <div
-                  style={{ backgroundColor: props.value.bases[1][2] }}
+                  style={{ backgroundColor: props.value.bases[1].hex }}
                   className="MiniColorCell"
                 ></div>
               </div>
