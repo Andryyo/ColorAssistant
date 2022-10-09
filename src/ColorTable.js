@@ -1,17 +1,13 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from './db';
 import * as culori from 'culori';
 
 const difference = culori.differenceCiede2000();
 
 const ColorTable = (props) => {
-  const [progress, setProgress] = React.useState(0);
   const tableRef = React.useRef(null);
   const [colors, setColors] = React.useState(null);
 
@@ -23,7 +19,6 @@ const ColorTable = (props) => {
         if (message.data.value === 100) {
           tableRef.current?.api?.hideOverlay();
         } else {
-          setProgress(message.data.value);
           tableRef.current?.api?.showLoadingOverlay();
         }
       }
@@ -40,13 +35,76 @@ const ColorTable = (props) => {
   }, [props.selectedColor]);
 
   const colorsWithDelta = React.useMemo(() => {
-    return colors?.map((c) => {
+    const result = colors?.map((c) => {
       const delta = props.selectedColor
         ? Math.round(difference(c.color, props.selectedColor))
         : null;
       return { ...c, delta: delta };
     });
+
+    return result;
   }, [colors, props.selectedColor]);
+
+  const collections = React.useMemo(() => {
+    if (!colorsWithDelta) {
+      return new Set();
+    }
+
+    return new Set(colorsWithDelta.map((c) => c.collection));
+  }, [colorsWithDelta]);
+
+  const datasource = React.useMemo(() => {
+    return {
+      rowCount: null,
+      getRows: (params) => {
+        if (!colorsWithDelta) {
+          params.successCallback(null, 0);
+
+          return;
+        }
+
+        let result = colorsWithDelta.map((c) => c);
+
+        if (params.sortModel) {
+          result.sort(
+            (a, b) =>
+              a[params.sortModel[0].colId] - b[params.sortModel[0].colId]
+          );
+
+          if (params.sortModel[0].sort === 'desc') {
+            result.reverse();
+          }
+        }
+
+        for (const [name, filter] of Object.entries(params.filterModel)) {
+          switch (filter.filterType) {
+            case 'text':
+              result = result.filter((c) =>
+                c[name].toString().includes(filter.filter)
+              );
+              break;
+            case 'collection':
+              result = result.filter(
+                (c) =>
+                  (filter.filter.has(c.collection) ||
+                    c.bases?.every((b) => filter.filter.has(b.collection))) &&
+                  (c.collection !== 'Mix' || filter.filter.has('Mix'))
+              );
+              break;
+          }
+        }
+
+        if (props.onTopColorsChange) {
+          props.onTopColorsChange(result.slice(0, 100));
+        }
+
+        params.successCallback(
+          result.slice(params.startRow, params.endRow),
+          result.length
+        );
+      }
+    };
+  }, [colorsWithDelta]);
 
   const columns = React.useMemo(
     () => [
@@ -55,6 +113,7 @@ const ColorTable = (props) => {
         headerName: 'Collection',
         width: 100,
         filter: CollectionsFilter,
+        filterParams: { options: collections },
         wrapText: true
       },
       {
@@ -64,19 +123,21 @@ const ColorTable = (props) => {
         sortable: true,
         filter: true,
         floatingFilter: true,
+        suppressMenu: true,
         wrapText: true
       },
       {
         valueGetter: (props) => {
           return {
-            color: props.data.hex,
-            bases: props.data.bases
+            color: props.data?.hex,
+            bases: props.data?.bases
           };
         },
         headerName: 'Code',
         width: 200,
-        sortable: true,
         filter: true,
+        floatingFilter: true,
+        suppressMenu: true,
         cellRenderer: (props) => {
           if (props.value.bases) {
             return (
@@ -113,37 +174,34 @@ const ColorTable = (props) => {
         field: 'H',
         headerName: 'Hue',
         width: 75,
-        sortable: true,
-        filter: 'agNumberColumnFilter'
+        sortable: true
       },
       {
         field: 'S',
         headerName: 'Saturation',
         width: 75,
-        sortable: true,
-        filter: 'agNumberColumnFilter'
+        sortable: true
       },
       {
         field: 'V',
         headerName: 'Value',
         width: 75,
-        sortable: true,
-        filter: 'agNumberColumnFilter'
+        sortable: true
       },
       {
         field: 'owned',
         headerName: 'Owned',
         width: 75,
-        sortable: true,
         filter: true,
         floatingFilter: true,
+        suppressMenu: true,
         floatingFilterComponent: OwnedFloatingFilter,
         cellRenderer: (props) => {
           return (
             <input
               type="checkbox"
               defaultChecked={props.value}
-              disabled={props.data.collection === 'Mix'}
+              disabled={props.data?.collection === 'Mix'}
               onChange={(e) => {
                 props.node.setDataValue(props.column, e.target.checked);
               }}
@@ -156,7 +214,6 @@ const ColorTable = (props) => {
         headerName: 'Delta',
         width: 50,
         sortable: true,
-        filter: 'agNumberColumnFilter',
         sort: 'asc',
         sortingOrder: ['asc']
       },
@@ -164,22 +221,11 @@ const ColorTable = (props) => {
         field: 'minDelta',
         headerName: 'Min Delta',
         width: 50,
-        sortable: true,
-        filter: 'agNumberColumnFilter'
+        sortable: true
       }
     ],
-    []
+    [collections]
   );
-
-  const updateTopColors = () => {
-    if (props.onTopColorsChange) {
-      let topColors = [];
-      tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
-        topColors.push(node.data);
-      });
-      props.onTopColorsChange(topColors);
-    }
-  };
 
   const onCellValueChanged = (e) => {
     props.worker.postMessage({
@@ -190,35 +236,21 @@ const ColorTable = (props) => {
   };
 
   React.useEffect(() => {
-    updateTopColors();
-  }, [colorsWithDelta]);
-
-  const progressOverlay = (props) => {
-    return (
-      <div
-        className="ag-overlay-loading-center"
-        style={{ backgroundColor: 'lightsteelblue', height: '9%' }}
-      >
-        <i className="far fa-frown"> Loading: {props.progress}%</i>
-      </div>
-    );
-  };
+    if (colorsWithDelta && tableRef.current?.api) {
+      tableRef.current.api.purgeInfiniteCache();
+    }
+  }, [colors, props.selectedColor]);
 
   return (
     <AgGridReact
       className="ag-theme-material"
       ref={tableRef}
-      rowData={colorsWithDelta}
       columnDefs={columns}
       rowHeight={75}
-      pagination={true}
-      onFilterChanged={updateTopColors}
-      onSortChanged={updateTopColors}
       onCellValueChanged={(e) => onCellValueChanged(e)}
-      loadingOverlayComponent={progressOverlay}
-      loadingOverlayComponentParams={{ progress: progress }}
       enableCellTextSelection={true}
-      getRowId={(r) => r.data.collection + ' ' + r.data.name + ' ' + r.data.hex}
+      rowModelType={'infinite'}
+      datasource={datasource}
     />
   );
 };

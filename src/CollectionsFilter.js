@@ -9,13 +9,7 @@ import React, {
 } from 'react';
 
 export default forwardRef((props, ref) => {
-  const options = React.useMemo(() => {
-    let result = new Set();
-    props.api.forEachNode((node) => result.add(node.data.collection));
-    return result;
-  }, []);
-
-  const [collections, setCollections] = useState(options);
+  const [collections, setCollections] = useState(props.options);
 
   // expose AG Grid Filter Lifecycle callbacks
   useImperativeHandle(ref, () => {
@@ -29,7 +23,11 @@ export default forwardRef((props, ref) => {
       },
 
       isFilterActive() {
-        return collections.size != options.size;
+        return collections.size != props.options.size;
+      },
+
+      getModel() {
+        return { filterType: 'collection', filter: collections };
       }
     };
   });
@@ -49,10 +47,10 @@ export default forwardRef((props, ref) => {
       <FormControlLabel
         control={
           <Checkbox
-            checked={collections.size == options.size}
+            checked={collections.size == props.options.size}
             onChange={(e) => {
               if (e.target.checked) {
-                setCollections(options);
+                setCollections(props.options);
               } else {
                 setCollections(new Set());
               }
@@ -61,7 +59,7 @@ export default forwardRef((props, ref) => {
         }
         label="All"
       />
-      {[...options].map((option) => (
+      {[...props.options].map((option) => (
         <FormControlLabel
           key={option}
           label={option}
