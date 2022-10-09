@@ -21,8 +21,8 @@ const createColor = (collection, name, hex, owned) => {
     hex: hex,
     color: color,
     H: Math.round(hsv.h || 0),
-    S: Math.round(hsv.s),
-    V: Math.round(hsv.v),
+    S: Math.round(hsv.s * 100),
+    V: Math.round(hsv.v * 100),
     owned: owned
   };
 };
