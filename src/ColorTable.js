@@ -4,7 +4,6 @@ import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
-import { gridSelectionStateSelector } from '@mui/x-data-grid';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
 import * as culori from 'culori';
@@ -14,11 +13,13 @@ const difference = culori.differenceCiede2000();
 const ColorTable = (props) => {
   const [progress, setProgress] = React.useState(0);
   const tableRef = React.useRef(null);
-  const colors = useLiveQuery(() => db.colors.toArray());
+  const [colors, setColors] = React.useState(null);
 
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
-      if (message.data.type === 'progressUpdate') {
+      if (message.data.type === 'colorsUpdated') {
+        setColors(message.data.colors);
+      } else if (message.data.type === 'progressUpdate') {
         if (message.data.value === 100) {
           tableRef.current?.api?.hideOverlay();
         } else {
