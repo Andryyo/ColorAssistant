@@ -45,6 +45,12 @@ const ColorTable = (props) => {
     return result;
   }, [colors, props.selectedColor]);
 
+  React.useEffect(() => {
+    if (colorsWithDelta) {
+      tableRef.current?.api?.hideOverlay();
+    }
+  }, [colorsWithDelta]);
+
   const collections = React.useMemo(() => {
     if (!colorsWithDelta) {
       return new Set();
@@ -264,6 +270,7 @@ const ColorTable = (props) => {
       enableCellTextSelection={true}
       rowModelType={'infinite'}
       datasource={datasource}
+      onGridReady={(e) => e.api.showLoadingOverlay()}
     />
   );
 };
