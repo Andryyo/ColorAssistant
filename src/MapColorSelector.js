@@ -84,6 +84,17 @@ const MapColorSelector = (props) => {
         if (props.click) {
           props.click({ x: e.latlng.lng, y: e.latlng.lat });
         }
+      },
+      boxzoomend: (e) => {
+        if (props.boxzoomend) {
+          console.log(e.boxZoomBounds);
+          props.boxzoomend(
+            e.boxZoomBounds.getWest(),
+            e.boxZoomBounds.getSouth(),
+            e.boxZoomBounds.getEast(),
+            e.boxZoomBounds.getNorth()
+          );
+        }
       }
     });
 

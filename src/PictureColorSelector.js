@@ -89,6 +89,28 @@ const Picture = (props) => {
     };
   };
 
+  const boxzoomend = (x1, y1, x2, y2) => {
+    const canvas = new OffscreenCanvas(x2 - x1, y2 - y1);
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        imgCanvas,
+        x1,
+        y1,
+        x2 - x1,
+        y2 - y1,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+    setImgCanvas(canvas);
+
+    canvas.convertToBlob().then((blob) => setImgSrc(URL.createObjectURL(blob)));
+  };
+
   let markers = [];
 
   if (selectedColor && selectedPosition) {
@@ -118,6 +140,7 @@ const Picture = (props) => {
           click={(e) => selectColor(e.x, e.y)}
           markers={markers}
           topColor={props.topColors && props.topColors[0]}
+          boxzoomend={boxzoomend}
         />
         <div className="ColorsContainer">
           {colors.map((c) => (
