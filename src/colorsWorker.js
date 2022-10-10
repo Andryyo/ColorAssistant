@@ -86,29 +86,43 @@ const colorToBase = (color) => {
 
   for (let i = 0; i < baseColors.length; i++) {
     for (let j = i + 1; j < baseColors.length; j++) {
-      const mix = mixbox.lerp(baseColors[i].hex, baseColors[j].hex, 0.5);
-      const code = culori.formatHex({
-        mode: 'rgb',
-        r: mix[0] / 256,
-        g: mix[1] / 256,
-        b: mix[2] / 256
-      });
+      const ratios = [
+        { value: 0.25, name: '3 to 1' },
+        { value: 0.5, name: '1 to 1' },
+        { value: 0.75, name: '1 to 3' }
+      ];
 
-      const name =
-        baseColors[i].collection +
-        ' ' +
-        baseColors[i].name +
-        '+' +
-        baseColors[j].collection +
-        ' ' +
-        baseColors[j].name;
+      for (const ratio of ratios) {
+        const mix = mixbox.lerp(
+          baseColors[i].hex,
+          baseColors[j].hex,
+          ratio.value
+        );
+        const code = culori.formatHex({
+          mode: 'rgb',
+          r: mix[0] / 256,
+          g: mix[1] / 256,
+          b: mix[2] / 256
+        });
 
-      const color = createColor('Mix', name, code, false);
+        const name =
+          baseColors[i].collection +
+          ' ' +
+          baseColors[i].name +
+          ' + ' +
+          baseColors[j].collection +
+          ' ' +
+          baseColors[j].name +
+          ' ' +
+          ratio.name;
 
-      mixes.push({
-        ...color,
-        bases: [colorToBase(baseColors[i]), colorToBase(baseColors[j])]
-      });
+        const color = createColor('Mix', name, code, false);
+
+        mixes.push({
+          ...color,
+          bases: [colorToBase(baseColors[i]), colorToBase(baseColors[j])]
+        });
+      }
     }
 
     if (i % step == 0) {
