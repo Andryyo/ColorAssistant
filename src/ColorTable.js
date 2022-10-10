@@ -55,7 +55,7 @@ const ColorTable = (props) => {
 
   const datasource = React.useMemo(() => {
     return {
-      rowCount: null,
+      rowCount: colorsWithDelta?.length,
       getRows: (params) => {
         if (!colorsWithDelta) {
           params.successCallback(null, 0);
@@ -84,12 +84,16 @@ const ColorTable = (props) => {
               );
               break;
             case 'collection':
-              result = result.filter(
-                (c) =>
-                  (filter.filter.has(c.collection) ||
-                    c.bases?.every((b) => filter.filter.has(b.collection))) &&
-                  (c.collection !== 'Mix' || filter.filter.has('Mix'))
-              );
+              result = result.filter((c) => {
+                if (c.collection === 'Mix') {
+                  return (
+                    filter.filter.has(c.collection) &&
+                    c.bases?.every((b) => filter.filter.has(b.collection))
+                  );
+                } else {
+                  return filter.filter.has(c.collection);
+                }
+              });
               break;
           }
         }
@@ -124,6 +128,9 @@ const ColorTable = (props) => {
         filter: true,
         floatingFilter: true,
         suppressMenu: true,
+        floatingFilterComponentParams: {
+          suppressFilterButton: true
+        },
         wrapText: true
       },
       {
@@ -138,6 +145,9 @@ const ColorTable = (props) => {
         filter: true,
         floatingFilter: true,
         suppressMenu: true,
+        floatingFilterComponentParams: {
+          suppressFilterButton: true
+        },
         cellRenderer: (props) => {
           if (props.value.bases) {
             return (
@@ -195,6 +205,9 @@ const ColorTable = (props) => {
         filter: true,
         floatingFilter: true,
         suppressMenu: true,
+        floatingFilterComponentParams: {
+          suppressFilterButton: true
+        },
         floatingFilterComponent: OwnedFloatingFilter,
         cellRenderer: (props) => {
           return (
