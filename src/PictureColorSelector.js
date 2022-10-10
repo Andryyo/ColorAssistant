@@ -40,11 +40,25 @@ const Picture = (props) => {
       .getContext('2d')
       .getImageData(0, 0, imgCanvas.width, imgCanvas.height);
 
-    props.worker.postMessage({ type: 'kmeans', data: data });
+    const ratio = imgCanvas.width / imgCanvas.height;
+    const newCanvas = new OffscreenCanvas(300, 300 / ratio);
+    const newCtx = newCanvas.getContext('2d');
+    newCtx.drawImage(imgCanvas, 0, 0, newCanvas.width, newCanvas.height);
+    const newData = newCtx.getImageData(
+      0,
+      0,
+      newCanvas.width,
+      newCanvas.height
+    );
+
+    props.worker.postMessage({ type: 'kmeans', data: newData });
 
     props.worker.onmessage = (message) => {
       if (message.data.type === 'kmeans') {
-        imgCanvas.getContext('2d').putImageData(message.data.data, 0, 0);
+        newCtx.putImageData(message.data.data, 0, 0);
+        imgCanvas
+          .getContext('2d')
+          .drawImage(newCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
 
         imgCanvas
           .convertToBlob()
@@ -64,8 +78,7 @@ const Picture = (props) => {
     const img = new Image();
     img.src = src;
     img.onload = () => {
-      const ratio = img.width / img.height;
-      const canvas = new OffscreenCanvas(300, 300 / ratio);
+      const canvas = new OffscreenCanvas(img.width, img.height);
       const ctx = canvas.getContext('2d');
 
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
