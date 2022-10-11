@@ -14,7 +14,8 @@ const ColorTable = (props) => {
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
       if (message.data.type === 'colorsUpdated') {
-        setColors(message.data.colors);
+        const colors = JSON.parse(message.data.data);
+        setColors(colors);
       } else if (message.data.type === 'progressUpdate') {
         if (message.data.value === 100) {
           tableRef.current?.api?.hideOverlay();

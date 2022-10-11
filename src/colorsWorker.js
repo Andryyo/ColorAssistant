@@ -61,7 +61,7 @@ const colorToBase = (color) => {
 
   if (savedColors) {
     colors = JSON.parse(savedColors.data);
-    postMessage({ type: 'colorsUpdated', colors: colors });
+    postMessage({ type: 'colorsUpdated', data: savedColors.data });
     return;
   }
 
@@ -135,11 +135,12 @@ const colorToBase = (color) => {
   postMessage({ type: 'progressUpdate', value: 95 });
 
   console.log('Saving colors', colors.length);
-  await db.data.put({ id: 'colors', data: JSON.stringify(colors) });
+  const data = JSON.stringify(colors);
+  await db.data.put({ id: 'colors', data: data });
   console.log('Saved colors');
 
   postMessage({ type: 'progressUpdate', value: 100 });
-  postMessage({ type: 'colorsUpdated', colors: colors });
+  postMessage({ type: 'colorsUpdated', data: data });
 })();
 
 self.onmessage = async (message) => {
@@ -181,8 +182,9 @@ self.onmessage = async (message) => {
     );
     updateMinDelta();
 
-    await db.data.put({ id: 'colors', data: JSON.stringify(colors) });
-    postMessage({ type: 'colorsUpdated', colors: colors });
+    const data = JSON.stringify(colors);
+    await db.data.put({ id: 'colors', data: data });
+    postMessage({ type: 'colorsUpdated', data: data });
     postMessage({ type: 'progressUpdate', value: 100 });
   }
 };
