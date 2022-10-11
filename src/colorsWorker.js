@@ -6,6 +6,7 @@ import armyPainter from './ArmyPainter';
 import mixbox from 'mixbox';
 import { db } from 'db.js';
 import * as culori from 'culori';
+import { ColorsMessage } from 'ColorsMessage';
 
 const difference = culori.differenceCiede2000();
 
@@ -57,11 +58,14 @@ const colorToBase = (color) => {
 };
 
 (async () => {
-  const savedColors = await db.data.get('colors');
+  const savedBuffer = await db.data.get('colors');
+  console.log('Buffer:', savedBuffer);
 
-  if (savedColors) {
-    colors = JSON.parse(savedColors.data);
-    postMessage({ type: 'colorsUpdated', data: savedColors.data });
+  if (savedBuffer) {
+    colors = ColorsMessage.decode(savedBuffer.data).colors;
+    postMessage({ type: 'colorsUpdated', data: savedBuffer.data }, [
+      savedBuffer.data.buffer
+    ]);
     return;
   }
 
@@ -135,12 +139,12 @@ const colorToBase = (color) => {
   postMessage({ type: 'progressUpdate', value: 95 });
 
   console.log('Saving colors', colors.length);
-  const data = JSON.stringify(colors);
-  await db.data.put({ id: 'colors', data: data });
+  const buffer = ColorsMessage.encode({ colors: colors }).finish();
+  await db.data.put({ id: 'colors', data: buffer });
   console.log('Saved colors');
 
   postMessage({ type: 'progressUpdate', value: 100 });
-  postMessage({ type: 'colorsUpdated', data: data });
+  postMessage({ type: 'colorsUpdated', data: buffer }, [buffer.buffer]);
 })();
 
 self.onmessage = async (message) => {
@@ -182,9 +186,9 @@ self.onmessage = async (message) => {
     );
     updateMinDelta();
 
-    const data = JSON.stringify(colors);
-    await db.data.put({ id: 'colors', data: data });
-    postMessage({ type: 'colorsUpdated', data: data });
+    const buffer = ColorsMessage.encode({ colors: colors }).finish();
+    await db.data.put({ id: 'colors', data: buffer });
+    postMessage({ type: 'colorsUpdated', data: buffer }, [buffer.buffer]);
     postMessage({ type: 'progressUpdate', value: 100 });
   }
 };

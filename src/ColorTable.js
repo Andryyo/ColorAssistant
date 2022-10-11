@@ -4,6 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
 import * as culori from 'culori';
+import { ColorsMessage } from 'ColorsMessage';
 
 const difference = culori.differenceCiede2000();
 
@@ -14,7 +15,7 @@ const ColorTable = (props) => {
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
       if (message.data.type === 'colorsUpdated') {
-        const colors = JSON.parse(message.data.data);
+        const colors = ColorsMessage.decode(message.data.data).colors;
         setColors(colors);
       } else if (message.data.type === 'progressUpdate') {
         if (message.data.value === 100) {
@@ -143,6 +144,7 @@ const ColorTable = (props) => {
       {
         valueGetter: (props) => {
           return {
+            collection: props.data?.collection,
             color: props.data?.hex,
             bases: props.data?.bases
           };
@@ -156,7 +158,7 @@ const ColorTable = (props) => {
           suppressFilterButton: true
         },
         cellRenderer: (props) => {
-          if (props.value.bases) {
+          if (props.value.collection === 'Mix') {
             return (
               <div style={{ display: 'flex', height: '100%' }}>
                 <div

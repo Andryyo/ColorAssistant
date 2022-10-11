@@ -102,7 +102,7 @@ const MapColorSelector = (props) => {
   };
 
   const ColorCell = (props) => {
-    if (props.marker.bases) {
+    if (props.marker.bases?.length > 0) {
       return (
         <div style={{ display: 'flex', width: '100px' }}>
           <div

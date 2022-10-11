@@ -17,7 +17,7 @@ export default forwardRef((props, ref) => {
       doesFilterPass(params) {
         return (
           collections.has(params.data.collection) &&
-          (!params.data.bases ||
+          (params.data.collection !== 'Mix' ||
             params.data.bases.every((b) => collections.has(b.collection)))
         );
       },
