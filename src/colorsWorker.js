@@ -63,10 +63,12 @@ const colorToBase = (color) => {
 
   if (savedBuffer) {
     colors = ColorsMessage.decode(savedBuffer.data).colors;
-    postMessage({ type: 'colorsUpdated', data: savedBuffer.data }, [
-      savedBuffer.data.buffer
-    ]);
-    return;
+    if (colors && colors.length > 0) {
+      postMessage({ type: 'colorsUpdated', data: savedBuffer.data }, [
+        savedBuffer.data.buffer
+      ]);
+      return;
+    }
   }
 
   console.log('Starting generation');
