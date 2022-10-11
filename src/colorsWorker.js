@@ -58,12 +58,12 @@ const colorToBase = (color, index) => index;
 (async () => {
   const savedBuffer = await db.data.get('colors');
 
-  const transferBuffer = new Uint8Array(savedBuffer.data);
-  postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
-    transferBuffer.buffer
-  ]);
-
   if (savedBuffer) {
+    const transferBuffer = new Uint8Array(savedBuffer.data);
+    postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+      transferBuffer.buffer
+    ]);
+
     try {
       colors = ColorsMessage.decode(savedBuffer.data).colors;
     } catch (err) {
