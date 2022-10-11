@@ -130,7 +130,7 @@ const colorToBase = (color) => {
     }
   }
 
-  colors.push(...mixes);
+  colors = colors.concat(mixes);
 
   postMessage({ type: 'progressUpdate', value: 95 });
 
