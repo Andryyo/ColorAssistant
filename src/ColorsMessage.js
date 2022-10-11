@@ -19,7 +19,8 @@ export const ColorMessage = new Type('ColorMessage')
   .add(new Field('S', 13, 'int32'))
   .add(new Field('V', 14, 'int32'))
   .add(new Field('owned', 15, 'bool'))
-  .add(new Field('bases', 16, 'int32', 'repeated'));
+  .add(new Field('bases', 16, 'int32', 'repeated'))
+  .add(new Field('ratio', 18, 'float'));
 
 export const ColorsMessage = new Type('ColorsMessage').add(
   new Field('colors', 17, 'ColorMessage', 'repeated')

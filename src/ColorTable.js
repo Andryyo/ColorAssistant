@@ -45,7 +45,29 @@ const ColorTable = (props) => {
       const delta = props.selectedColor
         ? Math.round(difference(c.color, props.selectedColor))
         : null;
-      return { ...c, delta: delta };
+
+      if (c.bases?.length == 0) {
+        return { ...c, delta: delta };
+      } else {
+        const ratios = [
+          { value: 0.25, name: '3 to 1' },
+          { value: 0.5, name: '1 to 1' },
+          { value: 0.75, name: '1 to 3' }
+        ];
+
+        const name =
+          colors[c.bases[0]].collection +
+          ' ' +
+          colors[c.bases[0]].name +
+          ' + ' +
+          colors[c.bases[1]].collection +
+          ' ' +
+          colors[c.bases[1]].name +
+          ' ' +
+          ratios.find((r) => r.value === c.ratio)?.name;
+
+        return { ...c, name: name, collection: 'Mix', delta: delta };
+      }
     });
 
     return result;

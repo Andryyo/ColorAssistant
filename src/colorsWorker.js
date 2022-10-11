@@ -29,7 +29,7 @@ const createColor = (collection, name, hex, owned) => {
 };
 
 const updateMinDelta = () => {
-  const baseColors = colors.filter((color) => color.collection !== 'Mix');
+  const baseColors = colors.filter((color) => color.bases?.length === 0);
   for (let color1 of baseColors) {
     const deltas = baseColors
       .filter((c) => c !== color1 && c.owned)
@@ -59,6 +59,8 @@ const colorToBase = (color, index) => index;
   const savedBuffer = await db.data.get('colors');
 
   if (savedBuffer) {
+    console.log(savedBuffer);
+
     const transferBuffer = new Uint8Array(savedBuffer.data);
     postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
       transferBuffer.buffer
@@ -95,18 +97,10 @@ const colorToBase = (color, index) => index;
 
   for (let i = 0; i < baseColors.length; i++) {
     for (let j = i + 1; j < baseColors.length; j++) {
-      const ratios = [
-        { value: 0.25, name: '3 to 1' },
-        { value: 0.5, name: '1 to 1' },
-        { value: 0.75, name: '1 to 3' }
-      ];
+      const ratios = [0.25, 0.5, 0.75];
 
       for (const ratio of ratios) {
-        const mix = mixbox.lerp(
-          baseColors[i].hex,
-          baseColors[j].hex,
-          ratio.value
-        );
+        const mix = mixbox.lerp(baseColors[i].hex, baseColors[j].hex, ratio);
         const code = culori.formatHex({
           mode: 'rgb',
           r: mix[0] / 256,
@@ -114,22 +108,12 @@ const colorToBase = (color, index) => index;
           b: mix[2] / 256
         });
 
-        const name =
-          baseColors[i].collection +
-          ' ' +
-          baseColors[i].name +
-          ' + ' +
-          baseColors[j].collection +
-          ' ' +
-          baseColors[j].name +
-          ' ' +
-          ratio.name;
-
-        const color = createColor('Mix', name, code, false);
+        const color = createColor(null, null, code, false);
 
         mixes.push({
           ...color,
-          bases: [colorToBase(baseColors[i], i), colorToBase(baseColors[j], j)]
+          bases: [colorToBase(baseColors[i], i), colorToBase(baseColors[j], j)],
+          ratio: ratio
         });
       }
     }
@@ -166,7 +150,7 @@ self.onmessage = async (message) => {
     colors[colorIndex].owned = message.data.color.owned;
 
     const mixes = colors
-      .filter((color) => color.collection === 'Mix')
+      .filter((color) => color.bases?.length > 0)
       .filter((color) =>
         color.bases.some(
           (b) =>
