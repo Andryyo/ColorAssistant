@@ -62,7 +62,11 @@ const colorToBase = (color) => {
   console.log('Buffer:', savedBuffer);
 
   if (savedBuffer) {
-    colors = ColorsMessage.decode(savedBuffer.data).colors;
+    try {
+      colors = ColorsMessage.decode(savedBuffer.data).colors;
+    } catch (err) {
+      console.log(err);
+    }
     if (colors && colors.length > 0) {
       postMessage({ type: 'colorsUpdated', data: savedBuffer.data }, [
         savedBuffer.data.buffer
