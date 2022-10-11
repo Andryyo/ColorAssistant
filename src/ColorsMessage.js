@@ -10,11 +10,6 @@ export const LabMessage = new Type('LabMessage')
   .add(new Field('a', 3, 'float'))
   .add(new Field('b', 4, 'float'));
 
-export const BaseMessage = new Type('BaseMessage')
-  .add(new Field('collection', 5, 'string'))
-  .add(new Field('name', 6, 'string'))
-  .add(new Field('hex', 7, 'string'));
-
 export const ColorMessage = new Type('ColorMessage')
   .add(new Field('collection', 8, 'string'))
   .add(new Field('name', 9, 'string'))
@@ -24,7 +19,7 @@ export const ColorMessage = new Type('ColorMessage')
   .add(new Field('S', 13, 'int32'))
   .add(new Field('V', 14, 'int32'))
   .add(new Field('owned', 15, 'bool'))
-  .add(new Field('bases', 16, 'BaseMessage', 'repeated'));
+  .add(new Field('bases', 16, 'int32', 'repeated'));
 
 export const ColorsMessage = new Type('ColorsMessage').add(
   new Field('colors', 17, 'ColorMessage', 'repeated')
@@ -33,6 +28,5 @@ export const ColorsMessage = new Type('ColorsMessage').add(
 export const root = new Root()
   .define('ColorAssistant')
   .add(LabMessage)
-  .add(BaseMessage)
   .add(ColorMessage)
   .add(ColorsMessage);

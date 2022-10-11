@@ -53,12 +53,15 @@ const getCollection = (collection, data) => {
     });
 };
 
-const colorToBase = (color) => {
-  return { collection: color.collection, name: color.name, hex: color.hex };
-};
+const colorToBase = (color, index) => index;
 
 (async () => {
   const savedBuffer = await db.data.get('colors');
+
+  const transferBuffer = new Uint8Array(savedBuffer.data);
+  postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+    transferBuffer.buffer
+  ]);
 
   if (savedBuffer) {
     try {
@@ -67,9 +70,6 @@ const colorToBase = (color) => {
       console.log(err);
     }
     if (colors && colors.length > 0) {
-      postMessage({ type: 'colorsUpdated', data: savedBuffer.data }, [
-        savedBuffer.data.buffer
-      ]);
       return;
     }
   }
@@ -129,7 +129,7 @@ const colorToBase = (color) => {
 
         mixes.push({
           ...color,
-          bases: [colorToBase(baseColors[i]), colorToBase(baseColors[j])]
+          bases: [colorToBase(baseColors[i], i), colorToBase(baseColors[j], j)]
         });
       }
     }
@@ -170,30 +170,26 @@ self.onmessage = async (message) => {
       .filter((color) =>
         color.bases.some(
           (b) =>
-            b.collection === message.data.color.collection &&
-            b.name === message.data.color.name &&
-            b.hex === message.data.color.hex
+            colors[b].collection === message.data.color.collection &&
+            colors[b].name === message.data.color.name &&
+            colors[b].hex === message.data.color.hex
         )
       );
 
     mixes.forEach(
       (color) =>
         (color.owned = color.bases.every((base) => {
-          const baseIndex = colors.findIndex(
-            (color) =>
-              color.collection === base.collection &&
-              color.name === base.name &&
-              color.hex === base.hex
-          );
-
-          return colors[baseIndex].owned;
+          return colors[base].owned;
         }))
     );
     updateMinDelta();
 
     const buffer = ColorsMessage.encode({ colors: colors }).finish();
     await db.data.put({ id: 'colors', data: buffer });
-    postMessage({ type: 'colorsUpdated', data: buffer }, [buffer.buffer]);
+    const transferBuffer = new Uint8Array(buffer);
+    postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+      transferBuffer.buffer
+    ]);
     postMessage({ type: 'progressUpdate', value: 100 });
   }
 };

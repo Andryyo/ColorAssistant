@@ -15,8 +15,12 @@ const ColorTable = (props) => {
   React.useEffect(() => {
     props.worker.onmessage = (message) => {
       if (message.data.type === 'colorsUpdated') {
-        const colors = ColorsMessage.decode(message.data.data).colors;
-        setColors(colors);
+        try {
+          const colors = ColorsMessage.decode(message.data.data).colors;
+          setColors(colors);
+        } catch (err) {
+          console.log(err);
+        }
       } else if (message.data.type === 'progressUpdate') {
         if (message.data.value === 100) {
           tableRef.current?.api?.hideOverlay();
@@ -96,7 +100,9 @@ const ColorTable = (props) => {
                 if (c.collection === 'Mix') {
                   return (
                     filter.filter.has(c.collection) &&
-                    c.bases?.every((b) => filter.filter.has(b.collection))
+                    c.bases?.every((b) =>
+                      filter.filter.has(colors[b].collection)
+                    )
                   );
                 } else {
                   return filter.filter.has(c.collection);
@@ -107,7 +113,10 @@ const ColorTable = (props) => {
         }
 
         if (props.onTopColorsChange) {
-          props.onTopColorsChange(result.slice(0, 100));
+          const topColors = result.slice(0, 20).map((c) => {
+            return { ...c, bases: c.bases.map((b) => colors[b]) };
+          });
+          props.onTopColorsChange(topColors);
         }
 
         params.successCallback(
@@ -125,7 +134,7 @@ const ColorTable = (props) => {
         headerName: 'Collection',
         width: 100,
         filter: CollectionsFilter,
-        filterParams: { options: collections },
+        filterParams: { options: collections, colors: colors },
         wrapText: true
       },
       {
@@ -146,7 +155,7 @@ const ColorTable = (props) => {
           return {
             collection: props.data?.collection,
             color: props.data?.hex,
-            bases: props.data?.bases
+            bases: props.data?.bases?.map((b) => colors[b])
           };
         },
         headerName: 'Code',
