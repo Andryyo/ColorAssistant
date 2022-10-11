@@ -87,7 +87,6 @@ const MapColorSelector = (props) => {
       },
       boxzoomend: (e) => {
         if (props.boxzoomend) {
-          console.log(e.boxZoomBounds);
           props.boxzoomend(
             e.boxZoomBounds.getWest(),
             e.boxZoomBounds.getSouth(),

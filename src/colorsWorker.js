@@ -59,7 +59,6 @@ const colorToBase = (color) => {
 
 (async () => {
   const savedBuffer = await db.data.get('colors');
-  console.log('Buffer:', savedBuffer);
 
   if (savedBuffer) {
     try {
