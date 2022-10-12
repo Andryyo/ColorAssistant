@@ -88,7 +88,9 @@ const ColorTable = (props) => {
       return new Set();
     }
 
-    return new Set(colorsWithDelta.map((c) => c.collection));
+    const result = new Set(colorsWithDelta.map((c) => c.collection));
+    result.add('Mix');
+    return result;
   }, [colorsWithDelta]);
 
   const datasource = React.useMemo(() => {
