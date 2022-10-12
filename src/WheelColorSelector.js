@@ -77,12 +77,15 @@ const ColorSelector = (props) => {
   };
 
   const selectColor = (color) => {
-    setValue(culori.hsv(color).v);
-    setSelectedColor(color);
     setText(color);
-    if (props.onChange) {
-      props.onChange(culori.lab65(color));
-    }
+    try {
+      setValue(culori.hsv(color).v);
+      setSelectedColor(culori.formatHex(color));
+      if (props.onChange) {
+        props.onChange(culori.lab65(color));
+      }
+      // eslint-disable-next-line no-empty
+    } catch {}
   };
 
   const onValueChanging = (event, newValue) => {
