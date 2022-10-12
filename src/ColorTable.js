@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
@@ -16,7 +17,32 @@ const ColorTable = (props) => {
     props.worker.onmessage = (message) => {
       if (message.data.type === 'colorsUpdated') {
         try {
-          const colors = ColorsMessage.decode(message.data.data).colors;
+          const rawColors = ColorsMessage.decode(message.data.data).colors;
+          const colors = rawColors.map((c) => {
+            if (c.bases?.length > 0) {
+              const ratios = [
+                { value: 0.25, name: '3 to 1' },
+                { value: 0.5, name: '1 to 1' },
+                { value: 0.75, name: '1 to 3' }
+              ];
+
+              const name =
+                rawColors[c.bases[0]].collection +
+                ' ' +
+                rawColors[c.bases[0]].name +
+                ' + ' +
+                rawColors[c.bases[1]].collection +
+                ' ' +
+                rawColors[c.bases[1]].name +
+                ' ' +
+                ratios.find((r) => r.value === c.ratio)?.name;
+
+              return { ...c, name: name, collection: 'Mix' };
+            } else {
+              return c;
+            }
+          });
+
           setColors(colors);
         } catch (err) {
           console.log(err);
@@ -45,29 +71,7 @@ const ColorTable = (props) => {
       const delta = props.selectedColor
         ? Math.round(difference(c.color, props.selectedColor))
         : null;
-
-      if (c.bases?.length == 0) {
-        return { ...c, delta: delta };
-      } else {
-        const ratios = [
-          { value: 0.25, name: '3 to 1' },
-          { value: 0.5, name: '1 to 1' },
-          { value: 0.75, name: '1 to 3' }
-        ];
-
-        const name =
-          colors[c.bases[0]].collection +
-          ' ' +
-          colors[c.bases[0]].name +
-          ' + ' +
-          colors[c.bases[1]].collection +
-          ' ' +
-          colors[c.bases[1]].name +
-          ' ' +
-          ratios.find((r) => r.value === c.ratio)?.name;
-
-        return { ...c, name: name, collection: 'Mix', delta: delta };
-      }
+      return { ...c, delta: delta };
     });
 
     return result;
@@ -99,7 +103,7 @@ const ColorTable = (props) => {
 
         let result = colorsWithDelta.map((c) => c);
 
-        if (params.sortModel) {
+        if (params.sortModel?.length > 0) {
           result.sort(
             (a, b) =>
               a[params.sortModel[0].colId] - b[params.sortModel[0].colId]
@@ -122,7 +126,7 @@ const ColorTable = (props) => {
                 if (c.collection === 'Mix') {
                   return (
                     filter.filter.has(c.collection) &&
-                    c.bases?.every((b) =>
+                    c.bases.every((b) =>
                       filter.filter.has(colors[b].collection)
                     )
                   );
@@ -136,7 +140,7 @@ const ColorTable = (props) => {
 
         if (props.onTopColorsChange) {
           const topColors = result.slice(0, 20).map((c) => {
-            return { ...c, bases: c.bases.map((b) => colors[b]) };
+            return { ...c, bases: c.bases?.map((b) => colors[b]) };
           });
           props.onTopColorsChange(topColors);
         }

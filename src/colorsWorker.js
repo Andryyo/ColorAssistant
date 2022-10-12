@@ -29,7 +29,9 @@ const createColor = (collection, name, hex, owned) => {
 };
 
 const updateMinDelta = () => {
-  const baseColors = colors.filter((color) => color.bases?.length === 0);
+  const baseColors = colors.filter(
+    (color) => !color.bases || color.bases.length === 0
+  );
   for (let color1 of baseColors) {
     const deltas = baseColors
       .filter((c) => c !== color1 && c.owned)
@@ -91,40 +93,6 @@ const colorToBase = (color, index) => index;
 
   baseColors.forEach((c) => colors.push(c));
 
-  let mixes = [];
-
-  const step = Math.ceil(baseColors.length / 100);
-
-  for (let i = 0; i < baseColors.length; i++) {
-    for (let j = i + 1; j < baseColors.length; j++) {
-      const ratios = [0.25, 0.5, 0.75];
-
-      for (const ratio of ratios) {
-        const mix = mixbox.lerp(baseColors[i].hex, baseColors[j].hex, ratio);
-        const code = culori.formatHex({
-          mode: 'rgb',
-          r: mix[0] / 256,
-          g: mix[1] / 256,
-          b: mix[2] / 256
-        });
-
-        const color = createColor(null, null, code, false);
-
-        mixes.push({
-          ...color,
-          bases: [colorToBase(baseColors[i], i), colorToBase(baseColors[j], j)],
-          ratio: ratio
-        });
-      }
-    }
-
-    if (i % step == 0) {
-      postMessage({ type: 'progressUpdate', value: i / step });
-    }
-  }
-
-  colors = colors.concat(mixes);
-
   postMessage({ type: 'progressUpdate', value: 95 });
 
   console.log('Saving colors', colors.length);
@@ -149,23 +117,49 @@ self.onmessage = async (message) => {
 
     colors[colorIndex].owned = message.data.color.owned;
 
-    const mixes = colors
-      .filter((color) => color.bases?.length > 0)
-      .filter((color) =>
-        color.bases.some(
-          (b) =>
-            colors[b].collection === message.data.color.collection &&
-            colors[b].name === message.data.color.name &&
-            colors[b].hex === message.data.color.hex
-        )
+    if (colors[colorIndex].owned) {
+      const baseColors = colors.filter(
+        (c, i) =>
+          colorIndex !== i && c.owned && (!c.bases || c.bases.length === 0)
       );
+      let mixes = [];
 
-    mixes.forEach(
-      (color) =>
-        (color.owned = color.bases.every((base) => {
-          return colors[base].owned;
-        }))
-    );
+      for (let i = 0; i < baseColors.length; i++) {
+        const ratios = [0.25, 0.5, 0.75];
+
+        for (const ratio of ratios) {
+          const mix = mixbox.lerp(
+            colors[colorIndex].hex,
+            baseColors[i].hex,
+            ratio
+          );
+          const code = culori.formatHex({
+            mode: 'rgb',
+            r: mix[0] / 256,
+            g: mix[1] / 256,
+            b: mix[2] / 256
+          });
+
+          const color = createColor(null, null, code, true);
+
+          mixes.push({
+            ...color,
+            bases: [
+              colorToBase(colors[colorIndex], colorIndex),
+              colorToBase(baseColors[i], i)
+            ],
+            ratio: ratio
+          });
+        }
+      }
+
+      colors = colors.concat(mixes);
+    } else {
+      colors = colors.filter(
+        (c) => !c.bases || c.bases.every((b) => b !== colorIndex)
+      );
+    }
+
     updateMinDelta();
 
     const buffer = ColorsMessage.encode({ colors: colors }).finish();
