@@ -76,6 +76,7 @@ const Picture = (props) => {
 
   const loadImage = (src) => {
     const img = new Image();
+    img.crossOrigin = 'Anonymous';
     img.src = src;
     img.onload = () => {
       const canvas = new OffscreenCanvas(img.width, img.height);
@@ -133,7 +134,7 @@ const Picture = (props) => {
         }}
       >
         <MapColorSelector
-          style={{ flex: '1', minHeight: 0, height: '90%' }}
+          style={{ flex: '1', minHeight: 0, height: '100%' }}
           src={imgSrc}
           imgHeight={imgCanvas?.height}
           imgWidth={imgCanvas?.width}
@@ -161,7 +162,12 @@ const Picture = (props) => {
         </div>
       </div>
       <input
-        style={{ flex: '0 0 auto' }}
+        style={{ flex: '0 0 auto', width: '95%' }}
+        type="url"
+        onChange={(e) => loadImage(e.target.value)}
+      />
+      <input
+        style={{ flex: '0 0 auto', width: '95%' }}
         type="file"
         name="file"
         onChange={(e) => loadImage(URL.createObjectURL(e.target.files[0]))}

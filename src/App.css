@@ -58,8 +58,7 @@
 }
 
 .SelectedColor {
-  margin: 1vw 1vw 1vw 1vw;
-  width: 90%;
+  width: 95%;
   color: black;
   -webkit-text-stroke: 1px white;
   font-size: x-large;
@@ -74,6 +73,7 @@
   flex-direction: column;
   align-items: left;
   flex: 0 0 auto;
+  gap: 10px;
 }
 
 .ColorWheelContainer {

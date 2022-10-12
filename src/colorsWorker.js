@@ -33,7 +33,7 @@ const updateMinDelta = () => {
     (color) => !color.bases || color.bases.length === 0
   );
   for (let color1 of baseColors) {
-    const deltas = baseColors
+    const deltas = colors
       .filter((c) => c !== color1 && c.owned)
       .map((color2) => {
         const delta = Math.round(difference(color1.color, color2.color));
