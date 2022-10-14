@@ -118,21 +118,17 @@ self.onmessage = async (message) => {
     colors[colorIndex].owned = message.data.color.owned;
 
     if (colors[colorIndex].owned) {
-      const baseColors = colors.filter(
-        (c, i) =>
-          colorIndex !== i && c.owned && (!c.bases || c.bases.length === 0)
-      );
       let mixes = [];
 
-      for (let i = 0; i < baseColors.length; i++) {
+      colors.forEach((c, i) => {
+        if (colorIndex === i || !c.owned || c.bases?.length > 0) {
+          return;
+        }
+
         const ratios = [0.25, 0.5, 0.75];
 
         for (const ratio of ratios) {
-          const mix = mixbox.lerp(
-            colors[colorIndex].hex,
-            baseColors[i].hex,
-            ratio
-          );
+          const mix = mixbox.lerp(colors[colorIndex].hex, c.hex, ratio);
           const code = culori.formatHex({
             mode: 'rgb',
             r: mix[0] / 256,
@@ -146,12 +142,12 @@ self.onmessage = async (message) => {
             ...color,
             bases: [
               colorToBase(colors[colorIndex], colorIndex),
-              colorToBase(baseColors[i], i)
+              colorToBase(c, i)
             ],
             ratio: ratio
           });
         }
-      }
+      });
 
       colors = colors.concat(mixes);
     } else {
