@@ -12,7 +12,6 @@ const fastConvert = (H, S, V, n) => {
 
 const ColorSelector = (props) => {
   const [value, setValue] = React.useState(1);
-  const [selectedColor, setSelectedColor] = React.useState('#ffffff');
   const [text, setText] = React.useState('#ffffff');
   const [imgSrc, setImgSrc] = React.useState(null);
   const [imgCanvas, setImgCanvas] = React.useState(null);
@@ -55,6 +54,11 @@ const ColorSelector = (props) => {
     canvas.convertToBlob().then((blob) => setImgSrc(URL.createObjectURL(blob)));
   }, [value]);
 
+  React.useEffect(() => {
+    setText(culori.formatHex(props.selectedColor));
+    setValue(culori.hsv(props.selectedColor).v);
+  }, [props.selectedColor]);
+
   const selectColorByPosition = (x, y) => {
     const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
@@ -69,18 +73,14 @@ const ColorSelector = (props) => {
       g: pixel.data[1] / 256,
       b: pixel.data[2] / 256
     });
-    setSelectedColor(newColor);
-    setText(newColor);
     if (props.onChange) {
       props.onChange(culori.lab65(newColor));
     }
   };
 
   const selectColor = (color) => {
-    setText(color);
     try {
       setValue(culori.hsv(color).v);
-      setSelectedColor(culori.formatHex(color));
       if (props.onChange) {
         props.onChange(culori.lab65(color));
       }
@@ -89,7 +89,7 @@ const ColorSelector = (props) => {
   };
 
   const onValueChanging = (event, newValue) => {
-    const color = culori.hsv(selectedColor);
+    const color = culori.hsv(props.selectedColor);
     const newColor = culori.formatHex({
       mode: 'hsv',
       h: color.h || 0,
@@ -98,12 +98,11 @@ const ColorSelector = (props) => {
     });
 
     setValue(newValue);
-    setSelectedColor(newColor);
     setText(newColor);
   };
 
   const onValueChanged = (event, newValue) => {
-    const color = culori.hsv(selectedColor);
+    const color = culori.hsv(props.selectedColor);
     const newColor = culori.formatHex({
       mode: 'hsv',
       h: color.h || 0,
@@ -112,8 +111,6 @@ const ColorSelector = (props) => {
     });
 
     setValue(newValue);
-    setSelectedColor(newColor);
-    setText(newColor);
 
     if (props.onChange) {
       props.onChange(culori.lab65(newColor));
@@ -155,10 +152,15 @@ const ColorSelector = (props) => {
       .filter((m) => m);
   }
 
-  if (selectedColor) {
-    const pos = colorToPosition(selectedColor);
+  if (props.selectedColor) {
+    const pos = colorToPosition(props.selectedColor);
     if (pos) {
-      markers.push({ x: pos.x, y: pos.y, hex: selectedColor, selected: true });
+      markers.push({
+        x: pos.x,
+        y: pos.y,
+        hex: culori.formatHex(props.selectedColor),
+        selected: true
+      });
     }
   }
 
@@ -166,7 +168,7 @@ const ColorSelector = (props) => {
   markers.sort((a, b) => a.delta - b.delta);
 
   return (
-    <div className="ColorWheelContainer">
+    <div className="ColorWheelContainer" style={props.style}>
       <MapColorSelector
         style={{ flex: '1', minHeight: 0, width: '90%' }}
         src={imgSrc}
@@ -178,6 +180,7 @@ const ColorSelector = (props) => {
         markerSelected={(m) => {
           selectColor(m.color);
         }}
+        active={props.active}
       />
       <div className="SliderContainer">
         <Slider
@@ -191,7 +194,7 @@ const ColorSelector = (props) => {
       <input
         type="text"
         className="SelectedColor"
-        style={{ backgroundColor: selectedColor }}
+        style={{ backgroundColor: culori.formatHex(props.selectedColor) }}
         value={text}
         onChange={(e) => selectColor(e.target.value)}
       />

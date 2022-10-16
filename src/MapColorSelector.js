@@ -68,7 +68,7 @@ const MapColorSelector = (props) => {
 
   const bounds = new LatLngBounds([
     [0, 0],
-    [props.imgHeight || 0, props.imgWidth || 0]
+    [props.imgHeight || 1, props.imgWidth || 1]
   ]);
 
   React.useEffect(() => {
@@ -77,6 +77,13 @@ const MapColorSelector = (props) => {
       mapRef.current.fitBounds(bounds);
     }
   }, [props.src]);
+
+  React.useEffect(() => {
+    if (mapRef.current && bounds && props.active) {
+      mapRef.current.invalidateSize();
+      mapRef.current.fitBounds(bounds);
+    }
+  }, [props.active, mapRef.current]);
 
   const EventHandler = () => {
     useMapEvents({

@@ -61,8 +61,6 @@ const colorToBase = (color, index) => index;
   const savedBuffer = await db.data.get('colors');
 
   if (savedBuffer) {
-    console.log(savedBuffer);
-
     const transferBuffer = new Uint8Array(savedBuffer.data);
     postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
       transferBuffer.buffer

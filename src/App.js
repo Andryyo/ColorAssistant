@@ -9,9 +9,9 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
 function App() {
-  const [selectedColor, setSelectedColor] = React.useState(null);
+  const [selectedColor, setSelectedColor] = React.useState('#ffffff');
   const [topColors, setTopColors] = React.useState([]);
-  const [selectedTab, setSelectedTab] = React.useState(1);
+  const [selectedTab, setSelectedTab] = React.useState(0);
 
   const [colorsWorker, setColorsWorker] = React.useState(null);
 
@@ -52,17 +52,21 @@ function App() {
             <Tab label="Color Wheel" />
             <Tab label="Picture" />
           </Tabs>
-          {selectedTab === 0 && (
-            <ColorSelector
-              onChange={(e) => setSelectedColor(e)}
-              topColors={topColors}
-            />
-          )}
-          {selectedTab === 1 && opencvWorker && (
+          <ColorSelector
+            onChange={(e) => setSelectedColor(e)}
+            selectedColor={selectedColor}
+            topColors={topColors}
+            style={selectedTab === 0 ? null : { display: 'none' }}
+            active={selectedTab === 0}
+          />
+          {opencvWorker && (
             <Picture
               onChange={(e) => setSelectedColor(e)}
+              selectedColor={selectedColor}
               topColors={topColors}
               worker={opencvWorker}
+              style={selectedTab === 1 ? null : { display: 'none' }}
+              active={selectedTab === 1}
             />
           )}
         </Card>

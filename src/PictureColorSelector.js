@@ -7,7 +7,6 @@ import MapColorSelector from 'MapColorSelector';
 import * as culori from 'culori';
 
 const Picture = (props) => {
-  const [selectedColor, setSelectedColor] = React.useState(null);
   const [selectedPosition, setSelectedPosition] = React.useState(null);
   const [colors, setColors] = React.useState([]);
   const [imgCanvas, setImgCanvas] = React.useState(null);
@@ -28,7 +27,6 @@ const Picture = (props) => {
       b: pixel.data[2] / 256
     };
 
-    setSelectedColor(culori.formatHex(newColor));
     setSelectedPosition({ x, y });
     if (props.onChange) {
       props.onChange(culori.lab65(newColor));
@@ -114,17 +112,17 @@ const Picture = (props) => {
 
   let markers = [];
 
-  if (selectedColor && selectedPosition) {
+  if (props.selectedColor && selectedPosition) {
     markers.push({
       x: selectedPosition.x,
       y: selectedPosition.y,
-      hex: selectedColor,
+      hex: culori.formatHex(props.selectedColor),
       selected: true
     });
   }
 
   return (
-    <div className="PictureContainer">
+    <div className="PictureContainer" style={props.style}>
       <div
         style={{
           flex: '1',
@@ -142,6 +140,7 @@ const Picture = (props) => {
           markers={markers}
           topColor={props.topColors && props.topColors[0]}
           boxzoomend={boxzoomend}
+          active={props.active}
         />
         <div className="ColorsContainer">
           {colors.map((c) => (
@@ -150,7 +149,6 @@ const Picture = (props) => {
               className="ColorCell"
               style={{ width: 'auto', height: 'auto', backgroundColor: c }}
               onClick={() => {
-                setSelectedColor(c);
                 if (props.onChange) {
                   props.onChange(culori.lab65(c));
                 }
@@ -174,9 +172,12 @@ const Picture = (props) => {
       />
       <div
         className="SelectedColor"
-        style={{ flex: '0 0 auto', backgroundColor: selectedColor }}
+        style={{
+          flex: '0 0 auto',
+          backgroundColor: culori.formatHex(props.selectedColor)
+        }}
       >
-        {selectedColor}
+        {culori.formatHex(props.selectedColor)}
       </div>
       <Button
         style={{ flex: '0 0 auto' }}
