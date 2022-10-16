@@ -34,10 +34,6 @@ const Picture = (props) => {
   };
 
   const transform = () => {
-    const data = imgCanvas
-      .getContext('2d')
-      .getImageData(0, 0, imgCanvas.width, imgCanvas.height);
-
     const ratio = imgCanvas.width / imgCanvas.height;
     const newCanvas = new OffscreenCanvas(300, 300 / ratio);
     const newCtx = newCanvas.getContext('2d');

@@ -14,6 +14,9 @@ const ColorTable = (props) => {
   const [colors, setColors] = React.useState(null);
 
   React.useEffect(() => {
+    if (!props.worker) {
+      return;
+    }
     props.worker.onmessage = (message) => {
       if (message.data.type === 'colorsUpdated') {
         try {
@@ -58,13 +61,13 @@ const ColorTable = (props) => {
   }, [props.worker]);
 
   React.useEffect(() => {
-    if (props.selectedColor) {
+    if (props.selectedColor && props.worker) {
       props.worker.postMessage({
         type: 'updateSelectedColor',
         selectedColor: props.selectedColor
       });
     }
-  }, [props.selectedColor]);
+  }, [props.worker, props.selectedColor]);
 
   const colorsWithDelta = React.useMemo(() => {
     const result = colors?.map((c) => {
