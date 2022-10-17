@@ -80,6 +80,7 @@ const ColorSelector = (props) => {
 
   const selectColor = (color) => {
     try {
+      setText(color);
       setValue(culori.hsv(color).v);
       if (props.onChange) {
         props.onChange(culori.lab65(color));
