@@ -175,10 +175,6 @@ const ColorTable = (props) => {
         sortable: true,
         filter: true,
         floatingFilter: true,
-        suppressMenu: true,
-        floatingFilterComponentParams: {
-          suppressFilterButton: true
-        },
         wrapText: true
       },
       {
@@ -192,11 +188,6 @@ const ColorTable = (props) => {
         headerName: 'Code',
         width: 200,
         filter: true,
-        floatingFilter: true,
-        suppressMenu: true,
-        floatingFilterComponentParams: {
-          suppressFilterButton: true
-        },
         cellRenderer: (props) => {
           if (props.value.collection === 'Mix') {
             return (
@@ -253,10 +244,6 @@ const ColorTable = (props) => {
         width: 75,
         filter: true,
         floatingFilter: true,
-        suppressMenu: true,
-        floatingFilterComponentParams: {
-          suppressFilterButton: true
-        },
         floatingFilterComponent: OwnedFloatingFilter,
         cellRenderer: (props) => {
           return (
@@ -303,6 +290,20 @@ const ColorTable = (props) => {
     }
   }, [colors, props.selectedColor]);
 
+  const updateTopColors = () => {
+    if (props.onTopColorsChange) {
+      let topColors = [];
+      tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
+        topColors.push(node.data);
+      });
+      props.onTopColorsChange(topColors);
+    }
+  };
+
+  React.useEffect(() => {
+    updateTopColors();
+  }, [colorsWithDelta]);
+
   return (
     <AgGridReact
       className="ag-theme-material"
@@ -311,9 +312,10 @@ const ColorTable = (props) => {
       rowHeight={75}
       onCellValueChanged={(e) => onCellValueChanged(e)}
       enableCellTextSelection={true}
-      rowModelType={'infinite'}
-      datasource={datasource}
-      onGridReady={(e) => e.api.showLoadingOverlay()}
+      rowData={colorsWithDelta}
+      getRowId={(r) => r.data.collection + ' ' + r.data.name + ' ' + r.data.hex}
+      onFilterChanged={updateTopColors}
+      onSortChanged={updateTopColors}
     />
   );
 };
