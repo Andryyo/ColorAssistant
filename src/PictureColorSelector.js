@@ -22,9 +22,9 @@ const Picture = (props) => {
 
     const newColor = {
       mode: 'rgb',
-      r: pixel.data[0] / 256,
-      g: pixel.data[1] / 256,
-      b: pixel.data[2] / 256
+      r: pixel.data[0] / 255,
+      g: pixel.data[1] / 255,
+      b: pixel.data[2] / 255
     };
 
     setSelectedPosition({ x, y });

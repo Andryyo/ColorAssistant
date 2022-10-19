@@ -11,7 +11,7 @@ const fastConvert = (H, S, V, n) => {
 };
 
 const ColorSelector = (props) => {
-  const [value, setValue] = React.useState(1);
+  const [value, setValue] = React.useState(100);
   const [text, setText] = React.useState('#ffffff');
   const [imgSrc, setImgSrc] = React.useState(null);
   const [imgCanvas, setImgCanvas] = React.useState(null);
@@ -28,9 +28,10 @@ const ColorSelector = (props) => {
       for (let y = 0; y < imageData.height; y++) {
         const offset = 4 * (y * imageData.width + x);
 
-        const dx = (((x - imageData.width / 2) / imageData.width) * 2) / value;
+        const dx =
+          (((x - imageData.width / 2) / imageData.width) * 2) / value * 100;
         const dy =
-          (((y - imageData.height / 2) / imageData.height) * 2) / value;
+          (((y - imageData.height / 2) / imageData.height) * 2) / value * 100;
         const saturation = Math.sqrt(dx * dx + dy * dy);
 
         if (saturation > 1) {
@@ -42,9 +43,9 @@ const ColorSelector = (props) => {
         }
 
         const hue = (-Math.atan2(dy, dx) * 180) / Math.PI;
-        data[offset] = fastConvert(hue, saturation, value, 5);
-        data[offset + 1] = fastConvert(hue, saturation, value, 3);
-        data[offset + 2] = fastConvert(hue, saturation, value, 1);
+        data[offset] = fastConvert(hue, saturation, value / 100, 5);
+        data[offset + 1] = fastConvert(hue, saturation, value / 100, 3);
+        data[offset + 2] = fastConvert(hue, saturation, value / 100, 1);
         data[offset + 3] = 255;
       }
 
@@ -56,7 +57,7 @@ const ColorSelector = (props) => {
 
   React.useEffect(() => {
     setText(culori.formatHex(props.selectedColor));
-    setValue(culori.hsv(props.selectedColor).v);
+    setValue(Math.round(culori.hsv(props.selectedColor).v * 100));
   }, [props.selectedColor]);
 
   const selectColorByPosition = (x, y) => {
@@ -69,9 +70,9 @@ const ColorSelector = (props) => {
 
     const newColor = culori.formatHex({
       mode: 'rgb',
-      r: pixel.data[0] / 256,
-      g: pixel.data[1] / 256,
-      b: pixel.data[2] / 256
+      r: pixel.data[0] / 255,
+      g: pixel.data[1] / 255,
+      b: pixel.data[2] / 255
     });
     if (props.onChange) {
       props.onChange(culori.lab65(newColor));
@@ -81,7 +82,7 @@ const ColorSelector = (props) => {
   const selectColor = (color) => {
     try {
       setText(color);
-      setValue(culori.hsv(color).v);
+      setValue(Math.round(culori.hsv(color).v));
       if (props.onChange) {
         props.onChange(culori.lab65(color));
       }
@@ -95,7 +96,7 @@ const ColorSelector = (props) => {
       mode: 'hsv',
       h: color.h || 0,
       s: color.s,
-      v: newValue
+      v: newValue / 100
     });
 
     setValue(newValue);
@@ -108,7 +109,7 @@ const ColorSelector = (props) => {
       mode: 'hsv',
       h: color.h || 0,
       s: color.s,
-      v: newValue
+      v: newValue / 100
     });
 
     setValue(newValue);
@@ -125,12 +126,12 @@ const ColorSelector = (props) => {
       const angle = (-(hsv.h || 0) / 180) * Math.PI;
       return {
         x:
-          ((Math.cos(angle) * hsv.s * imgCanvas.width) / 2) * value +
+          (((Math.cos(angle) * hsv.s * imgCanvas.width) / 2) * value) / 100 +
           imgCanvas.width / 2,
         y:
-          ((Math.sin(angle) * hsv.s * imgCanvas.height) / 2) * value +
+          (((Math.sin(angle) * hsv.s * imgCanvas.height) / 2) * value) / 100 +
           imgCanvas.height / 2,
-        value: hsv.v
+        value: hsv.v * 100
       };
     } catch (err) {
       return null;
@@ -188,8 +189,7 @@ const ColorSelector = (props) => {
           value={value}
           onChange={onValueChanging}
           onChangeCommitted={onValueChanged}
-          max={1}
-          step={0.01}
+          max={100}
         />
       </div>
       <input

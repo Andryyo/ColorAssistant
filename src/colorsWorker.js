@@ -129,9 +129,9 @@ self.onmessage = async (message) => {
           const mix = mixbox.lerp(colors[colorIndex].hex, c.hex, ratio);
           const code = culori.formatHex({
             mode: 'rgb',
-            r: mix[0] / 256,
-            g: mix[1] / 256,
-            b: mix[2] / 256
+            r: mix[0] / 255,
+            g: mix[1] / 255,
+            b: mix[2] / 255
           });
 
           const color = createColor(null, null, code, true);

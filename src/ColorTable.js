@@ -72,7 +72,7 @@ const ColorTable = (props) => {
   const colorsWithDelta = React.useMemo(() => {
     const result = colors?.map((c) => {
       const delta = props.selectedColor
-        ? Math.round(difference(c.color, props.selectedColor))
+        ? difference(c.color, props.selectedColor)
         : null;
       return { ...c, delta: delta };
     });
@@ -261,7 +261,7 @@ const ColorTable = (props) => {
       {
         field: 'delta',
         headerName: 'Delta',
-        width: 50,
+        width: 75,
         sortable: true,
         sort: 'asc',
         sortingOrder: ['asc']
