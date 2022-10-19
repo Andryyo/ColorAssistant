@@ -17,6 +17,7 @@
     "dexie": "^3.2.2",
     "dexie-react-hooks": "^1.1.1",
     "gh-pages": "^4.0.0",
+    "js-file-download": "^0.4.12",
     "leaflet": "^1.9.1",
     "mixbox": "^2.0.0",
     "prettier": "^2.7.1",

@@ -103,7 +103,14 @@ const colorToBase = (color, index) => index;
 })();
 
 self.onmessage = async (message) => {
-  if (message.data.type === 'updateOwned') {
+  if (message.data.type === 'getColors') {
+    const buffer = ColorsMessage.encode({ colors: colors }).finish();
+    await db.data.put({ id: 'colors', data: buffer });
+    const transferBuffer = new Uint8Array(buffer);
+    postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+      transferBuffer.buffer
+    ]);
+  } else if (message.data.type === 'updateOwned') {
     postMessage({ type: 'progressUpdate', value: 0 });
 
     const colorIndex = colors.findIndex(
@@ -112,6 +119,11 @@ self.onmessage = async (message) => {
         color.name === message.data.color.name &&
         color.hex === message.data.color.hex
     );
+
+    if (colors[colorIndex].owned === message.data.color.owned) {
+      postMessage({ type: 'progressUpdate', value: 100 });
+      return;
+    }
 
     colors[colorIndex].owned = message.data.color.owned;
 

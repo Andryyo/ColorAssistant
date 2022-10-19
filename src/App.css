@@ -40,7 +40,7 @@
 
 .ColorsContainer {
   margin: 1vw 1vw 1vw 1vw;
-  width: 20%;
+  width: auto;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;

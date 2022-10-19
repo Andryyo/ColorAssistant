@@ -5,72 +5,14 @@ import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from 'CollectionsFilter';
 import OwnedFloatingFilter from 'OwnedFloatingFilter';
 import * as culori from 'culori';
-import { ColorsMessage } from 'ColorsMessage';
 
 const difference = culori.differenceCiede2000();
 
 const ColorTable = (props) => {
   const tableRef = React.useRef(null);
-  const [colors, setColors] = React.useState(null);
-
-  React.useEffect(() => {
-    if (!props.worker) {
-      return;
-    }
-    props.worker.onmessage = (message) => {
-      if (message.data.type === 'colorsUpdated') {
-        try {
-          const rawColors = ColorsMessage.decode(message.data.data).colors;
-          const colors = rawColors.map((c) => {
-            if (c.bases?.length > 0) {
-              const ratios = [
-                { value: 0.25, name: '3 to 1' },
-                { value: 0.5, name: '1 to 1' },
-                { value: 0.75, name: '1 to 3' }
-              ];
-
-              const name =
-                rawColors[c.bases[0]].collection +
-                ' ' +
-                rawColors[c.bases[0]].name +
-                ' + ' +
-                rawColors[c.bases[1]].collection +
-                ' ' +
-                rawColors[c.bases[1]].name +
-                ' ' +
-                ratios.find((r) => r.value === c.ratio)?.name;
-
-              return { ...c, name: name, collection: 'Mix' };
-            } else {
-              return c;
-            }
-          });
-
-          setColors(colors);
-        } catch (err) {
-          console.log(err);
-        }
-      } else if (message.data.type === 'progressUpdate') {
-        if (message.data.value === 100) {
-          tableRef.current?.api?.hideOverlay();
-        } else {
-          tableRef.current?.api?.showLoadingOverlay();
-        }
-      }
-    };
-  }, [props.worker]);
-
-  React.useEffect(() => {
-    if (props.selectedColor && props.worker) {
-      props.worker.postMessage({
-        type: 'updateSelectedColor',
-        selectedColor: props.selectedColor
-      });
-    }
-  }, [props.worker, props.selectedColor]);
 
   const colorsWithDelta = React.useMemo(() => {
-    const result = colors?.map((c) => {
+    const result = props.colors?.map((c) => {
       const delta = props.selectedColor
         ? difference(c.color, props.selectedColor)
         : null;
@@ -78,13 +20,15 @@ const ColorTable = (props) => {
     });
 
     return result;
-  }, [colors, props.selectedColor]);
+  }, [props.colors, props.selectedColor]);
 
   React.useEffect(() => {
-    if (colorsWithDelta) {
+    if (props.loading) {
+      tableRef.current?.api?.showLoadingOverlay();
+    } else {
       tableRef.current?.api?.hideOverlay();
     }
-  }, [colorsWithDelta]);
+  }, [props.loading]);
 
   const collections = React.useMemo(() => {
     if (!colorsWithDelta) {
@@ -96,68 +40,6 @@ const ColorTable = (props) => {
     return result;
   }, [colorsWithDelta]);
 
-  const datasource = React.useMemo(() => {
-    return {
-      rowCount: colorsWithDelta?.length,
-      getRows: (params) => {
-        if (!colorsWithDelta) {
-          params.successCallback(null, 0);
-
-          return;
-        }
-
-        let result = colorsWithDelta.map((c) => c);
-
-        if (params.sortModel?.length > 0) {
-          result.sort(
-            (a, b) =>
-              a[params.sortModel[0].colId] - b[params.sortModel[0].colId]
-          );
-
-          if (params.sortModel[0].sort === 'desc') {
-            result.reverse();
-          }
-        }
-
-        for (const [name, filter] of Object.entries(params.filterModel)) {
-          switch (filter.filterType) {
-            case 'text':
-              result = result.filter((c) =>
-                c[name].toString().includes(filter.filter)
-              );
-              break;
-            case 'collection':
-              result = result.filter((c) => {
-                if (c.collection === 'Mix') {
-                  return (
-                    filter.filter.has(c.collection) &&
-                    c.bases.every((b) =>
-                      filter.filter.has(colors[b].collection)
-                    )
-                  );
-                } else {
-                  return filter.filter.has(c.collection);
-                }
-              });
-              break;
-          }
-        }
-
-        if (props.onTopColorsChange) {
-          const topColors = result.slice(0, 20).map((c) => {
-            return { ...c, bases: c.bases?.map((b) => colors[b]) };
-          });
-          props.onTopColorsChange(topColors);
-        }
-
-        params.successCallback(
-          result.slice(params.startRow, params.endRow),
-          result.length
-        );
-      }
-    };
-  }, [colorsWithDelta]);
-
   const columns = React.useMemo(
     () => [
       {
@@ -165,7 +47,7 @@ const ColorTable = (props) => {
         headerName: 'Collection',
         width: 100,
         filter: CollectionsFilter,
-        filterParams: { options: collections, colors: colors },
+        filterParams: { options: collections, colors: props.colors },
         wrapText: true
       },
       {
@@ -178,11 +60,11 @@ const ColorTable = (props) => {
         wrapText: true
       },
       {
-        valueGetter: (props) => {
+        valueGetter: (p) => {
           return {
-            collection: props.data?.collection,
-            color: props.data?.hex,
-            bases: props.data?.bases?.map((b) => colors[b])
+            collection: p.data?.collection,
+            color: p.data?.hex,
+            bases: p.data?.bases?.map((b) => props.colors[b])
           };
         },
         headerName: 'Code',
@@ -277,18 +159,10 @@ const ColorTable = (props) => {
   );
 
   const onCellValueChanged = (e) => {
-    props.worker.postMessage({
-      type: 'updateOwned',
-      color: e.data,
-      selectedColor: props.selectedColor
-    });
-  };
-
-  React.useEffect(() => {
-    if (colorsWithDelta && tableRef.current?.api) {
-      tableRef.current.api.purgeInfiniteCache();
+    if (props.updateOwned) {
+      props.updateOwned(e.data);
     }
-  }, [colors, props.selectedColor]);
+  };
 
   const updateTopColors = () => {
     if (props.onTopColorsChange) {

@@ -11,6 +11,7 @@ const Picture = (props) => {
   const [colors, setColors] = React.useState([]);
   const [imgCanvas, setImgCanvas] = React.useState(null);
   const [imgSrc, setImgSrc] = React.useState(null);
+  const fileInput = React.useRef(null);
 
   const selectColor = (x, y) => {
     const ctx = imgCanvas.getContext('2d');
@@ -160,11 +161,13 @@ const Picture = (props) => {
         type="url"
         onChange={(e) => loadImage(e.target.value)}
       />
+      <Button onClick={() => fileInput.current.click()}>Load picture</Button>
       <input
-        style={{ flex: '0 0 auto', width: '95%' }}
+        style={{ display: 'none' }}
         type="file"
         name="file"
         onChange={(e) => loadImage(URL.createObjectURL(e.target.files[0]))}
+        ref={fileInput}
       />
       <div
         className="SelectedColor"
