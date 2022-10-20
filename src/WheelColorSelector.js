@@ -29,9 +29,9 @@ const ColorSelector = (props) => {
         const offset = 4 * (y * imageData.width + x);
 
         const dx =
-          (((x - imageData.width / 2) / imageData.width) * 2) / value * 100;
+          ((((x - imageData.width / 2) / imageData.width) * 2) / value) * 100;
         const dy =
-          (((y - imageData.height / 2) / imageData.height) * 2) / value * 100;
+          ((((y - imageData.height / 2) / imageData.height) * 2) / value) * 100;
         const saturation = Math.sqrt(dx * dx + dy * dy);
 
         if (saturation > 1) {
@@ -146,7 +146,14 @@ const ColorSelector = (props) => {
       .map((c) => {
         const pos = colorToPosition(c.color);
         if (pos) {
-          return { x: pos.x, y: pos.y, ...c };
+          return {
+            x: pos.x,
+            y: pos.y,
+            ...c,
+            bases: c.bases?.map((b) => {
+              return { hex: props.colors[b].hex };
+            })
+          };
         } else {
           return null;
         }

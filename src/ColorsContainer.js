@@ -118,6 +118,7 @@ const ColorsContainer = () => {
       onChange={(e) => setSelectedColor(e)}
       selectedColor={selectedColor}
       topColors={topColors}
+      colors={colors}
       style={active ? null : { display: 'none' }}
       active={active}
     />
@@ -128,6 +129,7 @@ const ColorsContainer = () => {
       onChange={(e) => setSelectedColor(e)}
       selectedColor={selectedColor}
       topColors={topColors}
+      colors={colors}
       worker={opencvWorker}
       style={active ? null : { display: 'none' }}
       active={active}
