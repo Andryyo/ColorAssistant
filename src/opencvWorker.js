@@ -27,7 +27,7 @@ function kmeans(message) {
         sample.floatPtr(y + x * imageData.height)[z] =
           imageData.data[y * 4 + x * imageData.height * 4 + z];
 
-  var clusterCount = 16;
+  var clusterCount = 24;
   var labels = new cv.Mat();
   var attempts = 1;
   var centers = new cv.Mat();

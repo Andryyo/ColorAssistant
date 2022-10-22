@@ -120,44 +120,41 @@ const Picture = (props) => {
 
   return (
     <div className="PictureContainer" style={props.style}>
+      <MapColorSelector
+        style={{ display: 'flex', flex: '1', minHeight: 0, height: '100%' }}
+        src={imgSrc}
+        imgHeight={imgCanvas?.height}
+        imgWidth={imgCanvas?.width}
+        click={(e) => selectColor(e.x, e.y)}
+        markers={markers}
+        topColor={props.topColors && props.topColors[0]}
+        boxzoomend={boxzoomend}
+        active={props.active}
+      />
+      <div className="ColorsContainer">
+        {colors.map((c) => (
+          <div
+            key={c}
+            style={{ width: '5vmin', height: '5vmin', backgroundColor: c }}
+            onClick={() => {
+              if (props.onChange) {
+                props.onChange(culori.lab65(c));
+              }
+            }}
+          ></div>
+        ))}
+      </div>
       <div
+        className="SelectedColor"
         style={{
-          flex: '1',
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'row'
+          flex: '0 0 auto',
+          backgroundColor: culori.formatHex(props.selectedColor)
         }}
       >
-        <MapColorSelector
-          style={{ flex: '1', minHeight: 0, height: '100%' }}
-          src={imgSrc}
-          imgHeight={imgCanvas?.height}
-          imgWidth={imgCanvas?.width}
-          click={(e) => selectColor(e.x, e.y)}
-          markers={markers}
-          topColor={props.topColors && props.topColors[0]}
-          boxzoomend={boxzoomend}
-          active={props.active}
-        />
-        <div className="ColorsContainer">
-          {colors.map((c) => (
-            <div
-              key={c}
-              className="ColorCell"
-              style={{ width: 'auto', height: 'auto', backgroundColor: c }}
-              onClick={() => {
-                if (props.onChange) {
-                  props.onChange(culori.lab65(c));
-                }
-              }}
-            >
-              {c}
-            </div>
-          ))}
-        </div>
+        {culori.formatHex(props.selectedColor)}
       </div>
       <input
-        style={{ flex: '0 0 auto', width: '95%' }}
+        style={{ flex: '0 0 auto' }}
         type="url"
         onChange={(e) => loadImage(e.target.value)}
       />
@@ -169,15 +166,6 @@ const Picture = (props) => {
         onChange={(e) => loadImage(URL.createObjectURL(e.target.files[0]))}
         ref={fileInput}
       />
-      <div
-        className="SelectedColor"
-        style={{
-          flex: '0 0 auto',
-          backgroundColor: culori.formatHex(props.selectedColor)
-        }}
-      >
-        {culori.formatHex(props.selectedColor)}
-      </div>
       <Button
         style={{ flex: '0 0 auto' }}
         onClick={() => {

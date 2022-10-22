@@ -15,7 +15,7 @@
 }
 
 .MiniColorCell {
-  height: 75px;
+  height: 10vmin;
   width: 20%;
   display: flex;
   justify-content: center;
@@ -27,7 +27,7 @@
 }
 
 .ColorCell {
-  height: 75px;
+  height: 10vmin;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -39,26 +39,17 @@
 }
 
 .ColorsContainer {
-  margin: 1vw 1vw 1vw 1vw;
   width: auto;
   display: flex;
-  flex-direction: column;
   flex-wrap: wrap;
 }
 
-.Canvas {
-  margin: 1vw 1vw 1vw 1vw;
-  width: 90%;
-  height: 75%;
-}
-
 .SliderContainer {
-  margin: 1vw 1vw 1vw 1vw;
-  width: 90%;
+  width: 100%;
 }
 
 .SelectedColor {
-  width: 95%;
+  width: 100%;
   color: black;
   -webkit-text-stroke: 1px white;
   font-size: x-large;
@@ -67,8 +58,8 @@
 
 .PictureContainer {
   margin: 1vw 1vw 1vw 1vw;
-  height: 90%;
-  width: 100%;
+  height: 85%;
+  width: 95%;
   display: flex;
   flex-direction: column;
   align-items: left;
@@ -78,8 +69,8 @@
 
 .ColorWheelContainer {
   margin: 1vw 1vw 1vw 1vw;
-  height: 90%;
-  width: 100%;
+  height: 85%;
+  width: 95%;
   display: flex;
   flex-direction: column;
   align-items: left;

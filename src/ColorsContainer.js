@@ -145,16 +145,16 @@ const ColorsContainer = () => {
   );
 
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={1} sx={{ height: '100vh' }}>
       {width > breakpoint ? (
         <>
           <Grid item xs={8}>
-            <Card className="ColorTable" sx={{ p: 1, height: '90vh' }}>
+            <Card className="ColorTable" sx={{ p: 1, height: '95%' }}>
               {table(true)}
             </Card>
           </Grid>
           <Grid item xs={4}>
-            <Card className="ColorContainer" sx={{ p: 1, height: '90vh' }}>
+            <Card className="ColorContainer" sx={{ p: 1, height: '95%' }}>
               <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
                 <Tab label="Color Wheel" />
                 <Tab label="Picture" />
@@ -168,9 +168,14 @@ const ColorsContainer = () => {
         </>
       ) : (
         <>
-          <Grid item>
-            <Card className="ColorContainer" sx={{ p: 1, height: '90vh' }}>
-              <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
+          <Grid item sx={{ width: '100%', height: '100vh' }}>
+            <Card className="ColorContainer" sx={{ p: 1, height: '95%' }}>
+              <Tabs
+                value={selectedTab}
+                onChange={(e, v) => setSelectedTab(v)}
+                variant="scrollable"
+                scrollButtons="auto"
+              >
                 <Tab label="Colors" />
                 <Tab label="Color Wheel" />
                 <Tab label="Picture" />

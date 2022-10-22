@@ -179,7 +179,7 @@ const ColorSelector = (props) => {
   return (
     <div className="ColorWheelContainer" style={props.style}>
       <MapColorSelector
-        style={{ flex: '1', minHeight: 0, width: '90%' }}
+        style={{ flex: '1', minHeight: 0, width: '100%' }}
         src={imgSrc}
         imgHeight={imgCanvas?.height}
         imgWidth={imgCanvas?.width}
