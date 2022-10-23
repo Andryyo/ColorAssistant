@@ -8,15 +8,17 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Options from 'Options';
 import { ColorsMessage } from 'ColorsMessage';
+import Gallery from 'Gallery';
 
 const ColorsContainer = () => {
   const [selectedColor, setSelectedColor] = React.useState('#ffffff');
   const [topColors, setTopColors] = React.useState([]);
-  const [selectedTab, setSelectedTab] = React.useState(0);
+  const [selectedTab, setSelectedTab] = React.useState('colorWheel');
   const [colorsWorker, setColorsWorker] = React.useState(null);
   const [opencvWorker, setOpencvWorker] = React.useState(null);
   const [colors, setColors] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [selectedPicture, setSelectedPicture] = React.useState(null);
 
   function initColorsWorker() {
     const cw = new Worker(new URL('./colorsWorker.js', import.meta.url));
@@ -99,70 +101,100 @@ const ColorsContainer = () => {
     return () => window.removeEventListener('resize', handleWindowResize);
   }, []);
 
-  const table = (active) => (
-    <div
-      style={active ? { width: '100%', height: '100%' } : { display: 'none' }}
-    >
-      <ColorTable
+  const table = React.useMemo(
+    () => (
+      <div
+        style={
+          selectedTab === 'table' || width > breakpoint
+            ? { width: '100%', height: '100%' }
+            : { display: 'none' }
+        }
+      >
+        <ColorTable
+          selectedColor={selectedColor}
+          onTopColorsChange={(e) => setTopColors(e)}
+          loading={loading}
+          colors={colors}
+          updateOwned={updateOwned}
+        />
+      </div>
+    ),
+    [selectedColor, selectedTab, loading, colors, width]
+  );
+
+  const colorWheel = React.useMemo(
+    () => (
+      <ColorSelector
+        onChange={(e) => setSelectedColor(e)}
         selectedColor={selectedColor}
-        onTopColorsChange={(e) => setTopColors(e)}
-        loading={loading}
+        topColors={topColors}
+        colors={colors}
+        style={selectedTab === 'colorWheel' ? null : { display: 'none' }}
+        active={selectedTab === 'colorWheel'}
+      />
+    ),
+    [selectedColor, topColors, colors, selectedTab]
+  );
+
+  const picture = React.useMemo(
+    () => (
+      <Picture
+        onChange={(e) => setSelectedColor(e)}
+        selectedColor={selectedColor}
+        topColors={topColors}
+        colors={colors}
+        worker={opencvWorker}
+        style={selectedTab === 'picture' ? null : { display: 'none' }}
+        active={selectedTab === 'picture'}
+        src={selectedPicture}
+      />
+    ),
+    [selectedColor, topColors, colors, opencvWorker, selectedTab]
+  );
+
+  const options = React.useMemo(
+    () => (
+      <Options
+        style={selectedTab === 'options' ? null : { display: 'none' }}
         colors={colors}
         updateOwned={updateOwned}
       />
-    </div>
+    ),
+    [colors, selectedTab]
   );
 
-  const colorWheel = (active) => (
-    <ColorSelector
-      onChange={(e) => setSelectedColor(e)}
-      selectedColor={selectedColor}
-      topColors={topColors}
-      colors={colors}
-      style={active ? null : { display: 'none' }}
-      active={active}
-    />
-  );
-
-  const picture = (active) => (
-    <Picture
-      onChange={(e) => setSelectedColor(e)}
-      selectedColor={selectedColor}
-      topColors={topColors}
-      colors={colors}
-      worker={opencvWorker}
-      style={active ? null : { display: 'none' }}
-      active={active}
-    />
-  );
-
-  const options = (active) => (
-    <Options
-      style={active ? null : { display: 'none' }}
-      colors={colors}
-      updateOwned={updateOwned}
-    />
+  const gallery = React.useMemo(
+    () => (
+      <Gallery
+        style={selectedTab === 'gallery' ? null : { display: 'none' }}
+        selectPicture={(e) => {
+          setSelectedTab('picture');
+          setSelectedPicture(e);
+        }}
+      />
+    ),
+    [selectedTab]
   );
 
   return (
     <Grid container spacing={1} sx={{ height: '100vh' }}>
       {width > breakpoint ? (
         <>
-          <Grid item xs={8}>
-            <Card className="ColorTable" sx={{ p: 1, height: '95%' }}>
-              {table(true)}
-            </Card>
+          <Grid item xs={8} sx={{ p: 1, height: '100%' }}>
+            <Card className="ColorTable">{table}</Card>
           </Grid>
-          <Grid item xs={4}>
-            <Card className="ColorContainer" sx={{ p: 1, height: '95%' }}>
+          <Grid item xs={4} sx={{ p: 1, height: '100%' }}>
+            <Card className="ColorContainer">
               <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
-                <Tab label="Color Wheel" />
-                <Tab label="Picture" />
-                <Tab label="Options" />
+                <Tab label="Color Wheel" value="colorWheel" />
+                <Tab label="Picture" value="picture" />
+                <Tab label="Gallery" value="gallery" />
+                <Tab label="Options" value="options" />
               </Tabs>
-              {colorWheel(selectedTab === 0)}
-              {picture(selectedTab === 1)}
-              {options(selectedTab === 2)}
+              {colorWheel}
+              {picture}
+              {gallery}
+              {options}
             </Card>
           </Grid>
         </>
@@ -176,15 +208,17 @@ const ColorsContainer = () => {
                 variant="scrollable"
                 scrollButtons="auto"
               >
-                <Tab label="Colors" />
-                <Tab label="Color Wheel" />
-                <Tab label="Picture" />
-                <Tab label="Options" />
+                <Tab label="Colors" value="table" />
+                <Tab label="Color Wheel" value="colorWheel" />
+                <Tab label="Picture" value="picture" />
+                <Tab label="Gallery" value="gallery" />
+                <Tab label="Options" value="options" />
               </Tabs>
-              {table(selectedTab === 0)}
-              {colorWheel(selectedTab === 1)}
-              {picture(selectedTab === 2)}
-              {options(selectedTab === 3)}
+              {table}
+              {colorWheel}
+              {picture}
+              {gallery}
+              {options}
             </Card>
           </Grid>
         </>

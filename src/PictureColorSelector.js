@@ -3,8 +3,8 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import MapColorSelector from 'MapColorSelector';
-
 import * as culori from 'culori';
+import { db } from 'db';
 
 const Picture = (props) => {
   const [selectedPosition, setSelectedPosition] = React.useState(null);
@@ -67,6 +67,27 @@ const Picture = (props) => {
         setColors(colors);
       }
     };
+  };
+
+  React.useEffect(() => {
+    if (props.src) {
+      loadImage(URL.createObjectURL(props.src.data));
+    }
+  }, [props.src]);
+
+  const saveToGallery = async () => {
+    const ratio = imgCanvas.width / imgCanvas.height;
+    const newCanvas = new OffscreenCanvas(100, 100 / ratio);
+    const newCtx = newCanvas.getContext('2d');
+    newCtx.drawImage(imgCanvas, 0, 0, newCanvas.width, newCanvas.height);
+
+    const data = await imgCanvas.convertToBlob();
+    const preview = await newCanvas.convertToBlob();
+
+    db.gallery.add({
+      data: data,
+      preview: preview
+    });
   };
 
   const loadImage = (src) => {
@@ -158,22 +179,32 @@ const Picture = (props) => {
         type="url"
         onChange={(e) => loadImage(e.target.value)}
       />
-      <Button onClick={() => fileInput.current.click()}>Load picture</Button>
-      <input
-        style={{ display: 'none' }}
-        type="file"
-        name="file"
-        onChange={(e) => loadImage(URL.createObjectURL(e.target.files[0]))}
-        ref={fileInput}
-      />
-      <Button
-        style={{ flex: '0 0 auto' }}
-        onClick={() => {
-          transform();
-        }}
-      >
-        Transform
-      </Button>
+      <div style={{ display: 'flex' }}>
+        <Button onClick={() => fileInput.current.click()}>Load picture</Button>
+        <input
+          style={{ display: 'none' }}
+          type="file"
+          name="file"
+          onChange={(e) => loadImage(URL.createObjectURL(e.target.files[0]))}
+          ref={fileInput}
+        />
+        <Button
+          style={{ flex: '0 0 auto' }}
+          onClick={() => {
+            transform();
+          }}
+        >
+          Transform
+        </Button>
+        <Button
+          style={{ flex: '0 0 auto' }}
+          onClick={() => {
+            saveToGallery();
+          }}
+        >
+          Save
+        </Button>
+      </div>
     </div>
   );
 };

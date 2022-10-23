@@ -8,3 +8,8 @@ db.version(2).stores({
 db.version(3).stores({
   data: 'id'
 });
+
+db.version(4).stores({
+  data: 'id',
+  gallery: '++id'
+});
