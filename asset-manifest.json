@@ -1,21 +1,22 @@
 {
   "files": {
-    "main.css": "/ColorAssistant/static/css/main.d991d4e5.css",
-    "main.js": "/ColorAssistant/static/js/main.fa338878.js",
-    "static/js/38.b9255e5d.chunk.js": "/ColorAssistant/static/js/38.b9255e5d.chunk.js",
-    "static/js/528.b8e1a918.chunk.js": "/ColorAssistant/static/js/528.b8e1a918.chunk.js",
-    "static/js/893.f428e931.chunk.js": "/ColorAssistant/static/js/893.f428e931.chunk.js",
-    "static/js/227.f39429d5.chunk.js": "/ColorAssistant/static/js/227.f39429d5.chunk.js",
+    "main.css": "/ColorAssistant/static/css/main.2fa2c912.css",
+    "main.js": "/ColorAssistant/static/js/main.0d43f620.js",
+    "static/js/38.0cb35c5c.chunk.js": "/ColorAssistant/static/js/38.0cb35c5c.chunk.js",
+    "static/js/528.14aa860e.chunk.js": "/ColorAssistant/static/js/528.14aa860e.chunk.js",
+    "static/js/893.007344e1.chunk.js": "/ColorAssistant/static/js/893.007344e1.chunk.js",
+    "static/js/155.360fa694.chunk.js": "/ColorAssistant/static/js/155.360fa694.chunk.js",
+    "static/media/delete-icon.svg": "/ColorAssistant/static/media/delete-icon.04829cd512729628350dcf90b6bc747d.svg",
     "index.html": "/ColorAssistant/index.html",
-    "main.d991d4e5.css.map": "/ColorAssistant/static/css/main.d991d4e5.css.map",
-    "main.fa338878.js.map": "/ColorAssistant/static/js/main.fa338878.js.map",
-    "38.b9255e5d.chunk.js.map": "/ColorAssistant/static/js/38.b9255e5d.chunk.js.map",
-    "528.b8e1a918.chunk.js.map": "/ColorAssistant/static/js/528.b8e1a918.chunk.js.map",
-    "893.f428e931.chunk.js.map": "/ColorAssistant/static/js/893.f428e931.chunk.js.map",
-    "227.f39429d5.chunk.js.map": "/ColorAssistant/static/js/227.f39429d5.chunk.js.map"
+    "main.2fa2c912.css.map": "/ColorAssistant/static/css/main.2fa2c912.css.map",
+    "main.0d43f620.js.map": "/ColorAssistant/static/js/main.0d43f620.js.map",
+    "38.0cb35c5c.chunk.js.map": "/ColorAssistant/static/js/38.0cb35c5c.chunk.js.map",
+    "528.14aa860e.chunk.js.map": "/ColorAssistant/static/js/528.14aa860e.chunk.js.map",
+    "893.007344e1.chunk.js.map": "/ColorAssistant/static/js/893.007344e1.chunk.js.map",
+    "155.360fa694.chunk.js.map": "/ColorAssistant/static/js/155.360fa694.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.d991d4e5.css",
-    "static/js/main.fa338878.js"
+    "static/css/main.2fa2c912.css",
+    "static/js/main.0d43f620.js"
   ]
 }
