@@ -135,7 +135,7 @@ const Picture = (props) => {
         {colors.map((c) => (
           <div
             key={c}
-            style={{ width: '5vmin', height: '5vmin', backgroundColor: c }}
+            style={{ width: '8%', aspectRatio: '1 / 1', backgroundColor: c }}
             onClick={() => {
               if (props.onChange) {
                 props.onChange(culori.lab65(c));

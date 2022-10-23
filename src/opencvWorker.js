@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import cv from './opencv';
+import * as culori from 'culori';
 
 cv['onRuntimeInitialized'] = () => {
   console.log('Worker ready');
@@ -22,10 +23,18 @@ function kmeans(message) {
   let sample = new cv.Mat(imageData.height * imageData.width, 3, cv.CV_32F);
 
   for (var y = 0; y < imageData.height; y++)
-    for (var x = 0; x < imageData.width; x++)
-      for (var z = 0; z < 3; z++)
-        sample.floatPtr(y + x * imageData.height)[z] =
-          imageData.data[y * 4 + x * imageData.height * 4 + z];
+    for (var x = 0; x < imageData.width; x++) {
+      const offset = y * 4 + x * imageData.height * 4;
+      const color = culori.lab65({
+        mode: 'rgb',
+        r: imageData.data[offset] / 255,
+        g: imageData.data[offset + 1] / 255,
+        b: imageData.data[offset + 2] / 255
+      });
+      sample.floatPtr(y + x * imageData.height)[0] = color.l;
+      sample.floatPtr(y + x * imageData.height)[1] = color.a;
+      sample.floatPtr(y + x * imageData.height)[2] = color.b;
+    }
 
   var clusterCount = 24;
   var labels = new cv.Mat();
@@ -55,13 +64,16 @@ function kmeans(message) {
   for (y = 0; y < imageData.height; y++)
     for (x = 0; x < imageData.width; x++) {
       var cluster_idx = labels.intAt(y + x * imageData.height, 0);
-      const red = centers.floatAt(cluster_idx, 0);
-      const green = centers.floatAt(cluster_idx, 1);
-      const blue = centers.floatAt(cluster_idx, 2);
+      const color = culori.rgb({
+        mode: 'lab65',
+        l: centers.floatAt(cluster_idx, 0),
+        a: centers.floatAt(cluster_idx, 1),
+        b: centers.floatAt(cluster_idx, 2)
+      });
       const imageDataOffset = y * 4 + x * imageData.height * 4;
-      imageData.data[imageDataOffset + 0] = red;
-      imageData.data[imageDataOffset + 1] = green;
-      imageData.data[imageDataOffset + 2] = blue;
+      imageData.data[imageDataOffset + 0] = color.r * 255;
+      imageData.data[imageDataOffset + 1] = color.g * 255;
+      imageData.data[imageDataOffset + 2] = color.b * 255;
       //imageData.data[imageDataOffset + 3] = 255;
     }
 
@@ -70,10 +82,13 @@ function kmeans(message) {
   let colors = [];
 
   for (x = 0; x < centers.rows; x++) {
-    const R = centers.floatAt(x, 0);
-    const G = centers.floatAt(x, 1);
-    const B = centers.floatAt(x, 2);
-    colors.push({ mode: 'rgb', r: R / 255, g: G / 255, b: B / 255 });
+    const color = culori.rgb({
+      mode: 'lab65',
+      l: centers.floatAt(x, 0),
+      a: centers.floatAt(x, 1),
+      b: centers.floatAt(x, 2)
+    });
+    colors.push({ mode: 'rgb', r: color.r, g: color.g, b: color.b });
   }
 
   self.postMessage({ ...message.data, colors: colors });
