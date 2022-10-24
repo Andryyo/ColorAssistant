@@ -1,14 +1,15 @@
+// @ts-nocheck
 import React from 'react';
 import Card from '@mui/material/Card';
-import ColorTable from 'ColorTable';
-import ColorSelector from 'WheelColorSelector';
-import Picture from 'PictureColorSelector';
+import ColorTable from './ColorTable';
+import ColorSelector from './WheelColorSelector';
+import Picture from './PictureColorSelector';
 import Grid from '@mui/material/Grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Options from 'Options';
-import { ColorsMessage } from 'ColorsMessage';
-import Gallery from 'Gallery';
+import Options from './Options';
+import { ColorsMessage } from 'db/ColorsMessage';
+import Gallery from './Gallery';
 
 const ColorsContainer = () => {
   const [selectedColor, setSelectedColor] = React.useState('#ffffff');
@@ -21,7 +22,9 @@ const ColorsContainer = () => {
   const [selectedPicture, setSelectedPicture] = React.useState(null);
 
   function initColorsWorker() {
-    const cw = new Worker(new URL('./colorsWorker.js', import.meta.url));
+    const cw = new Worker(
+      new URL('../workers/colorsWorker.js', import.meta.url)
+    );
 
     cw.onmessage = (message) => {
       if (message.data.type === 'colorsUpdated') {
@@ -81,7 +84,9 @@ const ColorsContainer = () => {
 
     const cw = initColorsWorker();
 
-    const cvw = new Worker(new URL('./opencvWorker.js', import.meta.url));
+    const cvw = new Worker(
+      new URL('../workers/opencvWorker.js', import.meta.url)
+    );
     setOpencvWorker(cvw);
 
     return function cleanup() {

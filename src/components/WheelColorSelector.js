@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 
 import { Slider } from '@mui/material';
-import MapColorSelector from 'MapColorSelector';
+import MapColorSelector from './MapColorSelector';
 import React from 'react';
 import * as culori from 'culori';
 

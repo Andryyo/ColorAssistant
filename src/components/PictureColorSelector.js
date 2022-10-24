@@ -2,9 +2,9 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { Button } from '@mui/material';
-import MapColorSelector from 'MapColorSelector';
+import MapColorSelector from './MapColorSelector';
 import * as culori from 'culori';
-import { db } from 'db';
+import { db } from '../db/db';
 
 const Picture = (props) => {
   const [selectedPosition, setSelectedPosition] = React.useState(null);

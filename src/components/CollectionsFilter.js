@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import { Checkbox, FormControlLabel } from '@mui/material';

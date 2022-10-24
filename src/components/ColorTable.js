@@ -2,8 +2,8 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import CollectionsFilter from 'CollectionsFilter';
-import OwnedFloatingFilter from 'OwnedFloatingFilter';
+import CollectionsFilter from './CollectionsFilter';
+import OwnedFloatingFilter from './OwnedFloatingFilter';
 import * as culori from 'culori';
 
 const difference = culori.differenceCiede2000();

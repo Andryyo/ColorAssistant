@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
-import { db } from 'db';
+import { db } from '../db/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Icon, IconButton } from '@mui/material';
-import deleteIcon from './delete-icon.svg';
+import deleteIcon from '../assets/delete-icon.svg';
 
 const Gallery = (props) => {
   const images = useLiveQuery(() => db.gallery.toArray());

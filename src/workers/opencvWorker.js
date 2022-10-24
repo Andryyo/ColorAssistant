@@ -1,5 +1,6 @@
+// @ts-nocheck
 /* eslint-disable no-undef */
-import cv from './opencv';
+import cv from '../imports/opencv';
 import * as culori from 'culori';
 
 cv['onRuntimeInitialized'] = () => {

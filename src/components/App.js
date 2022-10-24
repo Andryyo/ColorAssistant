@@ -1,6 +1,6 @@
-import './App.css';
+import '../assets/App.css';
 import React from 'react';
-import ColorsContainer from 'ColorsContainer';
+import ColorsContainer from './ColorsContainer';
 
 function App() {
   return <ColorsContainer />;
