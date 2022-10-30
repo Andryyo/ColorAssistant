@@ -20,6 +20,8 @@ const ColorsContainer = () => {
   const [colors, setColors] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [selectedPicture, setSelectedPicture] = React.useState(null);
+  const [transformationColorsNumber, setTransformationColorsNumber] =
+    React.useState(16);
 
   function initColorsWorker() {
     const cw = new Worker(
@@ -106,6 +108,15 @@ const ColorsContainer = () => {
     return () => window.removeEventListener('resize', handleWindowResize);
   }, []);
 
+  React.useEffect(() => {
+    if (opencvWorker) {
+      opencvWorker.postMessage({
+        type: 'setTransformationColorsNumber',
+        value: transformationColorsNumber
+      });
+    }
+  }, [transformationColorsNumber, opencvWorker]);
+
   const table = React.useMemo(
     () => (
       <div
@@ -163,6 +174,9 @@ const ColorsContainer = () => {
         style={selectedTab === 'options' ? null : { display: 'none' }}
         colors={colors}
         updateOwned={updateOwned}
+        transformationColorsNumberChanged={(v) =>
+          setTransformationColorsNumber(v)
+        }
       />
     ),
     [colors, selectedTab]

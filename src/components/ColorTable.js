@@ -103,24 +103,6 @@ const ColorTable = (props) => {
         }
       },
       {
-        field: 'H',
-        headerName: 'Hue',
-        width: 75,
-        sortable: true
-      },
-      {
-        field: 'S',
-        headerName: 'Saturation',
-        width: 75,
-        sortable: true
-      },
-      {
-        field: 'V',
-        headerName: 'Value',
-        width: 75,
-        sortable: true
-      },
-      {
         field: 'owned',
         headerName: 'Owned',
         width: 75,
@@ -150,9 +132,27 @@ const ColorTable = (props) => {
       },
       {
         field: 'minDelta',
-        headerName: 'Min Delta',
+        headerName: 'Missing in collection',
         width: 50,
         sortable: true
+      },
+      {
+        headerName: 'L',
+        width: 75,
+        sortable: true,
+        valueGetter: (p) => p.data?.color.l
+      },
+      {
+        headerName: 'a',
+        width: 75,
+        sortable: true,
+        valueGetter: (p) => p.data?.color.a
+      },
+      {
+        headerName: 'b',
+        width: 75,
+        sortable: true,
+        valueGetter: (p) => p.data?.color.b
       }
     ],
     [collections]

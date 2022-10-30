@@ -9,9 +9,13 @@ cv['onRuntimeInitialized'] = () => {
 
 console.log('Loaded worker');
 
+let transformationColorsNumber = 16;
+
 self.onmessage = (message) => {
   if (message.data.type === 'kmeans') {
     kmeans(message);
+  } else if (message.data.type === 'setTransformationColorsNumber') {
+    transformationColorsNumber = message.data.value;
   }
 };
 
@@ -37,7 +41,6 @@ function kmeans(message) {
       sample.floatPtr(y + x * imageData.height)[2] = color.b;
     }
 
-  var clusterCount = 24;
   var labels = new cv.Mat();
   var attempts = 1;
   var centers = new cv.Mat();
@@ -52,7 +55,7 @@ function kmeans(message) {
 
   cv.kmeans(
     sample,
-    clusterCount,
+    transformationColorsNumber,
     labels,
     crite,
     attempts,
@@ -61,6 +64,11 @@ function kmeans(message) {
   );
 
   console.log(performance.now() - startTime, 'Completed k-means');
+
+  let centersWeight = [];
+  for (x = 0; x < centers.rows; x++) {
+    centersWeight.push(0);
+  }
 
   for (y = 0; y < imageData.height; y++)
     for (x = 0; x < imageData.width; x++) {
@@ -76,6 +84,8 @@ function kmeans(message) {
       imageData.data[imageDataOffset + 1] = color.g * 255;
       imageData.data[imageDataOffset + 2] = color.b * 255;
       //imageData.data[imageDataOffset + 3] = 255;
+
+      centersWeight[cluster_idx]++;
     }
 
   console.log(performance.now() - startTime, 'Posting result');
@@ -89,7 +99,10 @@ function kmeans(message) {
       a: centers.floatAt(x, 1),
       b: centers.floatAt(x, 2)
     });
-    colors.push({ mode: 'rgb', r: color.r, g: color.g, b: color.b });
+    colors.push({
+      color: { mode: 'rgb', r: color.r, g: color.g, b: color.b },
+      weight: centersWeight[x]
+    });
   }
 
   self.postMessage({ ...message.data, colors: colors });

@@ -1,10 +1,15 @@
 /* eslint-disable react/prop-types */
-import { Box, Button } from '@mui/material';
+import { Box, Button, Slider } from '@mui/material';
 import fileDownload from 'js-file-download';
 import React from 'react';
 
 const Options = (props) => {
   const fileInput = React.useRef(null);
+  const [transformationColorsNumber, setTransformationColorsNumber] =
+    React.useState(
+      () =>
+        parseInt(localStorage.getItem('transformationColorsNumber'), 10) || 16
+    );
 
   const onExport = () => {
     const data = JSON.stringify(
@@ -37,6 +42,17 @@ const Options = (props) => {
     };
   };
 
+  React.useEffect(() => {
+    if (props.transformationColorsNumberChanged) {
+      props.transformationColorsNumberChanged(transformationColorsNumber);
+    }
+  }, [transformationColorsNumber]);
+
+  const transformationColorsNumberChanged = (v) => {
+    localStorage.setItem('transformationColorsNumber', v);
+    setTransformationColorsNumber(v);
+  };
+
   return (
     <Box style={props.style} sx={{ display: 'flex', flexDirection: 'column' }}>
       <input
@@ -49,6 +65,15 @@ const Options = (props) => {
         Import owned colors
       </Button>
       <Button onClick={onExport}>Export owned colors</Button>
+      Palette size
+      <Slider
+        sx={{ mr: 2, ml: 2, width: 'auto' }}
+        value={transformationColorsNumber}
+        min={2}
+        max={32}
+        marks
+        onChange={(e, value) => transformationColorsNumberChanged(value)}
+      />
     </Box>
   );
 };

@@ -59,11 +59,19 @@ const Picture = (props) => {
           .convertToBlob()
           .then((blob) => setImgSrc(URL.createObjectURL(blob)));
 
-        let colors = message.data.colors.map((c) => culori.formatHex(c));
+        const map = new Map();
+        message.data.colors.forEach((item) => {
+          const key = culori.formatHex(item.color);
+          const existing = map.get(key);
+          if (!existing) {
+            map.set(key, { color: key, weight: item.weight });
+          } else {
+            existing.weight += item.weight;
+          }
+        });
 
-        colors = [...new Set(colors)];
-
-        colors.sort((a, b) => culori.hsv(b).h - culori.hsv(a).h);
+        const colors = Array.from(map.values());
+        colors.sort((a, b) => culori.hsv(b.color).h - culori.hsv(a.color).h);
         setColors(colors);
       }
     };
@@ -155,11 +163,15 @@ const Picture = (props) => {
       <div className="ColorsContainer">
         {colors.map((c) => (
           <div
-            key={c}
-            style={{ width: '8%', aspectRatio: '1 / 1', backgroundColor: c }}
+            key={c.color}
+            style={{
+              height: '5vmin',
+              backgroundColor: c.color,
+              flexGrow: c.weight
+            }}
             onClick={() => {
               if (props.onChange) {
-                props.onChange(culori.lab65(c));
+                props.onChange(culori.lab65(c.color));
               }
             }}
           ></div>
