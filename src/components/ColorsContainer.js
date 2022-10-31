@@ -51,7 +51,12 @@ const ColorsContainer = () => {
                 ' ' +
                 ratios.find((r) => r.value === c.ratio)?.name;
 
-              return { ...c, name: name, collection: 'Mix' };
+              return {
+                ...c,
+                name: name,
+                collection: 'Mix',
+                bases: [rawColors[c.bases[0]], rawColors[c.bases[1]]]
+              };
             } else {
               return c;
             }

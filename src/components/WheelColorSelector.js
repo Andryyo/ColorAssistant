@@ -149,10 +149,7 @@ const ColorSelector = (props) => {
           return {
             x: pos.x,
             y: pos.y,
-            ...c,
-            bases: c.bases?.map((b) => {
-              return { hex: props.colors[b].hex };
-            })
+            ...c
           };
         } else {
           return null;

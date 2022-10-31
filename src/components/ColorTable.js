@@ -64,7 +64,7 @@ const ColorTable = (props) => {
           return {
             collection: p.data?.collection,
             color: p.data?.hex,
-            bases: p.data?.bases?.map((b) => props.colors[b])
+            bases: p.data?.bases
           };
         },
         headerName: 'Code',

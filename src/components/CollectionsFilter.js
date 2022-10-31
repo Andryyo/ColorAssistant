@@ -19,9 +19,7 @@ export default forwardRef((props, ref) => {
         return (
           collections.has(params.data.collection) &&
           (params.data.collection !== 'Mix' ||
-            params.data.bases.every((b) =>
-              collections.has(props.colors[b].collection)
-            ))
+            params.data.bases.every((b) => collections.has(b.collection)))
         );
       },
 
