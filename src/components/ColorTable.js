@@ -143,16 +143,11 @@ const ColorTable = (props) => {
         valueGetter: (p) => p.data?.color.l
       },
       {
-        headerName: 'a',
+        headerName: 'Saturation',
         width: 75,
         sortable: true,
-        valueGetter: (p) => p.data?.color.a
-      },
-      {
-        headerName: 'b',
-        width: 75,
-        sortable: true,
-        valueGetter: (p) => p.data?.color.b
+        valueGetter: (p) =>
+          p.data?.color && Math.hypot(p.data.color.a, p.data.color.b)
       }
     ],
     [collections]
