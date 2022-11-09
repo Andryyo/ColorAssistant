@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Box, Button, Slider } from '@mui/material';
+import { Box, Button, Slider, TextField } from '@mui/material';
 import fileDownload from 'js-file-download';
 import React from 'react';
 
@@ -74,6 +74,20 @@ const Options = (props) => {
         marks
         onChange={(e, value) => transformationColorsNumberChanged(value)}
       />
+      <Box>
+        <TextField
+          label="Close mix coefficient"
+          value={props.deltaOptions.closeMix}
+          onChange={(e) => {
+            if (props.deltaOptionsChanged) {
+              props.deltaOptionsChanged({
+                ...props.deltaOptions,
+                closeMix: e.target.value
+              });
+            }
+          }}
+        />
+      </Box>
     </Box>
   );
 };

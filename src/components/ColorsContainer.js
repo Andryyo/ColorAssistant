@@ -22,6 +22,7 @@ const ColorsContainer = () => {
   const [selectedPicture, setSelectedPicture] = React.useState(null);
   const [transformationColorsNumber, setTransformationColorsNumber] =
     React.useState(16);
+  const [deltaOptions, setDeltaOptions] = React.useState({ closeMix: 0.1 });
 
   function initColorsWorker() {
     const cw = new Worker(
@@ -137,10 +138,11 @@ const ColorsContainer = () => {
           loading={loading}
           colors={colors}
           updateOwned={updateOwned}
+          deltaOptions={deltaOptions}
         />
       </div>
     ),
-    [selectedColor, selectedTab, loading, colors, width]
+    [selectedColor, selectedTab, loading, colors, width, deltaOptions]
   );
 
   const colorWheel = React.useMemo(
@@ -182,9 +184,11 @@ const ColorsContainer = () => {
         transformationColorsNumberChanged={(v) =>
           setTransformationColorsNumber(v)
         }
+        deltaOptions={deltaOptions}
+        deltaOptionsChanged={(o) => setDeltaOptions(o)}
       />
     ),
-    [colors, selectedTab]
+    [colors, selectedTab, deltaOptions]
   );
 
   const gallery = React.useMemo(

@@ -16,11 +16,19 @@ const ColorTable = (props) => {
       const delta = props.selectedColor
         ? difference(c.color, props.selectedColor)
         : null;
-      return { ...c, delta: delta };
+      let adjustedDelta = delta;
+      if (props.deltaOptions) {
+        let basesDiff = 0;
+        if (c.bases?.length > 0) {
+          basesDiff = difference(c.bases[0].color, c.bases[1].color);
+        }
+        adjustedDelta = delta + props.deltaOptions.closeMix * basesDiff;
+      }
+      return { ...c, delta: delta, adjustedDelta: adjustedDelta };
     });
 
     return result;
-  }, [props.colors, props.selectedColor]);
+  }, [props.colors, props.selectedColor, props.deltaOptions]);
 
   React.useEffect(() => {
     if (props.loading) {
@@ -125,6 +133,13 @@ const ColorTable = (props) => {
       {
         field: 'delta',
         headerName: 'Delta',
+        width: 75,
+        sortable: true,
+        sortingOrder: ['asc']
+      },
+      {
+        field: 'adjustedDelta',
+        headerName: 'Adjusted Delta',
         width: 75,
         sortable: true,
         sort: 'asc',
