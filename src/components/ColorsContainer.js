@@ -4,6 +4,7 @@ import Card from '@mui/material/Card';
 import ColorTable from './ColorTable';
 import ColorSelector from './WheelColorSelector';
 import Picture from './PictureColorSelector';
+import SelectedColor from './SelectedColor';
 import Grid from '@mui/material/Grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -22,7 +23,9 @@ const ColorsContainer = () => {
   const [selectedPicture, setSelectedPicture] = React.useState(null);
   const [transformationColorsNumber, setTransformationColorsNumber] =
     React.useState(16);
-  const [deltaOptions, setDeltaOptions] = React.useState({ closeMix: 0.1 });
+  const [deltaOptions, setDeltaOptions] = React.useState({
+    farMixPenalty: 0.1
+  });
 
   function initColorsWorker() {
     const cw = new Worker(
@@ -209,36 +212,86 @@ const ColorsContainer = () => {
   );
 
   return (
-    <Grid container spacing={1} sx={{ height: '100vh' }}>
+    <Grid container sx={{ height: '100vh' }}>
       {width > breakpoint ? (
         <>
-          <Grid item xs={8} sx={{ p: 1, height: '100%' }}>
-            <Card className="ColorTable">{table}</Card>
-          </Grid>
-          <Grid item xs={4} sx={{ p: 1, height: '100%' }}>
-            <Card className="ColorContainer">
-              <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
-                <Tab label="Color Wheel" value="colorWheel" />
-                <Tab label="Picture" value="picture" />
-                <Tab label="Gallery" value="gallery" />
-                <Tab label="Options" value="options" />
-              </Tabs>
-              {colorWheel}
-              {picture}
-              {gallery}
-              {options}
+          <Grid item xs={8} sx={{ p: 1, flexGrow: '1', display: 'flex' }}>
+            <Card
+              className="ColorTable"
+              sx={{ display: 'flex', flexGrow: '1' }}
+            >
+              {table}
             </Card>
+          </Grid>
+          <Grid
+            container
+            direction="column"
+            item
+            xs={4}
+            sx={{ p: 1 }}
+            spacing={1}
+          >
+            <Grid
+              item
+              sx={{ flexGrow: '1', display: 'flex', flexDirection: 'column' }}
+            >
+              <Card
+                sx={{
+                  p: 1,
+                  flexGrow: '1',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <Tabs
+                  value={selectedTab}
+                  onChange={(e, v) => setSelectedTab(v)}
+                >
+                  <Tab label="Color Wheel" value="colorWheel" />
+                  <Tab label="Picture" value="picture" />
+                  <Tab label="Gallery" value="gallery" />
+                  <Tab label="Options" value="options" />
+                </Tabs>
+                {colorWheel}
+                {picture}
+                {gallery}
+                {options}
+              </Card>
+            </Grid>
+            <Grid item>
+              <Card sx={{ p: 1 }}>
+                <SelectedColor
+                  onChange={(e) => setSelectedColor(e)}
+                  selectedColor={selectedColor}
+                />
+              </Card>
+            </Grid>
           </Grid>
         </>
       ) : (
         <>
-          <Grid item sx={{ width: '100%', height: '100vh' }}>
-            <Card className="ColorContainer" sx={{ p: 1, height: '95%' }}>
+          <Grid
+            container
+            item
+            direction="column"
+            xs={true}
+            sx={{ height: '100vh', alignItems: 'stretch' }}
+          >
+            <Card
+              sx={{
+                p: 1,
+                m: 1,
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
               <Tabs
                 value={selectedTab}
                 onChange={(e, v) => setSelectedTab(v)}
                 variant="scrollable"
                 scrollButtons="auto"
+                sx={{ width: '90vw' }}
               >
                 <Tab label="Colors" value="table" />
                 <Tab label="Color Wheel" value="colorWheel" />
@@ -251,6 +304,12 @@ const ColorsContainer = () => {
               {picture}
               {gallery}
               {options}
+            </Card>
+            <Card sx={{ p: 1, m: 1 }}>
+              <SelectedColor
+                onChange={(e) => setSelectedColor(e)}
+                selectedColor={selectedColor}
+              />
             </Card>
           </Grid>
         </>

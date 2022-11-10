@@ -177,15 +177,6 @@ const Picture = (props) => {
           ></div>
         ))}
       </div>
-      <div
-        className="SelectedColor"
-        style={{
-          flex: '0 0 auto',
-          backgroundColor: culori.formatHex(props.selectedColor)
-        }}
-      >
-        {culori.formatHex(props.selectedColor)}
-      </div>
       <input
         style={{ flex: '0 0 auto' }}
         type="url"

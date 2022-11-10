@@ -22,7 +22,7 @@ const ColorTable = (props) => {
         if (c.bases?.length > 0) {
           basesDiff = difference(c.bases[0].color, c.bases[1].color);
         }
-        adjustedDelta = delta + props.deltaOptions.closeMix * basesDiff;
+        adjustedDelta = delta + props.deltaOptions.farMixPenalty * basesDiff;
       }
       return { ...c, delta: delta, adjustedDelta: adjustedDelta };
     });

@@ -12,7 +12,6 @@ const fastConvert = (H, S, V, n) => {
 
 const ColorSelector = (props) => {
   const [value, setValue] = React.useState(100);
-  const [text, setText] = React.useState('#ffffff');
   const [imgSrc, setImgSrc] = React.useState(null);
   const [imgCanvas, setImgCanvas] = React.useState(null);
 
@@ -56,7 +55,6 @@ const ColorSelector = (props) => {
   }, [value]);
 
   React.useEffect(() => {
-    setText(culori.formatHex(props.selectedColor));
     setValue(Math.round(culori.hsv(props.selectedColor).v * 100));
   }, [props.selectedColor]);
 
@@ -81,7 +79,6 @@ const ColorSelector = (props) => {
 
   const selectColor = (color) => {
     try {
-      setText(color);
       setValue(Math.round(culori.hsv(color).v));
       if (props.onChange) {
         props.onChange(culori.lab65(color));
@@ -91,16 +88,15 @@ const ColorSelector = (props) => {
   };
 
   const onValueChanging = (event, newValue) => {
-    const color = culori.hsv(props.selectedColor);
+    /*const color = culori.hsv(props.selectedColor);
     const newColor = culori.formatHex({
       mode: 'hsv',
       h: color.h || 0,
       s: color.s,
       v: newValue / 100
-    });
+    });*/
 
     setValue(newValue);
-    setText(newColor);
   };
 
   const onValueChanged = (event, newValue) => {
@@ -196,13 +192,6 @@ const ColorSelector = (props) => {
           max={100}
         />
       </div>
-      <input
-        type="text"
-        className="SelectedColor"
-        style={{ backgroundColor: culori.formatHex(props.selectedColor) }}
-        value={text}
-        onChange={(e) => selectColor(e.target.value)}
-      />
     </div>
   );
 };
