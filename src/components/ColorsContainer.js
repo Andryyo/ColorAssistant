@@ -52,11 +52,15 @@ const ColorsContainer = () => {
                 ' ' +
                 ratios.find((r) => r.value === c.ratio)?.name;
 
+              const bases = [rawColors[c.bases[0]], rawColors[c.bases[1]]];
+
+              bases.sort((a, b) => a.color.l - b.color.l);
+
               return {
                 ...c,
                 name: name,
                 collection: 'Mix',
-                bases: [rawColors[c.bases[0]], rawColors[c.bases[1]]]
+                bases: bases
               };
             } else {
               return c;
