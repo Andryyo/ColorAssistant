@@ -7,6 +7,7 @@
     "./build/**/*"
   ],
   "compilerOptions": {
+    "outDir": "./build",
     "baseUrl": "./src",
     "esModuleInterop": true,
     "jsx": "react",
