@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Options from './Options';
-import { ColorsMessage } from 'db/ColorsMessage';
+import { ColorsMessage } from '../db/ColorsMessage';
 import Gallery from './Gallery';
 
 const ColorsContainer = () => {

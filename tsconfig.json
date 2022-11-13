@@ -1,8 +1,16 @@
 {
-    "compilerOptions": {
-      "baseUrl": "./src",
-      "esModuleInterop": true,
-      "jsx": "react"
-    }
+  "include": [
+    ".eslintrc.js",
+    "./src/**/*"
+  ],
+  "exclude": [
+    "./build/**/*"
+  ],
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "allowJs": true
   }
+}
   

@@ -5,7 +5,7 @@ import armyPainter from '../data/ArmyPainter';
 import mixbox from 'mixbox';
 import { db } from '../db/db';
 import * as culori from 'culori';
-import { ColorsMessage } from 'db/ColorsMessage';
+import { ColorsMessage } from '../db/ColorsMessage';
 
 const difference = culori.differenceCiede2000();
 

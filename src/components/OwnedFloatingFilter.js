@@ -11,8 +11,6 @@ export default forwardRef((props, ref) => {
   const [ownedOnly, setOwnedOnly] = useState(false);
 
   // expose AG Grid Filter Lifecycle callbacks
-  useImperativeHandle(ref, () => {});
-
   useEffect(() => {
     if (ownedOnly) {
       props.parentFilterInstance((instance) => {
