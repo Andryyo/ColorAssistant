@@ -11,7 +11,7 @@ console.log('Loaded worker');
 
 let transformationColorsNumber = 16;
 
-self.onmessage = (message) => {
+onmessage = (message) => {
   if (message.data.type === 'kmeans') {
     kmeans(message);
   } else if (message.data.type === 'setTransformationColorsNumber') {
@@ -105,5 +105,5 @@ function kmeans(message) {
     });
   }
 
-  self.postMessage({ ...message.data, colors: colors });
+  postMessage({ ...message.data, colors: colors });
 }

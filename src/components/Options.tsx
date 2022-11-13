@@ -3,7 +3,7 @@ import { Box, Button, Slider } from '@mui/material';
 import fileDownload from 'js-file-download';
 import React from 'react';
 
-const Options = (props) => {
+const Options = (props: any) => {
   const fileInput = React.useRef(null);
   const [transformationColorsNumber, setTransformationColorsNumber] =
     React.useState(
@@ -21,11 +21,8 @@ const Options = (props) => {
     fileDownload(data, 'ColorAssistantExport.json');
   };
 
-  const onImport = (e) => {
-    const fileReader = new FileReader();
-    fileReader.readAsText(e.target.files[0], 'UTF-8');
-    fileReader.onload = (e) => {
-      const data = JSON.parse(e.target.result);
+  const onFileLoad = (value: string) => {
+    const data = JSON.parse(value);
       for (const entry of data) {
         const color = props.colors
           .filter((c) => !c.bases || c.bases.length === 0)
@@ -39,7 +36,12 @@ const Options = (props) => {
           props.updateOwned(color);
         }
       }
-    };
+  };
+
+  const onImport = (e) => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(e.target.files[0], 'UTF-8');
+    fileReader.onload = (e) => onFileLoad(e.target.result as string);
   };
 
   React.useEffect(() => {

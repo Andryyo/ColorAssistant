@@ -4,7 +4,7 @@ import vallejoModel from '../data/VallejoModel';
 import citadel from '../data/Citadel';
 import armyPainter from '../data/ArmyPainter';
 import mixbox from 'mixbox';
-import { db } from '../db/db.js';
+import { db } from '../db/db';
 import * as culori from 'culori';
 import { ColorsMessage } from 'db/ColorsMessage';
 
