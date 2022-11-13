@@ -17,7 +17,7 @@ const SelectedColor = (props) => {
 
   React.useEffect(() => {
     setText(culori.formatHex(props.selectedColor));
-  }, [props.selecteColor]);
+  }, [props.selectedColor]);
 
   return (
     <input

@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable react/display-name */
 import { Checkbox, FormControlLabel } from '@mui/material';
 import React, {
   forwardRef,
@@ -24,7 +23,7 @@ export default forwardRef((props, ref) => {
         instance.onFloatingFilterChanged(null, null);
       });
     }
-  }, [ownedOnly]);
+  }, [ownedOnly, props]);
 
   return (
     <React.Fragment>
@@ -33,7 +32,7 @@ export default forwardRef((props, ref) => {
           <Checkbox
             checked={ownedOnly}
             onChange={(e) => {
-                setOwnedOnly(e.target.checked);
+              setOwnedOnly(e.target.checked);
             }}
           />
         }

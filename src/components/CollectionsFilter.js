@@ -1,6 +1,4 @@
-// @ts-nocheck
 /* eslint-disable react/prop-types */
-/* eslint-disable react/display-name */
 import { Checkbox, FormControlLabel } from '@mui/material';
 import React, {
   forwardRef,
@@ -24,7 +22,7 @@ export default forwardRef((props, ref) => {
       },
 
       isFilterActive() {
-        return collections.size != props.options.size;
+        return collections.size !== props.options.size;
       },
 
       getModel() {
@@ -35,7 +33,7 @@ export default forwardRef((props, ref) => {
 
   useEffect(() => {
     props.filterChangedCallback();
-  }, [collections]);
+  }, [props, collections]);
 
   return (
     <div
@@ -48,7 +46,7 @@ export default forwardRef((props, ref) => {
       <FormControlLabel
         control={
           <Checkbox
-            checked={collections.size == props.options.size}
+            checked={collections.size === props.options.size}
             onChange={(e) => {
               if (e.target.checked) {
                 setCollections(props.options);

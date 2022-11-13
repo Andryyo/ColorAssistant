@@ -1,5 +1,3 @@
-// @ts-nocheck
-/* eslint-disable no-undef */
 import cv from '../imports/opencv';
 import * as culori from 'culori';
 

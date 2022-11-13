@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
@@ -165,7 +164,7 @@ const ColorTable = (props) => {
           p.data?.color && Math.hypot(p.data.color.a, p.data.color.b)
       }
     ],
-    [collections]
+    [collections, props.colors]
   );
 
   const onCellValueChanged = (e) => {
@@ -174,7 +173,7 @@ const ColorTable = (props) => {
     }
   };
 
-  const updateTopColors = () => {
+  const updateTopColors = React.useCallback(() => {
     if (props.onTopColorsChange) {
       let topColors = [];
       tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
@@ -182,11 +181,11 @@ const ColorTable = (props) => {
       });
       props.onTopColorsChange(topColors);
     }
-  };
+  }, [props]);
 
   React.useEffect(() => {
     updateTopColors();
-  }, [colorsWithDelta]);
+  }, [colorsWithDelta, updateTopColors]);
 
   return (
     <AgGridReact

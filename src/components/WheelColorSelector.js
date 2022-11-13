@@ -62,7 +62,7 @@ const ColorSelector = (props) => {
     const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
 
-    if (pixel.data[3] == 0) {
+    if (pixel.data[3] === 0) {
       return;
     }
 

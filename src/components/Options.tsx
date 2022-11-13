@@ -4,11 +4,16 @@ import fileDownload from 'js-file-download';
 import React from 'react';
 
 const Options = (props: any) => {
-  const fileInput = React.useRef(null);
+  const fileInput = React.useRef<HTMLInputElement>(null);
   const [transformationColorsNumber, setTransformationColorsNumber] =
     React.useState(
-      () =>
-        parseInt(localStorage.getItem('transformationColorsNumber'), 10) || 16
+      () =>{
+        const item = localStorage.getItem('transformationColorsNumber');
+        if (item) {
+          return parseInt(item, 10) || 16
+        }
+        return 16;
+      }
     );
 
   const onExport = () => {
@@ -41,14 +46,18 @@ const Options = (props: any) => {
   const onImport = (e) => {
     const fileReader = new FileReader();
     fileReader.readAsText(e.target.files[0], 'UTF-8');
-    fileReader.onload = (e) => onFileLoad(e.target.result as string);
+    fileReader.onload = (e) => {
+      if (e.target) {
+        onFileLoad(e.target.result as string);
+      }
+    }
   };
 
   React.useEffect(() => {
     if (props.transformationColorsNumberChanged) {
       props.transformationColorsNumberChanged(transformationColorsNumber);
     }
-  }, [transformationColorsNumber]);
+  }, [transformationColorsNumber, props]);
 
   const transformationColorsNumberChanged = (v) => {
     localStorage.setItem('transformationColorsNumber', v);
@@ -63,7 +72,11 @@ const Options = (props: any) => {
         onChange={onImport}
         style={{ display: 'none' }}
       />
-      <Button onClick={() => fileInput.current.click()}>
+      <Button onClick={() => {
+        if (fileInput.current) {
+          fileInput.current.click()
+        }
+        }}>
         Import owned colors
       </Button>
       <Button onClick={onExport}>Export owned colors</Button>

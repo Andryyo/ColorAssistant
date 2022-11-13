@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import Card from '@mui/material/Card';
 import ColorTable from './ColorTable';
@@ -87,12 +86,15 @@ const ColorsContainer = () => {
     return cw;
   }
 
-  const updateOwned = (color) => {
-    colorsWorker.postMessage({
-      type: 'updateOwned',
-      color: color
-    });
-  };
+  const updateOwned = React.useCallback(
+    (color) => {
+      colorsWorker.postMessage({
+        type: 'updateOwned',
+        color: color
+      });
+    },
+    [colorsWorker]
+  );
 
   React.useEffect(() => {
     console.log('Creating workers');
@@ -149,7 +151,15 @@ const ColorsContainer = () => {
         />
       </div>
     ),
-    [selectedColor, selectedTab, loading, colors, width, deltaOptions]
+    [
+      selectedColor,
+      selectedTab,
+      loading,
+      colors,
+      width,
+      deltaOptions,
+      updateOwned
+    ]
   );
 
   const colorWheel = React.useMemo(
@@ -179,7 +189,14 @@ const ColorsContainer = () => {
         src={selectedPicture}
       />
     ),
-    [selectedColor, topColors, colors, opencvWorker, selectedTab]
+    [
+      selectedColor,
+      topColors,
+      colors,
+      opencvWorker,
+      selectedTab,
+      selectedPicture
+    ]
   );
 
   const options = React.useMemo(
@@ -195,7 +212,7 @@ const ColorsContainer = () => {
         deltaOptionsChanged={(o) => setDeltaOptions(o)}
       />
     ),
-    [colors, selectedTab, deltaOptions]
+    [colors, selectedTab, deltaOptions, updateOwned]
   );
 
   const gallery = React.useMemo(

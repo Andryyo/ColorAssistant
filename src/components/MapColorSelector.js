@@ -1,18 +1,8 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 
-import {
-  Canvas,
-  CRS,
-  Icon,
-  LatLngBounds,
-  map,
-  Transformation,
-  Util
-} from 'leaflet';
+import { CRS, Icon, LatLngBounds, Transformation, Util } from 'leaflet';
 import React from 'react';
 import {
-  TileLayer,
   MapContainer,
   Marker,
   Popup,
@@ -66,24 +56,28 @@ const MapColorSelector = (props) => {
     transformation: new Transformation(1, 0, 1, 0)
   });
 
-  const bounds = new LatLngBounds([
-    [0, 0],
-    [props.imgHeight || 1, props.imgWidth || 1]
-  ]);
+  const bounds = React.useMemo(
+    () =>
+      new LatLngBounds([
+        [0, 0],
+        [props.imgHeight || 1, props.imgWidth || 1]
+      ]),
+    [props.imgHeight, props.imgWidth]
+  );
 
   React.useEffect(() => {
     if (mapRef.current && bounds) {
       mapRef.current.setMaxBounds(bounds.pad(0.75));
       mapRef.current.fitBounds(bounds);
     }
-  }, [props.src]);
+  }, [props.src, bounds]);
 
   React.useEffect(() => {
     if (mapRef.current && bounds && props.active) {
       mapRef.current.invalidateSize();
       mapRef.current.fitBounds(bounds);
     }
-  }, [props.active, mapRef.current]);
+  }, [props.active, bounds]);
 
   const EventHandler = () => {
     useMapEvents({

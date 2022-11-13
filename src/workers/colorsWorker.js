@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import vallejoGame from '../data/VallejoGame';
 import vallejoModel from '../data/VallejoModel';
 import citadel from '../data/Citadel';
@@ -102,7 +101,7 @@ const colorToBase = (color, index) => index;
   postMessage({ type: 'colorsUpdated', data: buffer }, [buffer.buffer]);
 })();
 
-self.onmessage = async (message) => {
+onmessage = async (message) => {
   if (message.data.type === 'getColors') {
     const buffer = ColorsMessage.encode({ colors: colors }).finish();
     await db.data.put({ id: 'colors', data: buffer });

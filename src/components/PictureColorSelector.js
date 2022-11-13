@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { Button } from '@mui/material';
@@ -17,7 +16,7 @@ const Picture = (props) => {
     const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
 
-    if (pixel.data[3] == 0) {
+    if (pixel.data[3] === 0) {
       return;
     }
 
