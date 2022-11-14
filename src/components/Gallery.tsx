@@ -1,11 +1,16 @@
 /* eslint-disable react/prop-types */
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { db } from '../db/db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Icon, IconButton } from '@mui/material';
 import deleteIcon from '../assets/delete-icon.svg';
 
-const Gallery = (props) => {
+interface IGalleryProps {
+  style: CSSProperties;
+  selectPicture: (IGalleryItem) => void;
+}
+
+const Gallery = (props : IGalleryProps) => {
   const images = useLiveQuery(() => db.gallery.toArray());
 
   return (
@@ -26,7 +31,7 @@ const Gallery = (props) => {
             alt="Gallery item"
           />
           <IconButton
-            onClick={() => db.gallery.delete(i.id)}
+            onClick={() => void db.gallery.delete(i.id)}
             style={{ position: 'absolute', top: '-0.25em', right: '-0.15em' }}
           >
             <Icon style={{ width: '0.75em', height: 'auto' }}>

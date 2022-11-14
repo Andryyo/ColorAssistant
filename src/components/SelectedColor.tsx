@@ -1,11 +1,16 @@
 /* eslint-disable react/prop-types */
-import React from 'react';
 import * as culori from 'culori';
+import React from 'react';
 
-const SelectedColor = (props) => {
-  const [text, setText] = React.useState(culori.formatHex(props.selectedColor));
+interface ISelectedColorProps {
+  selectedColor: culori.ILabColor;
+  onChange: (color: culori.ILabColor) => void;
+}
 
-  const selectColor = (color) => {
+const SelectedColor = (props : ISelectedColorProps) => {
+  const [text, setText] = React.useState<string>(culori.formatHex(props.selectedColor));
+
+  const selectColor = (color: string) => {
     try {
       setText(color);
       if (props.onChange) {

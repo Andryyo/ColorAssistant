@@ -6,14 +6,20 @@ import React, {
   useImperativeHandle,
   useState
 } from 'react';
+import { IDoesFilterPassParams, IFilterParams } from 'ag-grid-community';
+import { IColor } from './Options';
 
-export default forwardRef((props, ref) => {
+interface ICollectionFilterParams extends IFilterParams {
+  options: Set<string>
+}
+
+const CollectionsFilter = forwardRef((props: ICollectionFilterParams, ref) => {
   const [collections, setCollections] = useState(props.options);
 
   // expose AG Grid Filter Lifecycle callbacks
   useImperativeHandle(ref, () => {
     return {
-      doesFilterPass(params) {
+      doesFilterPass(params: IDoesFilterPassParams<{collection: string, bases: IColor[]}>) {
         return (
           collections.has(params.data.collection) &&
           (params.data.collection !== 'Mix' ||
@@ -58,7 +64,7 @@ export default forwardRef((props, ref) => {
         }
         label="All"
       />
-      {[...props.options].map((option) => (
+      {[...props.options].map((option: string) => (
         <FormControlLabel
           key={option}
           label={option}
@@ -81,3 +87,7 @@ export default forwardRef((props, ref) => {
     </div>
   );
 });
+
+CollectionsFilter.displayName = 'CollectionsFilter';
+
+export default CollectionsFilter;

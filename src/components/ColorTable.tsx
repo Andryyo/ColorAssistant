@@ -4,11 +4,23 @@ import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from './CollectionsFilter';
 import OwnedFloatingFilter from './OwnedFloatingFilter';
 import * as culori from 'culori';
+import { IColor, IDeltaOptions } from './Options';
+import { ILabColor } from 'culori';
+import { CellValueChangedEvent, GetRowIdParams, ICellRendererParams, RowNode, ValueGetterParams } from 'ag-grid-community';
 
 const difference = culori.differenceCiede2000();
 
-const ColorTable = (props) => {
-  const tableRef = React.useRef(null);
+interface IColorTableProps {
+  colors: IColor[];
+  selectedColor: ILabColor;
+  deltaOptions: IDeltaOptions;
+  loading: boolean;
+  updateOwned: (color: IColor) => void;
+  onTopColorsChange: (colors: IColor[]) => void;
+}
+
+const ColorTable = (props : IColorTableProps) => {
+  const tableRef = React.useRef<AgGridReact>(null);
 
   const colorsWithDelta = React.useMemo(() => {
     const result = props.colors?.map((c) => {
@@ -67,32 +79,25 @@ const ColorTable = (props) => {
         wrapText: true
       },
       {
-        valueGetter: (p) => {
-          return {
-            collection: p.data?.collection,
-            color: p.data?.hex,
-            bases: p.data?.bases
-          };
-        },
         headerName: 'Code',
         width: 200,
         filter: true,
-        cellRenderer: (props) => {
-          if (props.value.collection === 'Mix') {
+        cellRenderer: (p: ICellRendererParams<IColor, IColor>) => {
+          if (p.data.collection === 'Mix') {
             return (
               <div style={{ display: 'flex', height: '100%' }}>
                 <div
-                  style={{ backgroundColor: props.value.bases[0].hex }}
+                  style={{ backgroundColor: p.data.bases[0].hex }}
                   className="MiniColorCell"
                 ></div>
                 <div
-                  style={{ backgroundColor: props.value.color }}
+                  style={{ backgroundColor: p.data.hex }}
                   className="ColorCell"
                 >
-                  {props.value.color}
+                  {p.data.hex}
                 </div>
                 <div
-                  style={{ backgroundColor: props.value.bases[1].hex }}
+                  style={{ backgroundColor: p.data.bases[1].hex }}
                   className="MiniColorCell"
                 ></div>
               </div>
@@ -100,10 +105,10 @@ const ColorTable = (props) => {
           } else {
             return (
               <div
-                style={{ backgroundColor: props.value.color }}
+                style={{ backgroundColor: p.data.hex }}
                 className="ColorCell"
               >
-                {props.value.color}
+                {p.data.hex}
               </div>
             );
           }
@@ -116,14 +121,14 @@ const ColorTable = (props) => {
         filter: true,
         floatingFilter: true,
         floatingFilterComponent: OwnedFloatingFilter,
-        cellRenderer: (props) => {
+        cellRenderer: (p : ICellRendererParams<IColor, boolean>) => {
           return (
             <input
               type="checkbox"
-              defaultChecked={props.value}
-              disabled={props.data?.collection === 'Mix'}
+              defaultChecked={p.value}
+              disabled={p.data?.collection === 'Mix'}
               onChange={(e) => {
-                props.node.setDataValue(props.column, e.target.checked);
+                p.node.setDataValue(p.column, e.target.checked);
               }}
             />
           );
@@ -134,15 +139,15 @@ const ColorTable = (props) => {
         headerName: 'Delta',
         width: 75,
         sortable: true,
-        sortingOrder: ['asc']
+        sortingOrder:  ['asc'] as ('asc' | 'desc')[]
       },
       {
         field: 'adjustedDelta',
         headerName: 'Adjusted Delta',
         width: 75,
         sortable: true,
-        sort: 'asc',
-        sortingOrder: ['asc']
+        sort: 'asc' as ('asc' | 'desc'),
+        sortingOrder: ['asc'] as ('asc' | 'desc')[]
       },
       {
         field: 'minDelta',
@@ -154,20 +159,20 @@ const ColorTable = (props) => {
         headerName: 'L',
         width: 75,
         sortable: true,
-        valueGetter: (p) => p.data?.color.l
+        valueGetter: (p: ValueGetterParams<IColor>) => p.data?.color.l
       },
       {
         headerName: 'Saturation',
         width: 75,
         sortable: true,
-        valueGetter: (p) =>
+        valueGetter: (p: ValueGetterParams<IColor>) =>
           p.data?.color && Math.hypot(p.data.color.a, p.data.color.b)
       }
     ],
     [collections, props.colors]
   );
 
-  const onCellValueChanged = (e) => {
+  const onCellValueChanged = (e: CellValueChangedEvent<IColor, IColor>) => {
     if (props.updateOwned) {
       props.updateOwned(e.data);
     }
@@ -175,8 +180,8 @@ const ColorTable = (props) => {
 
   const updateTopColors = React.useCallback(() => {
     if (props.onTopColorsChange) {
-      let topColors = [];
-      tableRef.current.api?.forEachNodeAfterFilterAndSort((node) => {
+      const topColors : IColor[] = [];
+      tableRef.current.api?.forEachNodeAfterFilterAndSort((node: RowNode<IColor>) => {
         topColors.push(node.data);
       });
       props.onTopColorsChange(topColors);
@@ -193,10 +198,10 @@ const ColorTable = (props) => {
       ref={tableRef}
       columnDefs={columns}
       rowHeight={75}
-      onCellValueChanged={(e) => onCellValueChanged(e)}
+      onCellValueChanged={(e: CellValueChangedEvent<IColor, IColor>) => onCellValueChanged(e)}
       enableCellTextSelection={true}
       rowData={colorsWithDelta}
-      getRowId={(r) => r.data.collection + ' ' + r.data.name + ' ' + r.data.hex}
+      getRowId={(r: GetRowIdParams<IColor>) => r.data.collection + ' ' + r.data.name + ' ' + r.data.hex}
       onFilterChanged={updateTopColors}
       onSortChanged={updateTopColors}
     />

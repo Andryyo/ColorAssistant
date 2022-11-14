@@ -1,9 +1,32 @@
 /* eslint-disable react/prop-types */
 import { Box, Button, Slider } from '@mui/material';
+import { ILabColor } from 'culori';
 import fileDownload from 'js-file-download';
 import React from 'react';
 
-const Options = (props: any) => {
+export interface IColor {
+  color: ILabColor,
+  collection: string,
+  name: string,
+  hex: string,
+  owned: boolean,
+  bases?: IColor[],
+}
+
+export interface IDeltaOptions {
+  farMixPenalty: number
+}
+
+export interface IOptionsProps {
+  style: React.CSSProperties,
+  colors: IColor[],
+  deltaOptions: IDeltaOptions,
+  deltaOptionsChanged: (deltaOptions: IDeltaOptions) => void
+  updateOwned: (color: IColor) => void,
+  transformationColorsNumberChanged: (number: number) => void
+}
+
+const Options = (props: IOptionsProps) => {
   const fileInput = React.useRef<HTMLInputElement>(null);
   const [transformationColorsNumber, setTransformationColorsNumber] =
     React.useState(
@@ -27,7 +50,8 @@ const Options = (props: any) => {
   };
 
   const onFileLoad = (value: string) => {
-    const data = JSON.parse(value);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data: string[] = JSON.parse(value);
       for (const entry of data) {
         const color = props.colors
           .filter((c) => !c.bases || c.bases.length === 0)
@@ -43,7 +67,7 @@ const Options = (props: any) => {
       }
   };
 
-  const onImport = (e) => {
+  const onImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader();
     fileReader.readAsText(e.target.files[0], 'UTF-8');
     fileReader.onload = (e) => {
@@ -59,8 +83,8 @@ const Options = (props: any) => {
     }
   }, [transformationColorsNumber, props]);
 
-  const transformationColorsNumberChanged = (v) => {
-    localStorage.setItem('transformationColorsNumber', v);
+  const transformationColorsNumberChanged = (v: number) => {
+    localStorage.setItem('transformationColorsNumber', v.toString());
     setTransformationColorsNumber(v);
   };
 
@@ -87,14 +111,21 @@ const Options = (props: any) => {
         min={2}
         max={32}
         marks
-        onChange={(e, value) => transformationColorsNumberChanged(value)}
+        onChange={(e, value) =>
+          {
+            if (typeof value === "number")
+            {
+              transformationColorsNumberChanged(value);
+            }
+          }
+        }
       />
       Far mix penalty
       <Slider
         sx={{ mr: 2, ml: 2, width: 'auto' }}
         value={props.deltaOptions.farMixPenalty}
         onChange={(e, value) => {
-          if (props.deltaOptionsChanged) {
+          if (props.deltaOptionsChanged && typeof value === "number") {
             props.deltaOptionsChanged({
               ...props.deltaOptions,
               farMixPenalty: value

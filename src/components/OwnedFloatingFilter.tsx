@@ -1,13 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Checkbox, FormControlLabel } from '@mui/material';
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState
-} from 'react';
+import { IFloatingFilterParams } from 'ag-grid-community';
+import React, { forwardRef, useEffect, useState } from 'react';
 
-export default forwardRef((props, ref) => {
+const OwnedFloatingFilter = forwardRef((props: IFloatingFilterParams) => {
   const [ownedOnly, setOwnedOnly] = useState(false);
 
   // expose AG Grid Filter Lifecycle callbacks
@@ -39,3 +35,6 @@ export default forwardRef((props, ref) => {
     </React.Fragment>
   );
 });
+OwnedFloatingFilter.displayName = 'OwnedFloatingFilter';
+
+export default OwnedFloatingFilter;
