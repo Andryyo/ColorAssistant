@@ -7,19 +7,22 @@ import SelectedColor from './SelectedColor';
 import Grid from '@mui/material/Grid';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Options from './Options';
+import Options, { IColor, IMixColor } from './Options';
 import { ColorsMessage } from '../db/ColorsMessage';
 import Gallery from './Gallery';
+import { IGalleryItem } from 'db/db';
+import * as culori from 'culori'
+import { IColorsUpdateMessage, IProgressUpdateMessage, ICompactColor } from 'workers/colorsWorker';
 
 const ColorsContainer = () => {
-  const [selectedColor, setSelectedColor] = React.useState('#ffffff');
+  const [selectedColor, setSelectedColor] = React.useState(culori.lab65('#ffffff'));
   const [topColors, setTopColors] = React.useState([]);
   const [selectedTab, setSelectedTab] = React.useState('colorWheel');
-  const [colorsWorker, setColorsWorker] = React.useState(null);
-  const [opencvWorker, setOpencvWorker] = React.useState(null);
-  const [colors, setColors] = React.useState(null);
+  const [colorsWorker, setColorsWorker] = React.useState<Worker>(null);
+  const [opencvWorker, setOpencvWorker] = React.useState<Worker>(null);
+  const [colors, setColors] = React.useState<IColor[]>(null);
   const [loading, setLoading] = React.useState(false);
-  const [selectedPicture, setSelectedPicture] = React.useState(null);
+  const [selectedPicture, setSelectedPicture] = React.useState<IGalleryItem>(null);
   const [transformationColorsNumber, setTransformationColorsNumber] =
     React.useState(16);
   const [deltaOptions, setDeltaOptions] = React.useState({
@@ -28,14 +31,18 @@ const ColorsContainer = () => {
 
   function initColorsWorker() {
     const cw = new Worker(
-      new URL('../workers/colorsWorker.js', import.meta.url)
+      new URL('../workers/colorsWorker.ts', import.meta.url)
     );
 
-    cw.onmessage = (message) => {
-      if (message.data.type === 'colorsUpdated') {
+    cw.onmessage = (message: MessageEvent<IColorsUpdateMessage | IProgressUpdateMessage>) => {
+      const data = message.data;
+      if (data.type === 'colorsUpdated') {
         try {
-          const rawColors = ColorsMessage.decode(message.data.data).colors;
-          const colors = rawColors.map((c) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const rawColors : ICompactColor[] = ColorsMessage.decode(data.data).colors;
+          const colors = rawColors.map((c : ICompactColor) : (IColor | IMixColor) => {
             if (c.bases?.length > 0) {
               const ratios = [
                 { value: 0.25, name: '3 to 1' },
@@ -54,16 +61,18 @@ const ColorsContainer = () => {
                 ' ' +
                 ratios.find((r) => r.value === c.ratio)?.name;
 
-              const bases = [rawColors[c.bases[0]], rawColors[c.bases[1]]];
+              const bases = [rawColors[c.bases[0]] as IColor, rawColors[c.bases[1]]];
 
               bases.sort((a, b) => a.color.l - b.color.l);
 
-              return {
+              const result: IMixColor =  {
                 ...c,
                 name: name,
                 collection: 'Mix',
                 bases: bases
               };
+
+              return result;
             } else {
               return c;
             }
@@ -73,8 +82,8 @@ const ColorsContainer = () => {
         } catch (err) {
           console.log(err);
         }
-      } else if (message.data.type === 'progressUpdate') {
-        if (message.data.value === 100) {
+      } else if (data.type === 'progressUpdate') {
+        if (data.value === 100) {
           setLoading(false);
         } else {
           setLoading(true);
@@ -87,7 +96,7 @@ const ColorsContainer = () => {
   }
 
   const updateOwned = React.useCallback(
-    (color) => {
+    (color: IColor) => {
       colorsWorker.postMessage({
         type: 'updateOwned',
         color: color
@@ -168,7 +177,6 @@ const ColorsContainer = () => {
         onChange={(e) => setSelectedColor(e)}
         selectedColor={selectedColor}
         topColors={topColors}
-        colors={colors}
         style={selectedTab === 'colorWheel' ? null : { display: 'none' }}
         active={selectedTab === 'colorWheel'}
       />
@@ -182,7 +190,6 @@ const ColorsContainer = () => {
         onChange={(e) => setSelectedColor(e)}
         selectedColor={selectedColor}
         topColors={topColors}
-        colors={colors}
         worker={opencvWorker}
         style={selectedTab === 'picture' ? null : { display: 'none' }}
         active={selectedTab === 'picture'}
@@ -219,7 +226,7 @@ const ColorsContainer = () => {
     () => (
       <Gallery
         style={selectedTab === 'gallery' ? null : { display: 'none' }}
-        selectPicture={(e) => {
+        selectPicture={(e: IGalleryItem) => {
           setSelectedTab('picture');
           setSelectedPicture(e);
         }}
@@ -262,7 +269,7 @@ const ColorsContainer = () => {
               >
                 <Tabs
                   value={selectedTab}
-                  onChange={(e, v) => setSelectedTab(v)}
+                  onChange={(e, v: string) => setSelectedTab(v)}
                 >
                   <Tab label="Color Wheel" value="colorWheel" />
                   <Tab label="Picture" value="picture" />
@@ -305,7 +312,7 @@ const ColorsContainer = () => {
             >
               <Tabs
                 value={selectedTab}
-                onChange={(e, v) => setSelectedTab(v)}
+                onChange={(e, v: string) => setSelectedTab(v)}
                 variant="scrollable"
                 scrollButtons="auto"
                 sx={{ width: '90vw' }}

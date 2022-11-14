@@ -1,10 +1,9 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import CollectionsFilter from './CollectionsFilter';
 import OwnedFloatingFilter from './OwnedFloatingFilter';
 import * as culori from 'culori';
-import { IColor, IDeltaOptions } from './Options';
+import { IColor, IDeltaOptions, isMix } from './Options';
 import { ILabColor } from 'culori';
 import { CellValueChangedEvent, GetRowIdParams, ICellRendererParams, RowNode, ValueGetterParams } from 'ag-grid-community';
 
@@ -30,7 +29,7 @@ const ColorTable = (props : IColorTableProps) => {
       let adjustedDelta = delta;
       if (props.deltaOptions) {
         let basesDiff = 0;
-        if (c.bases?.length > 0) {
+        if (isMix(c)) {
           basesDiff = difference(c.bases[0].color, c.bases[1].color);
         }
         adjustedDelta = delta + props.deltaOptions.farMixPenalty * basesDiff;
@@ -83,21 +82,22 @@ const ColorTable = (props : IColorTableProps) => {
         width: 200,
         filter: true,
         cellRenderer: (p: ICellRendererParams<IColor, IColor>) => {
-          if (p.data.collection === 'Mix') {
+          const data = p.data;
+          if (isMix(data)) {
             return (
               <div style={{ display: 'flex', height: '100%' }}>
                 <div
-                  style={{ backgroundColor: p.data.bases[0].hex }}
+                  style={{ backgroundColor: data.bases[0].hex }}
                   className="MiniColorCell"
                 ></div>
                 <div
-                  style={{ backgroundColor: p.data.hex }}
+                  style={{ backgroundColor: data.hex }}
                   className="ColorCell"
                 >
                   {p.data.hex}
                 </div>
                 <div
-                  style={{ backgroundColor: p.data.bases[1].hex }}
+                  style={{ backgroundColor: data.bases[1].hex }}
                   className="MiniColorCell"
                 ></div>
               </div>
@@ -139,15 +139,15 @@ const ColorTable = (props : IColorTableProps) => {
         headerName: 'Delta',
         width: 75,
         sortable: true,
-        sortingOrder:  ['asc'] as ('asc' | 'desc')[]
+        sortingOrder:  ['asc' as const]
       },
       {
         field: 'adjustedDelta',
         headerName: 'Adjusted Delta',
         width: 75,
         sortable: true,
-        sort: 'asc' as ('asc' | 'desc'),
-        sortingOrder: ['asc'] as ('asc' | 'desc')[]
+        sort: 'asc' as const,
+        sortingOrder: ['asc' as const]
       },
       {
         field: 'minDelta',

@@ -5,7 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Icon, IconButton } from '@mui/material';
 import deleteIcon from '../assets/delete-icon.svg';
 
-interface IGalleryProps {
+export interface IGalleryProps {
   style: CSSProperties;
   selectPicture: (IGalleryItem) => void;
 }

@@ -1,10 +1,11 @@
 import Dexie from 'dexie';
 
 interface IData {
-  id?: number,
+  id?: string,
+  data?: Uint8Array
 }
 
-interface IGalleryItem {
+export interface IGalleryItem {
   id?: number,
   data?: Blob,
   preview?: Blob
@@ -12,7 +13,7 @@ interface IGalleryItem {
 
 class ColorsDatabase extends Dexie {
 
-  data!: Dexie.Table<IData, number>;
+  data!: Dexie.Table<IData, string>;
   gallery!: Dexie.Table<IGalleryItem, number>;
 
   constructor() {

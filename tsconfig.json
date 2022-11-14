@@ -5,10 +5,11 @@
   ],
   "exclude": [
     "build",
-    "note_modules"
+    "node_modules"
   ],
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2020",
+    "module": "es2020",
     "moduleResolution": "node",
     "outDir": "./build",
     "baseUrl": "./src",

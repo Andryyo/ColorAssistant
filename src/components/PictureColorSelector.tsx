@@ -1,18 +1,39 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
 import { Button } from '@mui/material';
 import MapColorSelector from './MapColorSelector';
 import * as culori from 'culori';
-import { db } from '../db/db';
+import { db, IGalleryItem } from '../db/db';
+import { IColor } from './Options'
 
-const Picture = (props) => {
-  const [selectedPosition, setSelectedPosition] = React.useState(null);
-  const [colors, setColors] = React.useState([]);
-  const [imgCanvas, setImgCanvas] = React.useState(null);
-  const [imgSrc, setImgSrc] = React.useState(null);
-  const fileInput = React.useRef(null);
+interface IPictureProps {
+  onChange: (color: culori.ILabColor) => void;
+  worker: Worker;
+  src: IGalleryItem;
+  selectedColor: culori.ILabColor;
+  style: React.CSSProperties;
+  topColors: IColor[];
+  active: boolean;
+}
 
-  const selectColor = (x, y) => {
+interface IPaletteColor {
+  color: culori.IRgbColor | string,
+  weight: number
+}
+
+interface IKmeansMessage {
+  type: 'kmeans',
+  data: ImageData,
+  colors?: IPaletteColor[] 
+}
+
+const Picture = (props : IPictureProps) => {
+  const [selectedPosition, setSelectedPosition] = React.useState<{x: number, y: number}>(null);
+  const [paletteColors, setPaletteColors] = React.useState<IPaletteColor[]>([]);
+  const [imgCanvas, setImgCanvas] = React.useState<OffscreenCanvas>(null);
+  const [imgSrc, setImgSrc] = React.useState<string>(null);
+  const fileInput = React.useRef<HTMLInputElement>(null);
+
+  const selectColor = (x: number, y: number) => {
     const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
 
@@ -21,7 +42,7 @@ const Picture = (props) => {
     }
 
     const newColor = {
-      mode: 'rgb',
+      mode: 'rgb' as const,
       r: pixel.data[0] / 255,
       g: pixel.data[1] / 255,
       b: pixel.data[2] / 255
@@ -47,19 +68,20 @@ const Picture = (props) => {
 
     props.worker.postMessage({ type: 'kmeans', data: newData });
 
-    props.worker.onmessage = (message) => {
-      if (message.data.type === 'kmeans') {
-        newCtx.putImageData(message.data.data, 0, 0);
+    props.worker.onmessage = (message: MessageEvent<IKmeansMessage>) => {
+      const data = message.data; 
+      if (data.type === 'kmeans') {
+        newCtx.putImageData(data.data, 0, 0);
         imgCanvas
           .getContext('2d')
           .drawImage(newCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
 
-        imgCanvas
+        void imgCanvas
           .convertToBlob()
           .then((blob) => setImgSrc(URL.createObjectURL(blob)));
 
-        const map = new Map();
-        message.data.colors.forEach((item) => {
+        const map = new Map<string, IPaletteColor>();
+        data.colors.forEach((item) => {
           const key = culori.formatHex(item.color);
           const existing = map.get(key);
           if (!existing) {
@@ -71,7 +93,7 @@ const Picture = (props) => {
 
         const colors = Array.from(map.values());
         colors.sort((a, b) => culori.hsv(b.color).h - culori.hsv(a.color).h);
-        setColors(colors);
+        setPaletteColors(colors);
       }
     };
   };
@@ -91,13 +113,13 @@ const Picture = (props) => {
     const data = await imgCanvas.convertToBlob();
     const preview = await newCanvas.convertToBlob();
 
-    db.gallery.add({
+    void db.gallery.add({
       data: data,
       preview: preview
     });
   };
 
-  const loadImage = (src) => {
+  const loadImage = (src: string) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.src = src;
@@ -107,13 +129,13 @@ const Picture = (props) => {
 
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       setImgCanvas(canvas);
-      canvas
+      void canvas
         .convertToBlob()
         .then((blob) => setImgSrc(URL.createObjectURL(blob)));
     };
   };
 
-  const boxzoomend = (x1, y1, x2, y2) => {
+  const boxzoomend = (x1: number, y1: number, x2: number, y2: number) => {
     const canvas = new OffscreenCanvas(x2 - x1, y2 - y1);
 
     canvas
@@ -132,10 +154,10 @@ const Picture = (props) => {
 
     setImgCanvas(canvas);
 
-    canvas.convertToBlob().then((blob) => setImgSrc(URL.createObjectURL(blob)));
+    void canvas.convertToBlob().then((blob) => setImgSrc(URL.createObjectURL(blob)));
   };
 
-  let markers = [];
+  const markers = [];
 
   if (props.selectedColor && selectedPosition) {
     markers.push({
@@ -160,12 +182,12 @@ const Picture = (props) => {
         active={props.active}
       />
       <div className="ColorsContainer">
-        {colors.map((c) => (
+        {paletteColors.map((c) => (
           <div
-            key={c.color}
+            key={c.color as string}
             style={{
               height: '5vmin',
-              backgroundColor: c.color,
+              backgroundColor: c.color as string,
               flexGrow: c.weight
             }}
             onClick={() => {
@@ -201,7 +223,7 @@ const Picture = (props) => {
         <Button
           style={{ flex: '0 0 auto' }}
           onClick={() => {
-            saveToGallery();
+            void saveToGallery();
           }}
         >
           Save

@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import * as culori from 'culori';
 import React from 'react';
 

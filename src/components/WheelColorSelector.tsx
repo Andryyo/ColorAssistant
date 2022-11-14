@@ -1,19 +1,26 @@
-/* eslint-disable react/prop-types */
-
 import { Slider } from '@mui/material';
-import MapColorSelector from './MapColorSelector';
+import MapColorSelector, { IMarker } from './MapColorSelector';
 import React from 'react';
 import * as culori from 'culori';
+import { IColorWithDelta } from './Options';
 
-const fastConvert = (H, S, V, n) => {
+const fastConvert = (H: number, S: number, V: number, n: number) => {
   const k = (n + H / 60) % 6;
   return (V - V * S * Math.max(0, Math.min(k, 4 - k, 1))) * 255;
 };
 
-const ColorSelector = (props) => {
+interface IColorSelectorProps {
+  selectedColor: culori.ILabColor;
+  onChange: (color: culori.ILabColor) => void;
+  topColors: IColorWithDelta[];
+  style: React.CSSProperties;
+  active: boolean;
+}
+
+const ColorSelector = (props : IColorSelectorProps) => {
   const [value, setValue] = React.useState(100);
-  const [imgSrc, setImgSrc] = React.useState(null);
-  const [imgCanvas, setImgCanvas] = React.useState(null);
+  const [imgSrc, setImgSrc] = React.useState<string>(null);
+  const [imgCanvas, setImgCanvas] = React.useState<OffscreenCanvas>(null);
 
   React.useEffect(() => {
     const canvas = new OffscreenCanvas(400, 400);
@@ -51,14 +58,14 @@ const ColorSelector = (props) => {
     canvas.getContext('2d').putImageData(imageData, 0, 0);
 
     setImgCanvas(canvas);
-    canvas.convertToBlob().then((blob) => setImgSrc(URL.createObjectURL(blob)));
+    void canvas.convertToBlob().then((blob) => setImgSrc(URL.createObjectURL(blob)));
   }, [value]);
 
   React.useEffect(() => {
     setValue(Math.round(culori.hsv(props.selectedColor).v * 100));
   }, [props.selectedColor]);
 
-  const selectColorByPosition = (x, y) => {
+  const selectColorByPosition = (x: number, y: number) => {
     const ctx = imgCanvas.getContext('2d');
     const pixel = ctx.getImageData(x, y, 1, 1);
 
@@ -67,7 +74,7 @@ const ColorSelector = (props) => {
     }
 
     const newColor = culori.formatHex({
-      mode: 'rgb',
+      mode: 'rgb' as const,
       r: pixel.data[0] / 255,
       g: pixel.data[1] / 255,
       b: pixel.data[2] / 255
@@ -77,7 +84,7 @@ const ColorSelector = (props) => {
     }
   };
 
-  const selectColor = (color) => {
+  const selectColor = (color: string) => {
     try {
       setValue(Math.round(culori.hsv(color).v));
       if (props.onChange) {
@@ -87,7 +94,7 @@ const ColorSelector = (props) => {
     } catch {}
   };
 
-  const onValueChanging = (event, newValue) => {
+  const onValueChanging = (event, newValue : number) => {
     /*const color = culori.hsv(props.selectedColor);
     const newColor = culori.formatHex({
       mode: 'hsv',
@@ -99,7 +106,7 @@ const ColorSelector = (props) => {
     setValue(newValue);
   };
 
-  const onValueChanged = (event, newValue) => {
+  const onValueChanged = (event, newValue : number) => {
     const color = culori.hsv(props.selectedColor);
     const newColor = culori.formatHex({
       mode: 'hsv',
@@ -115,7 +122,7 @@ const ColorSelector = (props) => {
     }
   };
 
-  const colorToPosition = (color) => {
+  const colorToPosition = (color : culori.ILabColor) => {
     try {
       const hsv = culori.hsv(color);
 
@@ -134,7 +141,7 @@ const ColorSelector = (props) => {
     }
   };
 
-  let markers = null;
+  let markers : IMarker[] = null;
 
   if (props.topColors) {
     markers = props.topColors
@@ -145,6 +152,7 @@ const ColorSelector = (props) => {
           return {
             x: pos.x,
             y: pos.y,
+            selected: false,
             ...c
           };
         } else {
@@ -179,8 +187,8 @@ const ColorSelector = (props) => {
         markers={markers}
         topColor={props.topColors && props.topColors[0]}
         click={(e) => selectColorByPosition(e.x, e.y)}
-        markerSelected={(m) => {
-          selectColor(m.color);
+        markerSelected={(m: IMarker) => {
+          selectColor(m.hex);
         }}
         active={props.active}
       />

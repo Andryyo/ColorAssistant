@@ -3,6 +3,10 @@ declare module "*.svg" {
     export default content;
   }
 
+declare module "mixbox" {
+    export function lerp(c1: string, c2: string, ratio: number) : number
+}
+
 declare module "culori" {
   export interface ILabColor {
     mode: 'lab65',
@@ -18,8 +22,16 @@ declare module "culori" {
     v: number
   }
 
-  export function formatHex(color: ILabColor) : string;
-  export function lab65(color: string) : ILabColor;
-  export function hsv(color: string) : IHsvColor;
+  export interface IRgbColor {
+    mode: 'rgb',
+    r: number,
+    g: number,
+    b: number
+  }
+
+  export function formatHex(color: string | ILabColor | IRgbColor | IHsvColor) : string;
+  export function lab65(color: string | IRgbColor | IHsvColor) : ILabColor;
+  export function hsv(color: string| IRgbColor | ILabColor) : IHsvColor;
+  export function rgb(color: string| IRgbColor | ILabColor) : IRgbColor;
   export function differenceCiede2000(): (c1: ILabColor, c2: ILabColor) => number;
 }

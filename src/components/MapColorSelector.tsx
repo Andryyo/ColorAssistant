@@ -1,7 +1,6 @@
-/* eslint-disable react/prop-types */
-
-import { CRS, Icon, LatLngBounds, Transformation, Util } from 'leaflet';
-import React from 'react';
+import { ILabColor } from 'culori';
+import { CRS, Icon, LatLngBounds, LeafletMouseEvent, Map, Transformation, Util } from 'leaflet';
+import React, { CSSProperties } from 'react';
 import {
   MapContainer,
   Marker,
@@ -9,8 +8,9 @@ import {
   ImageOverlay,
   useMapEvents
 } from 'react-leaflet';
+import { IColor, IColorWithDelta, IMixColor } from './Options';
 
-const createIcon = (color, selected) => {
+const createIcon = (color: string, selected: boolean) : Icon => {
   const canvas = document.createElement('canvas');
   canvas.width = 32;
   canvas.height = 32;
@@ -33,7 +33,6 @@ const createIcon = (color, selected) => {
   if (selected) {
     return new Icon({
       iconUrl: canvas.toDataURL(),
-
       iconSize: [48, 48],
       iconAnchor: [24, 48],
       popupAnchor: [1, -34]
@@ -49,10 +48,40 @@ const createIcon = (color, selected) => {
   }
 };
 
-const MapColorSelector = (props) => {
-  const mapRef = React.useRef(null);
+export interface IMarker {
+  selected: boolean,
+  x: number,
+  y: number,
+  collection?: string,
+  name?: string,
+  hex?: string,
+  color?: ILabColor,
+  bases?: IColorWithDelta[],
+  delta?: number
+}
 
-  var CRSPixel = Util.extend(CRS.Simple, {
+interface IMapColorSelectorProps {
+  imgHeight: number;
+  imgWidth: number;
+  src: string;
+  active: boolean;
+  click: (position: {x: number, y: number}) => void;
+  boxzoomend?: (x1: number, y1: number, x2: number, y2: number) => void;
+  style: CSSProperties;
+  markers: IMarker[];
+  markerSelected?: (marker: IMarker) => void;
+  topColor: IColor;
+}
+
+interface IMarkerProps {
+  marker: IMarker;
+  closestColor?: IColor;
+}
+
+const MapColorSelector = (props : IMapColorSelectorProps) => {
+  const mapRef = React.useRef<Map>(null);
+
+  const CRSPixel = Util.extend(CRS.Simple, {
     transformation: new Transformation(1, 0, 1, 0)
   });
 
@@ -81,12 +110,14 @@ const MapColorSelector = (props) => {
 
   const EventHandler = () => {
     useMapEvents({
-      click: (e) => {
+      click: (e : LeafletMouseEvent) => {
         if (props.click) {
           props.click({ x: e.latlng.lng, y: e.latlng.lat });
         }
       },
-      boxzoomend: (e) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore 
+      boxzoomend: (e: {boxZoomBounds: LatLngBounds}) => {
         if (props.boxzoomend) {
           props.boxzoomend(
             e.boxZoomBounds.getWest(),
@@ -101,22 +132,22 @@ const MapColorSelector = (props) => {
     return null;
   };
 
-  const ColorCell = (props) => {
-    if (props.marker.bases?.length > 0) {
+  const ColorCell = (props: { bases: IColor[], hex: string }) => {
+    if (props.bases?.length > 0) {
       return (
         <div style={{ display: 'flex', width: '100px' }}>
           <div
-            style={{ backgroundColor: props.marker.bases[0].hex }}
+            style={{ backgroundColor: props.bases[0].hex }}
             className="MiniColorCell"
           ></div>
           <div
-            style={{ backgroundColor: props.marker.hex }}
+            style={{ backgroundColor: props.hex }}
             className="ColorCell"
           >
-            {props.marker.hex}
+            {props.hex}
           </div>
           <div
-            style={{ backgroundColor: props.marker.bases[1].hex }}
+            style={{ backgroundColor: props.bases[1].hex }}
             className="MiniColorCell"
           ></div>
         </div>
@@ -125,18 +156,18 @@ const MapColorSelector = (props) => {
       return (
         <div
           style={{
-            backgroundColor: props.marker.hex,
+            backgroundColor: props.hex,
             width: '100px'
           }}
           className="ColorCell"
         >
-          {props.marker.hex}
+          {props.hex}
         </div>
       );
     }
   };
 
-  const ColorPopup = (props) => {
+  const ColorPopup = (props: IMarkerProps) => {
     return (
       <Popup>
         <div style={{ maxWidth: '200px' }}>
@@ -144,24 +175,24 @@ const MapColorSelector = (props) => {
           <br />
           {props.marker.name}
           <br />
-          <ColorCell marker={props.marker} />
+          <ColorCell bases={props.marker.bases} hex={props.marker.hex} />
         </div>
       </Popup>
     );
   };
 
-  const SelectedColorPopup = (props) => {
+  const SelectedColorPopup = (props : IMarkerProps) => {
     return (
       <Popup>
         <div style={{ maxWidth: '200px' }}>
-          <ColorCell marker={props.marker} />
+        <ColorCell bases={props.marker.bases} hex={props.marker.hex} />
           <br />
           {props.closestColor && (
             <React.Fragment>
               Closest:
               {props.closestColor.collection + ' ' + props.closestColor.name}
               <br />
-              <ColorCell marker={props.closestColor} />
+              <ColorCell bases={(props.closestColor as IMixColor)?.bases} hex={props.closestColor.hex} />
             </React.Fragment>
           )}
         </div>
@@ -192,13 +223,6 @@ const MapColorSelector = (props) => {
             key={m.collection + m.name + m.hex}
             position={[m.y, m.x]}
             icon={createIcon(m.hex, m.selected)}
-            eventHandlers={{
-              click: (e) => {
-                if (props.markerSelected) {
-                  //props.markerSelected(m);
-                }
-              }
-            }}
           >
             {m.selected ? (
               <SelectedColorPopup marker={m} closestColor={props.topColor} />

@@ -6,12 +6,28 @@ import mixbox from 'mixbox';
 import { db } from '../db/db';
 import * as culori from 'culori';
 import { ColorsMessage } from '../db/ColorsMessage';
+import { ILabColor } from 'culori';
+import { IColor } from 'components/Options';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+const ctx: Worker = self as any;
 
 const difference = culori.differenceCiede2000();
 
-var colors = [];
+export interface ICompactColor {
+  color: ILabColor,
+  collection: string,
+  name: string,
+  hex: string,
+  owned: boolean,
+  bases?: number[],
+  minDelta?: number,
+  ratio?: number
+}
 
-const createColor = (collection, name, hex, owned) => {
+let colors: ICompactColor[] = [];
+
+const createColor = (collection: string, name: string, hex: string, owned: boolean) => {
   const color = culori.lab65(hex);
   const hsv = culori.hsv(color);
 
@@ -31,7 +47,7 @@ const updateMinDelta = () => {
   const baseColors = colors.filter(
     (color) => !color.bases || color.bases.length === 0
   );
-  for (let color1 of baseColors) {
+  for (const color1 of baseColors) {
     const deltas = colors
       .filter((c) => c !== color1 && c.owned)
       .map((color2) => {
@@ -43,7 +59,7 @@ const updateMinDelta = () => {
   }
 };
 
-const getCollection = (collection, data) => {
+const getCollection = (collection: string, data: string) => {
   return data
     .split('\n')
     .filter((s) => s)
@@ -54,18 +70,40 @@ const getCollection = (collection, data) => {
     });
 };
 
-const colorToBase = (color, index) => index;
+export interface IColorsUpdateMessage {
+  type: 'colorsUpdated';
+  data: Uint8Array;
+}
 
-(async () => {
+export interface IProgressUpdateMessage {
+  type: 'progressUpdate';
+  value: number
+}
+
+export interface IGetColorsMessage {
+  type: 'getColors';
+}
+
+export interface IUpdateOwnedMessage {
+  type: 'updateOwned';
+  color: IColor
+}
+
+type Message = IColorsUpdateMessage | IGetColorsMessage | IUpdateOwnedMessage | IProgressUpdateMessage;
+
+void (async () => {
   const savedBuffer = await db.data.get('colors');
 
   if (savedBuffer) {
     const transferBuffer = new Uint8Array(savedBuffer.data);
-    postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+    ctx.postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
       transferBuffer.buffer
     ]);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       colors = ColorsMessage.decode(savedBuffer.data).colors;
     } catch (err) {
       console.log(err);
@@ -78,7 +116,7 @@ const colorToBase = (color, index) => index;
   console.log('Starting generation');
 
   colors = [];
-  let baseColors = [];
+  const baseColors : ICompactColor[] = [];
   getCollection('Vallejo Game Colors', vallejoGame).forEach((c) =>
     baseColors.push(c)
   );
@@ -90,44 +128,48 @@ const colorToBase = (color, index) => index;
 
   baseColors.forEach((c) => colors.push(c));
 
-  postMessage({ type: 'progressUpdate', value: 95 });
+  ctx.postMessage({ type: 'progressUpdate', value: 95 });
 
   console.log('Saving colors', colors.length);
   const buffer = ColorsMessage.encode({ colors: colors }).finish();
   await db.data.put({ id: 'colors', data: buffer });
   console.log('Saved colors');
 
-  postMessage({ type: 'progressUpdate', value: 100 });
-  postMessage({ type: 'colorsUpdated', data: buffer }, [buffer.buffer]);
+  ctx.postMessage({ type: 'progressUpdate', value: 100 });
+  ctx.postMessage({ type: 'colorsUpdated', data: buffer }, [buffer.buffer]);
 })();
 
-onmessage = async (message) => {
-  if (message.data.type === 'getColors') {
-    const buffer = ColorsMessage.encode({ colors: colors }).finish();
-    await db.data.put({ id: 'colors', data: buffer });
-    const transferBuffer = new Uint8Array(buffer);
-    postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
-      transferBuffer.buffer
-    ]);
-  } else if (message.data.type === 'updateOwned') {
-    postMessage({ type: 'progressUpdate', value: 0 });
+onmessage = async (message: MessageEvent<Message>) => {
+  const data = message.data;
+  switch (data.type) {
+    case 'getColors': {
+      const buffer = ColorsMessage.encode({ colors: colors }).finish();
+      await db.data.put({ id: 'colors', data: buffer });
+      const transferBuffer = new Uint8Array(buffer);
+      ctx.postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+        transferBuffer.buffer
+      ]);
+      }
+      break;
+    case 'updateOwned': {
+      ctx.postMessage({ type: 'progressUpdate', value: 0 });
 
     const colorIndex = colors.findIndex(
       (color) =>
-        color.collection === message.data.color.collection &&
-        color.name === message.data.color.name &&
-        color.hex === message.data.color.hex
+        color.collection === data.color.collection &&
+        color.name === data.color.name &&
+        color.hex === data.color.hex
     );
 
-    if (colors[colorIndex].owned === message.data.color.owned) {
-      postMessage({ type: 'progressUpdate', value: 100 });
+    if (colors[colorIndex].owned === data.color.owned) {
+      ctx.postMessage({ type: 'progressUpdate', value: 100 });
       return;
     }
 
-    colors[colorIndex].owned = message.data.color.owned;
+    colors[colorIndex].owned = data.color.owned;
 
     if (colors[colorIndex].owned) {
-      let mixes = [];
+      const mixes = [];
 
       colors.forEach((c, i) => {
         if (colorIndex === i || !c.owned || c.bases?.length > 0) {
@@ -150,8 +192,8 @@ onmessage = async (message) => {
           mixes.push({
             ...color,
             bases: [
-              colorToBase(colors[colorIndex], colorIndex),
-              colorToBase(c, i)
+              colorIndex,
+              i
             ],
             ratio: ratio
           });
@@ -170,9 +212,11 @@ onmessage = async (message) => {
     const buffer = ColorsMessage.encode({ colors: colors }).finish();
     await db.data.put({ id: 'colors', data: buffer });
     const transferBuffer = new Uint8Array(buffer);
-    postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+    ctx.postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
       transferBuffer.buffer
     ]);
-    postMessage({ type: 'progressUpdate', value: 100 });
+    ctx.postMessage({ type: 'progressUpdate', value: 100 });
+      break;
   }
+}
 };

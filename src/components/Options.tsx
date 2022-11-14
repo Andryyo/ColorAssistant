@@ -1,16 +1,29 @@
-/* eslint-disable react/prop-types */
 import { Box, Button, Slider } from '@mui/material';
 import { ILabColor } from 'culori';
 import fileDownload from 'js-file-download';
 import React from 'react';
 
 export interface IColor {
-  color: ILabColor,
-  collection: string,
-  name: string,
-  hex: string,
-  owned: boolean,
-  bases?: IColor[],
+  color: ILabColor;
+  collection: string;
+  name: string;
+  hex: string;
+  owned: boolean;
+  minDelta?: number;
+}
+
+export interface IMixColor extends IColor{
+  bases: IColor[];
+}
+
+export function isMix(color: IColor) : color is IMixColor {
+  return color.collection === 'Mix';
+}
+
+export interface IColorWithDelta extends IColor{
+  delta: number,
+  adjustedDelta: number,
+  bases?: IColorWithDelta[],
 }
 
 export interface IDeltaOptions {
@@ -42,7 +55,7 @@ const Options = (props: IOptionsProps) => {
   const onExport = () => {
     const data = JSON.stringify(
       props.colors
-        .filter((c) => c.owned && (!c.bases || c.bases.length === 0))
+        .filter((c) => c.owned && !(isMix(c)))
         .map((c) => c.collection + ' ' + c.name + ' ' + c.hex)
     );
 
@@ -54,7 +67,7 @@ const Options = (props: IOptionsProps) => {
     const data: string[] = JSON.parse(value);
       for (const entry of data) {
         const color = props.colors
-          .filter((c) => !c.bases || c.bases.length === 0)
+          .filter((c) => !isMix(c))
           .find((c) => {
             const name = c.collection + ' ' + c.name + ' ' + c.hex;
             return name.includes(entry);

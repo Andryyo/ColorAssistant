@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { Checkbox, FormControlLabel } from '@mui/material';
 import React, {
   forwardRef,
@@ -23,7 +22,7 @@ const CollectionsFilter = forwardRef((props: ICollectionFilterParams, ref) => {
         return (
           collections.has(params.data.collection) &&
           (params.data.collection !== 'Mix' ||
-            params.data.bases.every((b) => collections.has(b.collection)))
+            params.data.bases.every((b: IColor) => collections.has(b.collection)))
         );
       },
 
