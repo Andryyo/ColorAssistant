@@ -175,7 +175,7 @@ const Picture = (props : IPictureProps) => {
         src={imgSrc}
         imgHeight={imgCanvas?.height}
         imgWidth={imgCanvas?.width}
-        click={(e) => selectColor(e.x, e.y)}
+        click={(position) => selectColor(position.x, position.y)}
         markers={markers}
         topColor={props.topColors && props.topColors[0]}
         boxzoomend={boxzoomend}

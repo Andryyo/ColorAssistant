@@ -2,6 +2,7 @@ import React from 'react';
 import Card from '@mui/material/Card';
 import ColorTable from './ColorTable';
 import ColorSelector from './WheelColorSelector';
+import GradientColorSelector from './GradientColorSelector'
 import Picture from './PictureColorSelector';
 import SelectedColor from './SelectedColor';
 import Grid from '@mui/material/Grid';
@@ -283,8 +284,13 @@ const ColorsContainer = () => {
               </Card>
             </Grid>
             <Grid item>
-              <Card sx={{ p: 1 }}>
+              <Card sx={{ p: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
                 <SelectedColor
+                  onChange={(e) => setSelectedColor(e)}
+                  selectedColor={selectedColor}
+                />
+                <GradientColorSelector
+                  style={{ height: '5vmin'}}
                   onChange={(e) => setSelectedColor(e)}
                   selectedColor={selectedColor}
                 />
@@ -329,11 +335,16 @@ const ColorsContainer = () => {
               {gallery}
               {options}
             </Card>
-            <Card sx={{ p: 1, m: 1 }}>
+            <Card sx={{ p: 1, m: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
               <SelectedColor
                 onChange={(e) => setSelectedColor(e)}
                 selectedColor={selectedColor}
               />
+              <GradientColorSelector
+                  style={{ height: '5vmin'}}
+                  onChange={(e) => setSelectedColor(e)}
+                  selectedColor={selectedColor}
+                />
             </Card>
           </Grid>
         </>

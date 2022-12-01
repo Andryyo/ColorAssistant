@@ -37,7 +37,6 @@
 }
 
 .SelectedColor {
-  width: 100%;
   color: black;
   -webkit-text-stroke: 1px white;
   font-size: x-large;

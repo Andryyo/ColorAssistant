@@ -35,9 +35,9 @@ const ColorSelector = (props : IColorSelectorProps) => {
         const offset = 4 * (y * imageData.width + x);
 
         const dx =
-          ((((x - imageData.width / 2) / imageData.width) * 2) / value) * 100;
+          (((x - imageData.width / 2) / imageData.width) * 2);
         const dy =
-          ((((y - imageData.height / 2) / imageData.height) * 2) / value) * 100;
+          (((y - imageData.height / 2) / imageData.height) * 2);
         const saturation = Math.sqrt(dx * dx + dy * dy);
 
         if (saturation > 1) {
@@ -129,10 +129,10 @@ const ColorSelector = (props : IColorSelectorProps) => {
       const angle = (-(hsv.h || 0) / 180) * Math.PI;
       return {
         x:
-          (((Math.cos(angle) * hsv.s * imgCanvas.width) / 2) * value) / 100 +
+          ((Math.cos(angle) * hsv.s * imgCanvas.width) / 2) +
           imgCanvas.width / 2,
         y:
-          (((Math.sin(angle) * hsv.s * imgCanvas.height) / 2) * value) / 100 +
+          ((Math.sin(angle) * hsv.s * imgCanvas.height) / 2) +
           imgCanvas.height / 2,
         value: hsv.v * 100
       };
