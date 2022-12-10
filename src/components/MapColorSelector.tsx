@@ -76,6 +76,7 @@ interface IMapColorSelectorProps {
 interface IMarkerProps {
   marker: IMarker;
   closestColor?: IColor;
+  referenceMarker?: IMarker
 }
 
 const MapColorSelector = (props : IMapColorSelectorProps) => {
@@ -132,10 +133,10 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
     return null;
   };
 
-  const ColorCell = (props: { bases: IColor[], hex: string }) => {
+  const ColorCell = (props: { bases: IColor[], referenceHex: string, hex: string }) => {
     if (props.bases?.length > 0) {
       return (
-        <div style={{ display: 'flex', width: '100px' }}>
+        <div style={{ display: 'flex', width: '200px' }}>
           <div
             style={{ backgroundColor: props.bases[0].hex }}
             className="MiniColorCell"
@@ -144,7 +145,11 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
             style={{ backgroundColor: props.hex }}
             className="ColorCell"
           >
-            {props.hex}
+            <div
+              style={{ backgroundColor: props.referenceHex }}
+              className="CenterColorCell">
+                {props.hex}
+            </div>
           </div>
           <div
             style={{ backgroundColor: props.bases[1].hex }}
@@ -157,11 +162,15 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
         <div
           style={{
             backgroundColor: props.hex,
-            width: '100px'
+            width: '200px'
           }}
           className="ColorCell"
         >
-          {props.hex}
+          <div
+            style={{ backgroundColor: props.referenceHex }}
+            className="CenterColorCell">
+              {props.hex}
+          </div>
         </div>
       );
     }
@@ -171,11 +180,9 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
     return (
       <Popup>
         <div style={{ maxWidth: '200px' }}>
-          {props.marker.collection}
+          {props.marker.collection + ' ' + props.marker.name}
           <br />
-          {props.marker.name}
-          <br />
-          <ColorCell bases={props.marker.bases} hex={props.marker.hex} />
+          <ColorCell bases={props.marker.bases} hex={props.marker.hex} referenceHex={props.referenceMarker?.hex}/>
         </div>
       </Popup>
     );
@@ -185,20 +192,19 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
     return (
       <Popup>
         <div style={{ maxWidth: '200px' }}>
-        <ColorCell bases={props.marker.bases} hex={props.marker.hex} />
-          <br />
           {props.closestColor && (
             <React.Fragment>
-              Closest:
-              {props.closestColor.collection + ' ' + props.closestColor.name}
+              {"Closest: " + props.closestColor.collection + ' ' + props.closestColor.name}
               <br />
-              <ColorCell bases={(props.closestColor as IMixColor)?.bases} hex={props.closestColor.hex} />
+              <ColorCell bases={(props.closestColor as IMixColor)?.bases} hex={props.closestColor.hex} referenceHex={props.marker.hex} />
             </React.Fragment>
           )}
         </div>
       </Popup>
     );
   };
+
+  const selectedMarker =  props.markers.find(x => x.selected)
 
   return (
     <React.Fragment>
@@ -225,9 +231,9 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
             icon={createIcon(m.hex, m.selected)}
           >
             {m.selected ? (
-              <SelectedColorPopup marker={m} closestColor={props.topColor} />
+              <SelectedColorPopup marker={m} closestColor={props.topColor} referenceMarker={selectedMarker} />
             ) : (
-              <ColorPopup marker={m} />
+              <ColorPopup marker={m} closestColor={props.topColor} referenceMarker={selectedMarker}/>
             )}
           </Marker>
         ))}
