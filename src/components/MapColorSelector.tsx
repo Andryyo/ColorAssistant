@@ -202,7 +202,7 @@ const MapColorSelector = (props : IMapColorSelectorProps) => {
 
   return (
     <React.Fragment>
-      <link rel="stylesheet" href="/ColorAssistant/leaflet.css" />
+      <link rel="stylesheet" href={process.env.PUBLIC_URL + "/leaflet.css"} />
       <MapContainer
         style={props.style}
         ref={mapRef}

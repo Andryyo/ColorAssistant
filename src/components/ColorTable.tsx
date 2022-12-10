@@ -92,9 +92,12 @@ const ColorTable = (props : IColorTableProps) => {
                 ></div>
                 <div
                   style={{ backgroundColor: data.hex }}
-                  className="ColorCell"
-                >
-                  {p.data.hex}
+                  className="ColorCell">
+                  <div
+                    style={{ backgroundColor: culori.formatHex(props.selectedColor) }}
+                    className="CenterColorCell">
+                      {p.data.hex}
+                  </div>
                 </div>
                 <div
                   style={{ backgroundColor: data.bases[1].hex }}
@@ -106,9 +109,12 @@ const ColorTable = (props : IColorTableProps) => {
             return (
               <div
                 style={{ backgroundColor: p.data.hex }}
-                className="ColorCell"
-              >
-                {p.data.hex}
+                className="ColorCell">
+                <div
+                  style={{ backgroundColor: culori.formatHex(props.selectedColor) }}
+                  className="CenterColorCell">
+                    {p.data.hex}
+                </div>
               </div>
             );
           }

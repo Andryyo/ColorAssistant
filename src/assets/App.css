@@ -25,6 +25,14 @@
   font-weight: bold;
 }
 
+.CenterColorCell {
+  height: 50%;
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .ColorsContainer {
   width: 100%;
   height: auto;
