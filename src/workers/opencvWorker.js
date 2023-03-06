@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -20,6 +21,8 @@ onmessage = (message) => {
     kmeans(message);
   } else if (message.data.type === 'setTransformationColorsNumber') {
     transformationColorsNumber = message.data.value;
+  } else if (message.data.type === 'extract') {
+    extract(message);
   }
 };
 
@@ -29,21 +32,31 @@ function kmeans(message) {
   console.log(performance.now() - startTime, 'Starting...');
   const imageData = message.data.data;
   //define criteria, number of clusters(K) and apply kmeans()
-  let sample = new cv.Mat(imageData.height * imageData.width, 3, cv.CV_32F);
+
+  let colors = [];
 
   for (var y = 0; y < imageData.height; y++)
     for (var x = 0; x < imageData.width; x++) {
       const offset = y * 4 + x * imageData.height * 4;
+      if (imageData.data[offset + 3] === 0) {
+        continue;
+      }
       const color = culori.lab65({
         mode: 'rgb',
         r: imageData.data[offset] / 255,
         g: imageData.data[offset + 1] / 255,
         b: imageData.data[offset + 2] / 255
       });
-      sample.floatPtr(y + x * imageData.height)[0] = color.l;
-      sample.floatPtr(y + x * imageData.height)[1] = color.a;
-      sample.floatPtr(y + x * imageData.height)[2] = color.b;
+      colors.push(color);
     }
+
+  let sample = new cv.Mat(colors.length, 3, cv.CV_32F);
+
+  for (var i = 0; i < colors.length; i++) {
+    sample.floatPtr(i)[0] = colors[i].l;
+    sample.floatPtr(i)[1] = colors[i].a;
+    sample.floatPtr(i)[2] = colors[i].b;
+  }
 
   var labels = new cv.Mat();
   var attempts = 1;
@@ -74,27 +87,33 @@ function kmeans(message) {
     centersWeight.push(0);
   }
 
+  let colorIndex = 0;
   for (y = 0; y < imageData.height; y++)
     for (x = 0; x < imageData.width; x++) {
-      var cluster_idx = labels.intAt(y + x * imageData.height, 0);
+      const imageDataOffset = y * 4 + x * imageData.height * 4;
+      if (imageData.data[imageDataOffset + 3] === 0) {
+        continue;
+      }
+
+      var cluster_idx = labels.intAt(colorIndex, 0);
       const color = culori.rgb({
         mode: 'lab65',
         l: centers.floatAt(cluster_idx, 0),
         a: centers.floatAt(cluster_idx, 1),
         b: centers.floatAt(cluster_idx, 2)
       });
-      const imageDataOffset = y * 4 + x * imageData.height * 4;
       imageData.data[imageDataOffset + 0] = color.r * 255;
       imageData.data[imageDataOffset + 1] = color.g * 255;
       imageData.data[imageDataOffset + 2] = color.b * 255;
       //imageData.data[imageDataOffset + 3] = 255;
 
       centersWeight[cluster_idx]++;
+      colorIndex++;
     }
 
   console.log(performance.now() - startTime, 'Posting result');
 
-  let colors = [];
+  colors = [];
 
   for (x = 0; x < centers.rows; x++) {
     const color = culori.rgb({
@@ -110,4 +129,49 @@ function kmeans(message) {
   }
 
   postMessage({ ...message.data, colors: colors });
+}
+
+function extract(message) {
+  let input = cv.matFromImageData(message.data.data);
+
+  let sample = new cv.Mat();
+  cv.cvtColor(input, sample, cv.COLOR_RGBA2GRAY, 0);
+
+  cv.Canny(sample, sample, 50, 100, 3, true);
+
+  let contours = new cv.MatVector();
+  let hierarchy = new cv.Mat();
+
+  cv.findContours(
+    sample,
+    contours,
+    hierarchy,
+    cv.RETR_EXTERNAL,
+    cv.CHAIN_APPROX_NONE
+  );
+
+  let mask = new cv.Mat(sample.rows, sample.cols, cv.CV_8U, new cv.Scalar(255));
+
+  cv.drawContours(mask, contours, -1, new cv.Scalar(254), cv.FILLED);
+
+  let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
+  cv.erode(mask, mask, kernel);
+
+  cv.floodFill(
+    mask,
+    new cv.Mat(),
+    new cv.Point(4, 4),
+    new cv.Scalar(0, 0, 0, 0)
+  );
+
+  let resultMat = cv.Mat.zeros(sample.rows, sample.cols, cv.CV_8UC4);
+
+  input.copyTo(resultMat, mask);
+
+  let result = new ImageData(
+    new Uint8ClampedArray(resultMat.data, resultMat.cols, resultMat.rows),
+    resultMat.cols
+  );
+
+  postMessage({ type: 'extract', data: result });
 }

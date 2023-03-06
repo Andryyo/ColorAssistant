@@ -26,6 +26,11 @@ interface IKmeansMessage {
   colors?: IPaletteColor[] 
 }
 
+interface IExtractMessage {
+  type: 'extract',
+  data: ImageData
+}
+
 const Picture = (props : IPictureProps) => {
   const [selectedPosition, setSelectedPosition] = React.useState<{x: number, y: number}>(null);
   const [paletteColors, setPaletteColors] = React.useState<IPaletteColor[]>([]);
@@ -94,6 +99,38 @@ const Picture = (props : IPictureProps) => {
         const colors = Array.from(map.values());
         colors.sort((a, b) => culori.hsv(b.color).h - culori.hsv(a.color).h);
         setPaletteColors(colors);
+      }
+    };
+  };
+
+  const extract = () => {
+    const ratio = imgCanvas.width / imgCanvas.height;
+    const newCanvas = new OffscreenCanvas(300, 300 / ratio);
+    const newCtx = newCanvas.getContext('2d');
+    newCtx.drawImage(imgCanvas, 0, 0, newCanvas.width, newCanvas.height);
+    const newData = newCtx.getImageData(
+      0,
+      0,
+      newCanvas.width,
+      newCanvas.height
+    );
+
+    props.worker.postMessage({ type: 'extract', data: newData });
+
+    props.worker.onmessage = (message: MessageEvent<IExtractMessage>) => {
+      const data = message.data; 
+      if (data.type === 'extract') {
+        newCtx.putImageData(data.data, 0, 0);
+        imgCanvas
+          .getContext('2d')
+          .clearRect(0, 0, imgCanvas.width, imgCanvas.height)
+        imgCanvas
+          .getContext('2d')
+          .drawImage(newCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
+
+        void imgCanvas
+          .convertToBlob()
+          .then((blob) => setImgSrc(URL.createObjectURL(blob)));
       }
     };
   };
@@ -219,6 +256,14 @@ const Picture = (props : IPictureProps) => {
           }}
         >
           Transform
+        </Button>
+        <Button
+          style={{ flex: '0 0 auto' }}
+          onClick={() => {
+            extract();
+          }}
+        >
+          Extract
         </Button>
         <Button
           style={{ flex: '0 0 auto' }}
