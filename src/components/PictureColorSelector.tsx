@@ -225,7 +225,8 @@ const Picture = (props : IPictureProps) => {
             style={{
               height: '5vmin',
               backgroundColor: c.color as string,
-              flexGrow: c.weight
+              flexGrow: c.weight,
+              minWidth: '1vmin'
             }}
             onClick={() => {
               if (props.onChange) {
