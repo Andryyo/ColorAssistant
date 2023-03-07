@@ -150,19 +150,35 @@ function extract(message) {
     cv.CHAIN_APPROX_NONE
   );
 
-  let mask = new cv.Mat(sample.rows, sample.cols, cv.CV_8U, new cv.Scalar(255));
+  let mask = new cv.Mat(sample.rows, sample.cols, cv.CV_8U, new cv.Scalar(0));
 
-  cv.drawContours(mask, contours, -1, new cv.Scalar(254), cv.FILLED);
+  cv.drawContours(mask, contours, -1, new cv.Scalar(255), cv.FILLED);
 
   let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
-  cv.erode(mask, mask, kernel);
+  cv.dilate(mask, mask, kernel);
 
-  cv.floodFill(
+  contours = new cv.MatVector();
+  hierarchy = new cv.Mat();
+
+  cv.findContours(
     mask,
-    new cv.Mat(),
-    new cv.Point(4, 4),
-    new cv.Scalar(0, 0, 0, 0)
+    contours,
+    hierarchy,
+    cv.RETR_EXTERNAL,
+    cv.CHAIN_APPROX_NONE
   );
+
+  mask = cv.Mat.zeros(sample.rows, sample.cols, cv.CV_8U);
+  for (let i = 0; i < contours.size(); i++) {
+    let dist = cv.pointPolygonTest(
+      contours.get(i),
+      new cv.Point(mask.cols / 2, mask.rows / 2),
+      false
+    );
+    if (dist >= 0) {
+      cv.drawContours(mask, contours, i, new cv.Scalar(255), cv.FILLED);
+    }
+  }
 
   let resultMat = cv.Mat.zeros(sample.rows, sample.cols, cv.CV_8UC4);
 
