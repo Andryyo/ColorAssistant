@@ -139,26 +139,14 @@ function extract(message) {
 
   cv.Canny(sample, sample, 50, 100, 3, true);
 
-  let contours = new cv.MatVector();
-  let hierarchy = new cv.Mat();
-
-  cv.findContours(
-    sample,
-    contours,
-    hierarchy,
-    cv.RETR_EXTERNAL,
-    cv.CHAIN_APPROX_NONE
-  );
-
   let mask = new cv.Mat(sample.rows, sample.cols, cv.CV_8U, new cv.Scalar(0));
 
-  cv.drawContours(mask, contours, -1, new cv.Scalar(255), cv.FILLED);
-
   let kernel = cv.Mat.ones(5, 5, cv.CV_8U);
-  cv.dilate(mask, mask, kernel);
+  cv.dilate(sample, mask, kernel);
+  cv.erode(mask, mask, kernel);
 
-  contours = new cv.MatVector();
-  hierarchy = new cv.Mat();
+  let contours = new cv.MatVector();
+  let hierarchy = new cv.Mat();
 
   cv.findContours(
     mask,
