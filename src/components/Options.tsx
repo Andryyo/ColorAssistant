@@ -35,7 +35,7 @@ export interface IOptionsProps {
   colors: IColor[],
   deltaOptions: IDeltaOptions,
   deltaOptionsChanged: (deltaOptions: IDeltaOptions) => void
-  updateOwned: (color: IColor) => void,
+  updateOwned: (colors: IColor[]) => void,
   transformationColorsNumberChanged: (number: number) => void
 }
 
@@ -65,18 +65,18 @@ const Options = (props: IOptionsProps) => {
   const onFileLoad = (value: string) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data: string[] = JSON.parse(value);
-      for (const entry of data) {
-        const color = props.colors
+      const colors = data.map(entry => {
+        return props.colors
           .filter((c) => !isMix(c))
           .find((c) => {
             const name = c.collection + ' ' + c.name + ' ' + c.hex;
             return name.includes(entry);
           });
+      }).filter(color => color)
+      colors.forEach(color => color.owned = true)
 
-        if (props.updateOwned && color) {
-          color.owned = true;
-          props.updateOwned(color);
-        }
+      if (props.updateOwned) {
+        props.updateOwned(colors);
       }
   };
 

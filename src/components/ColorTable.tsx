@@ -14,7 +14,7 @@ interface IColorTableProps {
   selectedColor: ILabColor;
   deltaOptions: IDeltaOptions;
   loading: boolean;
-  updateOwned: (color: IColor) => void;
+  updateOwned: (colors: IColor[]) => void;
   onTopColorsChange: (colors: IColor[]) => void;
 }
 
@@ -180,7 +180,7 @@ const ColorTable = (props : IColorTableProps) => {
 
   const onCellValueChanged = (e: CellValueChangedEvent<IColor, IColor>) => {
     if (props.updateOwned) {
-      props.updateOwned(e.data);
+      props.updateOwned([e.data]);
     }
   };
 

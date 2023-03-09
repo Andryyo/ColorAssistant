@@ -7,7 +7,7 @@ import { db } from '../db/db';
 import * as culori from 'culori';
 import { ColorsMessage } from '../db/ColorsMessage';
 import { ILabColor } from 'culori';
-import { IColor } from 'components/Options';
+import { IColor, IDeltaOptions } from 'components/Options';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
 const ctx: Worker = self as any;
@@ -26,6 +26,8 @@ export interface ICompactColor {
 }
 
 let colors: ICompactColor[] = [];
+
+let deltaOptions: IDeltaOptions = { farMixPenalty: 0.1 };
 
 const createColor = (collection: string, name: string, hex: string, owned: boolean) => {
   const color = culori.lab65(hex);
@@ -52,7 +54,12 @@ const updateMinDelta = () => {
       .filter((c) => c !== color1 && c.owned)
       .map((color2) => {
         const delta = Math.round(difference(color1.color, color2.color));
-        return delta;
+        if (!color2.bases || color2.bases.length === 0) {
+          return delta
+        } else {
+          const basesDiff = difference(colors[color2.bases[0]].color, colors[color2.bases[1]].color )
+          return delta + deltaOptions.farMixPenalty * basesDiff
+        }
       });
 
     color1.minDelta = Math.min(...deltas);
@@ -86,10 +93,15 @@ export interface IGetColorsMessage {
 
 export interface IUpdateOwnedMessage {
   type: 'updateOwned';
-  color: IColor
+  colors: IColor[]
 }
 
-type Message = IColorsUpdateMessage | IGetColorsMessage | IUpdateOwnedMessage | IProgressUpdateMessage;
+export interface IUpdateDeltaOptions {
+  type: 'updateDeltaOptions'
+  deltaOptions: IDeltaOptions
+}
+
+type Message = IColorsUpdateMessage | IGetColorsMessage | IUpdateOwnedMessage | IProgressUpdateMessage | IUpdateDeltaOptions;
 
 void (async () => {
   const savedBuffer = await db.data.get('colors');
@@ -151,72 +163,89 @@ onmessage = async (message: MessageEvent<Message>) => {
       ]);
       }
       break;
+    case 'updateDeltaOptions': {
+      if (!colors || colors.length === 0) {
+        return;
+      }
+
+      deltaOptions = data.deltaOptions;
+      updateMinDelta();
+      const buffer = ColorsMessage.encode({ colors: colors }).finish();
+      await db.data.put({ id: 'colors', data: buffer });
+      const transferBuffer = new Uint8Array(buffer);
+      ctx.postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+        transferBuffer.buffer
+      ]);
+      }
+      break;
     case 'updateOwned': {
       ctx.postMessage({ type: 'progressUpdate', value: 0 });
 
-    const colorIndex = colors.findIndex(
-      (color) =>
-        color.collection === data.color.collection &&
-        color.name === data.color.name &&
-        color.hex === data.color.hex
-    );
-
-    if (colors[colorIndex].owned === data.color.owned) {
-      ctx.postMessage({ type: 'progressUpdate', value: 100 });
-      return;
-    }
-
-    colors[colorIndex].owned = data.color.owned;
-
-    if (colors[colorIndex].owned) {
-      const mixes = [];
-
-      colors.forEach((c, i) => {
-        if (colorIndex === i || !c.owned || c.bases?.length > 0) {
+      data.colors.forEach(color => {
+        const colorIndex = colors.findIndex(
+          (c) =>
+            c.collection === color.collection &&
+            c.name === color.name &&
+            c.hex === color.hex
+        );
+    
+        if (colors[colorIndex].owned === color.owned) {
+          ctx.postMessage({ type: 'progressUpdate', value: 100 });
           return;
         }
-
-        const ratios = [0.25, 0.5, 0.75];
-
-        for (const ratio of ratios) {
-          const mix = mixbox.lerp(colors[colorIndex].hex, c.hex, ratio);
-          const code = culori.formatHex({
-            mode: 'rgb',
-            r: mix[0] / 255,
-            g: mix[1] / 255,
-            b: mix[2] / 255
+    
+        colors[colorIndex].owned = color.owned;
+    
+        if (colors[colorIndex].owned) {
+          const mixes = [];
+    
+          colors.forEach((c, i) => {
+            if (colorIndex === i || !c.owned || c.bases?.length > 0) {
+              return;
+            }
+    
+            const ratios = [0.25, 0.5, 0.75];
+    
+            for (const ratio of ratios) {
+              const mix = mixbox.lerp(colors[colorIndex].hex, c.hex, ratio);
+              const code = culori.formatHex({
+                mode: 'rgb',
+                r: mix[0] / 255,
+                g: mix[1] / 255,
+                b: mix[2] / 255
+              });
+    
+              const color = createColor(null, null, code, true);
+    
+              mixes.push({
+                ...color,
+                bases: [
+                  colorIndex,
+                  i
+                ],
+                ratio: ratio
+              });
+            }
           });
-
-          const color = createColor(null, null, code, true);
-
-          mixes.push({
-            ...color,
-            bases: [
-              colorIndex,
-              i
-            ],
-            ratio: ratio
-          });
+    
+          colors = colors.concat(mixes);
+        } else {
+          colors = colors.filter(
+            (c) => !c.bases || c.bases.every((b) => b !== colorIndex)
+          );
         }
       });
 
-      colors = colors.concat(mixes);
-    } else {
-      colors = colors.filter(
-        (c) => !c.bases || c.bases.every((b) => b !== colorIndex)
-      );
+      updateMinDelta();
+
+      const buffer = ColorsMessage.encode({ colors: colors }).finish();
+      await db.data.put({ id: 'colors', data: buffer });
+      const transferBuffer = new Uint8Array(buffer);
+      ctx.postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
+        transferBuffer.buffer
+      ]);
+      ctx.postMessage({ type: 'progressUpdate', value: 100 });
     }
-
-    updateMinDelta();
-
-    const buffer = ColorsMessage.encode({ colors: colors }).finish();
-    await db.data.put({ id: 'colors', data: buffer });
-    const transferBuffer = new Uint8Array(buffer);
-    ctx.postMessage({ type: 'colorsUpdated', data: transferBuffer }, [
-      transferBuffer.buffer
-    ]);
-    ctx.postMessage({ type: 'progressUpdate', value: 100 });
-      break;
-  }
+    break;
 }
 };

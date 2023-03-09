@@ -97,14 +97,24 @@ const ColorsContainer = () => {
   }
 
   const updateOwned = React.useCallback(
-    (color: IColor) => {
+    (colors: IColor[]) => {
       colorsWorker.postMessage({
         type: 'updateOwned',
-        color: color
+        colors: colors
       });
     },
     [colorsWorker]
   );
+
+  React.useEffect(
+    () => {
+      colorsWorker?.postMessage({
+        type: 'updateDeltaOptions',
+        deltaOptions: deltaOptions
+      })
+    },
+    [colorsWorker, deltaOptions]
+  )
 
   React.useEffect(() => {
     console.log('Creating workers');
