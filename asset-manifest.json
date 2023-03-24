@@ -1,23 +1,23 @@
 {
   "files": {
     "main.css": "/ColorAssistant/static/css/main.8b48e972.css",
-    "main.js": "/ColorAssistant/static/js/main.ab95ba72.js",
-    "static/js/162.dcd9c20a.chunk.js": "/ColorAssistant/static/js/162.dcd9c20a.chunk.js",
-    "static/js/808.45dfaec6.chunk.js": "/ColorAssistant/static/js/808.45dfaec6.chunk.js",
+    "main.js": "/ColorAssistant/static/js/main.8482e601.js",
+    "static/js/162.576ce9c7.chunk.js": "/ColorAssistant/static/js/162.576ce9c7.chunk.js",
+    "static/js/808.1df47f5e.chunk.js": "/ColorAssistant/static/js/808.1df47f5e.chunk.js",
     "static/js/893.007344e1.chunk.js": "/ColorAssistant/static/js/893.007344e1.chunk.js",
     "static/js/871.2288e62f.chunk.js": "/ColorAssistant/static/js/871.2288e62f.chunk.js",
     "service-worker.js": "/ColorAssistant/service-worker.js",
     "static/media/delete-icon.svg": "/ColorAssistant/static/media/delete-icon.04829cd512729628350dcf90b6bc747d.svg",
     "index.html": "/ColorAssistant/index.html",
     "main.8b48e972.css.map": "/ColorAssistant/static/css/main.8b48e972.css.map",
-    "main.ab95ba72.js.map": "/ColorAssistant/static/js/main.ab95ba72.js.map",
-    "162.dcd9c20a.chunk.js.map": "/ColorAssistant/static/js/162.dcd9c20a.chunk.js.map",
-    "808.45dfaec6.chunk.js.map": "/ColorAssistant/static/js/808.45dfaec6.chunk.js.map",
+    "main.8482e601.js.map": "/ColorAssistant/static/js/main.8482e601.js.map",
+    "162.576ce9c7.chunk.js.map": "/ColorAssistant/static/js/162.576ce9c7.chunk.js.map",
+    "808.1df47f5e.chunk.js.map": "/ColorAssistant/static/js/808.1df47f5e.chunk.js.map",
     "893.007344e1.chunk.js.map": "/ColorAssistant/static/js/893.007344e1.chunk.js.map",
     "871.2288e62f.chunk.js.map": "/ColorAssistant/static/js/871.2288e62f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.8b48e972.css",
-    "static/js/main.ab95ba72.js"
+    "static/js/main.8482e601.js"
   ]
 }
